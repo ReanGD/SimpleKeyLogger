@@ -1,0 +1,8 @@
+/bin/*
+/bin/*.*
+!/bin/KEEPME
+/tmp/*
+/tmp/*.*
+!/tmp/KEEPME
+*.suo
+*.vcxproj.user
