@@ -1,17 +1,69 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(rtge VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.10)
+project(rtge VERSION 0.1 LANGUAGES CXX)
 
 find_package(glfw3 3.3 REQUIRED)
-include_directories(${GLFW_INCLUDE_DIRS})
-
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-include_directories(${OPENGL_INCLUDE_DIR})
-
 find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIRS})
 
-include_directories("src")
-file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+   file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.14/conan.cmake"
+                 "${CMAKE_BINARY_DIR}/conan.cmake")
+endif()
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+conan_cmake_run(CONANFILE conanfile.txt  # or relative build/conanfile.txt
+                BASIC_SETUP CMAKE_TARGETS
+                BUILD missing)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
-add_executable(${PROJECT_NAME} "src/main.cpp" ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARY} ${GLEW_LIBRARIES})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+    add_compile_options(
+        -Werror
+
+        -Wall
+        -Wextra
+        -Wpedantic
+
+        -Wcast-align
+        -Wcast-qual
+        -Wconversion
+        -Wctor-dtor-privacy
+        -Wenum-compare
+        -Wfloat-equal
+        -Wnon-virtual-dtor
+        -Wold-style-cast
+        -Woverloaded-virtual
+        -Wredundant-decls
+        -Wsign-conversion
+        -Wsign-promo
+    )
+endif()
+
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
+add_executable(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SOURCE_FILES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    "src"
+    ${GLFW_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIRS})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    "glfw"
+    ${OPENGL_LIBRARY}
+    ${GLEW_LIBRARIES}
+    ${CONAN_LIBS})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
