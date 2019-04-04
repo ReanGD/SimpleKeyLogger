@@ -67,5 +67,9 @@
     "C_Cpp.default.intelliSenseMode": "clang-x64",
     "C_Cpp.default.cppStandard": "c++17",
     "cmake.configureOnOpen": true,
-    "cmake.environment": {"CC": "/usr/bin/clang", "CXX": "/usr/bin/clang++"}
+    "cmake.environment": {
+        "CC": "/usr/bin/clang",
+        "CXX": "/usr/bin/clang++"
+    },
+    "C_Cpp.enhancedColorization": "Disabled"
 }

@@ -1,6 +1,7 @@
 [requires]
 expected-lite/0.3.0
 glm/0.9.9.5@g-truc/stable
+fmt/5.3.0@bincrafters/stable
 
 [generators]
 cmake
