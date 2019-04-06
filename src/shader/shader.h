@@ -2,6 +2,23 @@
 
 #define GLEW_STATIC
 #include <GL/glew.h>
+
+#include <memory>
 #include <nonstd/expected.hpp>
 
-nonstd::expected<GLuint, std::string> LoadShader(const char* filepath, GLenum shaderType);
+class Shader
+{
+private:
+    Shader() = delete;
+    Shader(GLuint shaderHandle);
+public:
+    ~Shader() = default;
+
+    void Bind();
+    GLint GetUniformLocation(const GLchar *name);
+    void Delete();
+
+    static nonstd::expected<Shader, std::string> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName);
+private:
+    GLuint m_shaderHandle;
+};

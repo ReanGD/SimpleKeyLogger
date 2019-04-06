@@ -84,32 +84,11 @@ int main()
 
     glBindVertexArray(0); // Unbind VAO
 
-    auto vertexShader = LoadShader("data/shaders/vertex.glsl", GL_VERTEX_SHADER);
-    if (!vertexShader) {
-        std::cout << vertexShader.error() << std::endl;
+    auto shader = Shader::Create("vertex", "fragment");
+     if (!shader) {
+        std::cout << shader.error() << std::endl;
         return -1;
     }
-    auto fragmentShader = LoadShader("data/shaders/fragment.glsl", GL_FRAGMENT_SHADER);
-    if (!fragmentShader) {
-        std::cout << fragmentShader.error() << std::endl;
-        return -1;
-    }
-
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, *vertexShader);
-    glAttachShader(shaderProgram, *fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    GLint success;
-    GLchar infoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-        return -1;
-    }
-    glDeleteShader(*vertexShader);
-    glDeleteShader(*fragmentShader);
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -139,12 +118,12 @@ int main()
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        shader->Bind();
 
         // Bind Textures using texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(glGetUniformLocation(shaderProgram, "ourTexture1"), 0);
+        glUniform1i(shader->GetUniformLocation("ourTexture1"), 0);
         
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -153,6 +132,7 @@ int main()
         glfwSwapBuffers(window);
     }
 
+    shader->Delete();
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &IBO);
