@@ -65,7 +65,8 @@
         "variant": "cpp",
         "csignal": "cpp",
         "strstream": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "*.ipp": "cpp"
     },
     "C_Cpp.default.intelliSenseMode": "clang-x64",
     "C_Cpp.default.cppStandard": "c++17",

@@ -1,10 +1,14 @@
 #include "shader/shader.h"
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <filesystem>
 #include <fmt/format.h>
+#include <glm/gtc/type_ptr.hpp>
 
 
 std::pair<GLchar*, GLint> read(const char* filepath) {
@@ -40,29 +44,74 @@ nonstd::expected<GLuint, std::string> LoadShader(std::filesystem::path&& filepat
     GLint success;    
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        GLchar infoLog[512];
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(shader, 1024, NULL, infoLog);
         return nonstd::make_unexpected(fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog));
     }
 
     return shader;
 }
 
-Shader::Shader(GLuint shaderHandle)
+Shader::Shader(uint shaderHandle)
     : m_shaderHandle(shaderHandle) {
 
 }
 
-void Shader::Bind() {
+void Shader::Bind() const {
     glUseProgram(m_shaderHandle);
 }
 
-GLint Shader::GetUniformLocation(const GLchar *name) {
-    return glGetUniformLocation(m_shaderHandle, name);
+void Shader::SetBool(const char* name, bool value) const {  
+    glUniform1i(glGetUniformLocation(m_shaderHandle, name), static_cast<int>(value)); 
+}
+
+void Shader::SetInt(const char* name, int value) const {
+    glUniform1i(glGetUniformLocation(m_shaderHandle, name), value); 
+}
+
+void Shader::SetFloat(const char* name, float value) const {
+    glUniform1f(glGetUniformLocation(m_shaderHandle, name), value); 
+}
+
+void Shader::SetVec2(const char* name, const glm::vec2& vec) const {
+    glUniform2fv(glGetUniformLocation(m_shaderHandle, name), 1, glm::value_ptr(vec)); 
+}
+
+void Shader::SetVec2(const char* name, float x, float y) const {
+    glUniform2f(glGetUniformLocation(m_shaderHandle, name), x, y); 
+}
+
+void Shader::SetVec3(const char* name, const glm::vec3& vec) const {
+    glUniform3fv(glGetUniformLocation(m_shaderHandle, name), 1, glm::value_ptr(vec));
+}
+
+void Shader::SetVec3(const char* name, float x, float y, float z) const {
+    glUniform3f(glGetUniformLocation(m_shaderHandle, name), x, y, z); 
+}
+
+void Shader::SetVec4(const char* name, const glm::vec4& vec) const {
+    glUniform4fv(glGetUniformLocation(m_shaderHandle, name), 1, glm::value_ptr(vec)); 
+}
+
+void Shader::SetVec4(const char* name, float x, float y, float z, float w) const {
+    glUniform4f(glGetUniformLocation(m_shaderHandle, name), x, y, z, w); 
+}
+
+void Shader::SetMat2(const char* name, const glm::mat2& mat) const {
+    glUniformMatrix2fv(glGetUniformLocation(m_shaderHandle, name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Shader::SetMat3(const char* name, const glm::mat3& mat) const {
+    glUniformMatrix3fv(glGetUniformLocation(m_shaderHandle, name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Shader::SetMat4(const char* name, const glm::mat4& mat) const {
+    glUniformMatrix4fv(glGetUniformLocation(m_shaderHandle, name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void Shader::Delete() {
     glDeleteProgram(m_shaderHandle);
+    m_shaderHandle = 0;
 }
 
 nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName) {
@@ -88,8 +137,8 @@ nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexSh
     GLint success;
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
-        GLchar infoLog[512];
-        glGetShaderInfoLog(shaderProgram, 512, NULL, infoLog);
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
         return nonstd::make_unexpected(fmt::format(
             "Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
             vertexShaderName, fragmentShaderName, infoLog));

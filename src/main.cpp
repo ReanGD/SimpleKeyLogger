@@ -8,6 +8,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include <glm/gtc/matrix_transform.hpp>
 #include "shader/shader.h"
 
 
@@ -123,7 +124,12 @@ int main()
         // Bind Textures using texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(shader->GetUniformLocation("ourTexture1"), 0);
+        shader->SetInt("ourTexture1", 0);
+
+        glm::mat4 matWorld = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        matWorld = glm::translate(matWorld, glm::vec3(0.5f, -0.5f, 0.0f));
+        matWorld = glm::rotate(matWorld, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        shader->SetMat4("matWorld", matWorld);
         
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
