@@ -10,6 +10,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include "shader/shader.h"
+#include "camera/camera.h"
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -113,6 +114,9 @@ int main()
     stbi_image_free(texData);
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
 
+    Camera camera(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);    
+    camera.SetViewParams(glm::vec3(0, 0, -10), glm::vec3(0, 0, 1));
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -129,6 +133,8 @@ int main()
         glm::mat4 matWorld = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
         matWorld = glm::translate(matWorld, glm::vec3(0.5f, -0.5f, 0.0f));
         matWorld = glm::rotate(matWorld, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        shader->SetMat4("matProj", camera.GetProjMatrix());
+        shader->SetMat4("matView", camera.GetViewMatrix());
         shader->SetMat4("matWorld", matWorld);
         
         glBindVertexArray(VAO);
