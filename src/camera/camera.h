@@ -8,24 +8,36 @@ public:
 	Camera();
 	Camera(float fovy, uint width, uint height, float nearPlane, float farPlane);
 	~Camera() = default;
-protected:
-	void recalcProjMatrix();
-	void recalcViewMatrix();
+
 public:
 	void SetProjParams(float fovy, float aspectRatio, float nearPlane, float farPlane);
 
-	void SetPosition(const glm::vec3& position);
-	void SetDirection(const glm::vec3& direction);
+	void SetPosition(const glm::vec3& value);
+	void SetDirection(const glm::vec3& value);
 	void SetViewParams(const glm::vec3& position, const glm::vec3& direction);
 
-	glm::vec3 GetPosition() const;
-	glm::vec3 GetDirection() const;
+	glm::vec3 GetPosition() const noexcept {
+		return m_from;
+	}
+	glm::vec3 GetDirection() const noexcept {
+		return m_direction;
+	}
+
 	// Get a normalized third axis of the camera
 	glm::vec3 GetCrossVector() const;
 
-	glm::mat4 GetProjMatrix() const;
-	glm::mat4 GetViewMatrix() const;
-protected:
+	glm::mat4 GetProjMatrix() const noexcept {
+		return m_matProj;
+	}
+	glm::mat4 GetViewMatrix() const noexcept {
+		return m_matView;
+	}
+
+private:
+	void recalcProjMatrix();
+	void recalcViewMatrix();
+
+private:
 	glm::vec3 m_from = glm::vec3(0.0);
 	// Always normalized
 	glm::vec3 m_direction = glm::vec3(1.0, 0.0, 0.0);
