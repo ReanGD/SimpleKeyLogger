@@ -12,6 +12,8 @@ public:
     ~Shader() = default;
 
     void Bind() const;
+    void Unbind() const;
+    void Delete();
 
     void SetBool(const char* name, bool value) const;
     void SetInt(const char* name, int value) const;
@@ -24,11 +26,9 @@ public:
     void SetVec4(const char* name, float x, float y, float z, float w) const;
     void SetMat2(const char* name, const glm::mat2& mat) const;
     void SetMat3(const char* name, const glm::mat3& mat) const;
-    void SetMat4(const char* name, const glm::mat4& mat) const;
-
-    void Delete();
+    void SetMat4(const char* name, const glm::mat4& mat) const;    
 
     static nonstd::expected<Shader, std::string> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName);
 private:
-    uint m_shaderHandle;
+    uint m_handle;
 };

@@ -40,7 +40,7 @@ void Camera::SetViewParams(const glm::vec3& position, const glm::vec3& direction
 	recalcViewMatrix();
 }
 
-glm::vec3 Camera::GetCrossVector() const {
+glm::vec3 Camera::GetLeftVector() const {
 	return glm::normalize(glm::cross(m_direction, m_up));
 }
 

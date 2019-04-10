@@ -10,6 +10,7 @@
 #include <stb_image.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include "mesh/mesh.h"
 #include "shader/shader.h"
 #include "camera/camera_fps.h"
 
@@ -18,7 +19,7 @@ void processInput(GLFWwindow *window);
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 CameraFps cameraFps;
-const GLuint WIDTH = 800, HEIGHT = 600;
+const GLuint WIDTH = 1024, HEIGHT = 768;
 
 int main()
 {
@@ -62,33 +63,9 @@ int main()
         1, 2, 3
     };
 
-    GLuint VBO, VAO, IBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &IBO);    
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    const GLvoid *pointer = nullptr;
-    // Position attribute    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), pointer);
-    glEnableVertexAttribArray(0);
-    // Color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-    // TexCoord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0); // Unbind VAO
+    DataBuffer vertexBuffer(GL_ARRAY_BUFFER, vertices, sizeof(vertices));
+    DataBuffer indexBuffer(GL_ELEMENT_ARRAY_BUFFER, indices, sizeof(indices));
+    Mesh mesh(VDecls::PosColorTex, vertexBuffer, indexBuffer);
 
     auto shader = Shader::Create("vertex", "fragment");
      if (!shader) {
@@ -148,17 +125,17 @@ int main()
         shader->SetMat4("matView", camera->GetViewMatrix());
         shader->SetMat4("matWorld", matWorld);
         
-        glBindVertexArray(VAO);
+        mesh.Bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        mesh.Unbind();
+
+        shader->Unbind();
 
         glfwSwapBuffers(window);
     }
 
     shader->Delete();
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &IBO);
+    mesh.Delete();
 
     glfwTerminate();
     return 0;
@@ -189,15 +166,14 @@ void processInput(GLFWwindow *window) {
 bool firstMouse = true;
 double lastX = WIDTH / 2.0f;
 double lastY = HEIGHT / 2.0f;
-void mouseCallback(GLFWwindow* window  __attribute__((unused)), double xpos, double ypos) {
+void mouseCallback(GLFWwindow* window __attribute__((unused)), double xpos, double ypos) {
     if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
     }
 
-    cameraFps.RotateYaw(float(xpos - lastX));
-    cameraFps.RotatePitch(float(lastY - ypos));
+    cameraFps.Rotate(float(lastX - xpos), float(lastY - ypos));
 
     lastX = xpos;
     lastY = ypos;    

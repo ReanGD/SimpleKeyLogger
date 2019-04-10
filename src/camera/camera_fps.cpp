@@ -1,11 +1,12 @@
 #include "camera/camera_fps.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-void CameraFps::SetMovementSpeed(float value) {
+
+void CameraFps::SetMovementSpeed(float value) noexcept {
 	m_movementSpeed	= value;
 }
 
-void CameraFps::SetMouseSensitivity(float value) {
+void CameraFps::SetMouseSensitivity(float value) noexcept {
 	m_mouseSensitivity = value;
 }
 
@@ -15,33 +16,30 @@ void CameraFps::SetPosition(const glm::vec3& value) {
     }
 }
 
-void CameraFps::SetTurn(float yaw, float pitch) {
+void CameraFps::SetTurn(float yaw, float pitch) noexcept {
 	m_yaw = yaw;
 	m_pitch	= pitch;
 }
 
-void CameraFps::MoveForward() {
+void CameraFps::MoveForward() noexcept {
 	m_posOffset.x += 1.0f;
 }
 
-void CameraFps::MoveBackward() {
+void CameraFps::MoveBackward() noexcept {
 	m_posOffset.x -= 1.0f;
 }
 
-void CameraFps::MoveLeft() {
+void CameraFps::MoveLeft() noexcept {
 	m_posOffset.y -= 1.0f;
 }
 
-void CameraFps::MoveRight() {
+void CameraFps::MoveRight() noexcept {
 	m_posOffset.y += 1.0f;
 }
 
-void CameraFps::RotateYaw(float value) {
-	m_yawOffset += value;
-}
-
-void CameraFps::RotatePitch(float value) {
-	m_pitchOffset -= value;
+void CameraFps::Rotate(float yaw, float pitch) noexcept {
+	m_yawOffset += yaw;
+	m_pitchOffset += pitch;
 }
 
 void CameraFps::AttachCamera(std::shared_ptr<Camera> camera) {
@@ -80,10 +78,13 @@ void CameraFps::Update(float dt) {
     glm::vec3 direction =
         glm::rotate(glm::mat4(1.0), m_pitch, glm::vec3(0.0f, 0.0f, 1.0f)) *
         glm::rotate(glm::mat4(1.0), m_yaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
-        glm::vec4(1,0,0,1);
+        glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
     for(const auto& camera: m_cameras) {
-        auto position = camera->GetPosition() + camera->GetDirection() * m_posOffsetPrevious.x + camera->GetCrossVector() * m_posOffsetPrevious.y;
+        auto position = 
+            camera->GetPosition() +
+            camera->GetDirection() * m_posOffsetPrevious.x +
+            camera->GetLeftVector() * m_posOffsetPrevious.y;
         camera->SetViewParams(position, direction);
     }
 }

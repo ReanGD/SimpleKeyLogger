@@ -23,8 +23,8 @@ public:
 		return m_direction;
 	}
 
-	// Get a normalized third axis of the camera
-	glm::vec3 GetCrossVector() const;
+	// A normalized vector that is directed to the left of the direction of the gaze
+	glm::vec3 GetLeftVector() const;
 
 	glm::mat4 GetProjMatrix() const noexcept {
 		return m_matProj;
