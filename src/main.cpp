@@ -10,7 +10,7 @@
 #include <stb_image.h>
 
 #include <glm/gtc/matrix_transform.hpp>
-#include "mesh/mesh.h"
+#include "mesh/mesh_generator.h"
 #include "shader/shader.h"
 #include "camera/camera_fps.h"
 
@@ -21,17 +21,15 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 CameraFps cameraFps;
 const GLuint WIDTH = 1024, HEIGHT = 768;
 
-int main()
-{
+int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "RTGE", nullptr, nullptr);    
-    if (window == nullptr)
-    {
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "RTGE", nullptr, nullptr);
+    if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -41,32 +39,18 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK)
-    {
+    if (glewInit() != GLEW_OK) {
         std::cout << "Failed to initialize GLEW" << std::endl;
         return -1;
-    }    
+    }
 
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);  
+    glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    GLfloat vertices[] = {
-        // Positions          // Colors           // Texture Coords
-        0.0f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
-        0.0f, -0.5f,  0.5f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
-        0.0f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
-        0.0f,  0.5f, -0.5f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left 
-    };
-    GLuint indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
+    glEnable(GL_DEPTH_TEST);
 
-    DataBuffer vertexBuffer(GL_ARRAY_BUFFER, vertices, sizeof(vertices));
-    DataBuffer indexBuffer(GL_ELEMENT_ARRAY_BUFFER, indices, sizeof(indices));
-    Mesh mesh(VDecls::PosColorTex, vertexBuffer, indexBuffer);
-
+    Mesh cube = MeshGenerator::CreateSolidCube();
     auto shader = Shader::Create("vertex", "fragment");
      if (!shader) {
         std::cout << shader.error() << std::endl;
@@ -89,13 +73,13 @@ int main()
                                     &texWidth,
                                     &texHeight,
                                     &texChannels,
-                                    STBI_rgb);    
+                                    STBI_rgb);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texData);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(texData);
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
 
-    auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);    
+    auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 0, 0), glm::vec3(1, 0, 0));
     cameraFps.AttachCamera(camera);
 
@@ -109,25 +93,22 @@ int main()
 
         glfwPollEvents();
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader->Bind();
 
-        // Bind Textures using texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         shader->SetInt("ourTexture1", 0);
 
-        glm::mat4 matWorld = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        matWorld = glm::translate(matWorld, glm::vec3(0.5f, -0.5f, 0.0f));
-        matWorld = glm::rotate(matWorld, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        shader->SetMat4("matProj", camera->GetProjMatrix());
-        shader->SetMat4("matView", camera->GetViewMatrix());
-        shader->SetMat4("matWorld", matWorld);
-        
-        mesh.Bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        mesh.Unbind();
+        auto matWorld = glm::mat4(1.0f);
+        shader->SetMat4("uProj", camera->GetProjMatrix());
+        shader->SetMat4("uView", camera->GetViewMatrix());
+        shader->SetMat4("uWorld", matWorld);
+
+        cube.Bind();
+        cube.Draw(12 * 3, GL_UNSIGNED_SHORT);
+        cube.Unbind();
 
         shader->Unbind();
 
@@ -135,7 +116,7 @@ int main()
     }
 
     shader->Delete();
-    mesh.Delete();
+    cube.Delete();
 
     glfwTerminate();
     return 0;
@@ -176,5 +157,5 @@ void mouseCallback(GLFWwindow* window __attribute__((unused)), double xpos, doub
     cameraFps.Rotate(float(lastX - xpos), float(lastY - ypos));
 
     lastX = xpos;
-    lastY = ypos;    
+    lastY = ypos;
 }

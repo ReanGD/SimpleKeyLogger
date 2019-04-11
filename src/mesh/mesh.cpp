@@ -4,6 +4,13 @@
 #include <GL/glew.h>
 
 
+const VertexDecl VertexPNTC::vDecl = {
+    {0, glm::vec3::length()}, // layout (location = 0) in vec3 vPosition;
+    {1, glm::vec3::length()}, // layout (location = 1) in vec3 vNormal;
+    {2, glm::vec3::length()}, // layout (location = 2) in vec3 vTangent;
+    {3, glm::vec2::length()}, // layout (location = 3) in vec2 vTexCoord;
+};
+
 // see: glGetAttribLocation
 VertexDecl::VertexDecl(const std::initializer_list<Layout>& layouts) {
     if (layouts.size() >= 16) {
@@ -13,12 +20,12 @@ VertexDecl::VertexDecl(const std::initializer_list<Layout>& layouts) {
     for (const auto& layout: layouts) {
         m_layouts[m_layoutsCnt] = layout;
         m_layoutsCnt++;
-        m_vertexSize+=layout.elementCnt * sizeof(GLfloat);
+        m_vertexSize+=layout.elementCnt;
     }
 }
 
 void VertexDecl::Bind() const {
-    auto stride = static_cast<GLsizei>(m_vertexSize);
+    auto stride = static_cast<GLsizei>(m_vertexSize * sizeof(GLfloat));
     GLboolean normalized = GL_FALSE;
     GLenum type = GL_FLOAT;
 
@@ -75,11 +82,15 @@ Mesh::Mesh(const VertexDecl& vDecl, const DataBuffer& vertexBuffer, const DataBu
 }
 
 void Mesh::Bind() const {
-    glBindVertexArray(m_handle);    
+    glBindVertexArray(m_handle);
 }
 
 void Mesh::Unbind() const {
     glBindVertexArray(0);
+}
+
+void Mesh::Draw(GLsizei count, GLenum type) const {
+    glDrawElements(GL_TRIANGLES, count, type, 0);
 }
 
 void Mesh::Delete() {
