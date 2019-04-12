@@ -25,13 +25,13 @@ VertexDecl::VertexDecl(const std::initializer_list<Layout>& layouts) {
 }
 
 void VertexDecl::Bind() const {
-    auto stride = static_cast<GLsizei>(m_vertexSize * sizeof(GLfloat));
-    GLboolean normalized = GL_FALSE;
-    GLenum type = GL_FLOAT;
+    const GLenum type = GL_FLOAT;
+    const GLboolean normalized = GL_FALSE;
 
  	char* pointer = nullptr;
+    auto stride = static_cast<GLsizei>(m_vertexSize * sizeof(GLfloat));
     for(uint i=0; i!=m_layoutsCnt; i++) {
-        GLuint index = m_layouts[i].index;
+        auto index = static_cast<GLuint>(m_layouts[i].index);
         uint elementCnt = m_layouts[i].elementCnt;
 
         glVertexAttribPointer(index, static_cast<GLint>(elementCnt), type, normalized, stride, pointer);
@@ -40,21 +40,11 @@ void VertexDecl::Bind() const {
     }
 }
 
-DataBuffer::DataBuffer(uint target, const void* data, ptrdiff_t size)
-    : m_target(target) {
-
+DataBuffer::DataBuffer(uint32_t target, const void* data, size_t size) {
     glGenBuffers(1, &m_handle);
-    Bind();
-    glBufferData(m_target, size, data, GL_STATIC_DRAW);
-    Unbind();
-}
-
-void DataBuffer::Bind() const {
-    glBindBuffer(m_target, m_handle);
-}
-
-void DataBuffer::Unbind() const {
-    glBindBuffer(m_target, 0);
+    glBindBuffer(static_cast<GLenum>(target), m_handle);
+    glBufferData(static_cast<GLenum>(target), static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data), GL_STATIC_DRAW);
+    glBindBuffer(static_cast<GLenum>(target), 0);
 }
 
 void DataBuffer::Delete() {
@@ -64,7 +54,42 @@ void DataBuffer::Delete() {
     }
 }
 
-Mesh::Mesh(const VertexDecl& vDecl, const DataBuffer& vertexBuffer, const DataBuffer& indexBuffer)
+VertexBuffer::VertexBuffer(const void* data, size_t size)
+    : DataBuffer(GL_ARRAY_BUFFER, data, size) {
+
+}
+
+void VertexBuffer::Bind() const {
+    glBindBuffer(GL_ARRAY_BUFFER, m_handle);
+}
+
+void VertexBuffer::Unbind() const {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+IndexBuffer::IndexBuffer(const uint16_t* data, size_t size)
+    : DataBuffer(GL_ELEMENT_ARRAY_BUFFER, data, size)
+    , m_count(static_cast<uint32_t>(size/sizeof(*data)))
+    , m_type(GL_UNSIGNED_SHORT) {
+
+}
+
+IndexBuffer::IndexBuffer(const uint32_t* data, size_t size)
+    : DataBuffer(GL_ELEMENT_ARRAY_BUFFER, data, size)
+    , m_count(static_cast<uint32_t>(size/sizeof(*data)))
+    , m_type( GL_UNSIGNED_INT) {
+
+}
+
+void IndexBuffer::Bind() const {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle);
+}
+
+void IndexBuffer::Unbind() const {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+Mesh::Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
     : m_vDecl(vDecl)
     , m_vertexBuffer(vertexBuffer)
     , m_indexBuffer(indexBuffer) {
@@ -89,8 +114,8 @@ void Mesh::Unbind() const {
     glBindVertexArray(0);
 }
 
-void Mesh::Draw(GLsizei count, GLenum type) const {
-    glDrawElements(GL_TRIANGLES, count, type, 0);
+void Mesh::Draw() const {
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexBuffer.Count()), static_cast<GLenum>(m_indexBuffer.Type()), 0);
 }
 
 void Mesh::Delete() {

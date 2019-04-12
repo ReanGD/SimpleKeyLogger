@@ -7,7 +7,7 @@ class Shader
 {
 private:
     Shader() = delete;
-    Shader(uint shaderHandle);
+    Shader(uint32_t shaderHandle);
 public:
     ~Shader() = default;
 
@@ -16,7 +16,7 @@ public:
     void Delete();
 
     void SetBool(const char* name, bool value) const;
-    void SetInt(const char* name, int value) const;
+    void SetInt(const char* name, int32_t value) const;
     void SetFloat(const char* name, float value) const;
     void SetVec2(const char* name, const glm::vec2& vec) const;
     void SetVec2(const char* name, float x, float y) const;
@@ -26,9 +26,9 @@ public:
     void SetVec4(const char* name, float x, float y, float z, float w) const;
     void SetMat2(const char* name, const glm::mat2& mat) const;
     void SetMat3(const char* name, const glm::mat3& mat) const;
-    void SetMat4(const char* name, const glm::mat4& mat) const;    
+    void SetMat4(const char* name, const glm::mat4& mat) const;
 
     static nonstd::expected<Shader, std::string> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName);
 private:
-    uint m_handle;
+    uint32_t m_handle;
 };

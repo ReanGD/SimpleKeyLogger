@@ -1,13 +1,8 @@
 #pragma once
 
 #include <array>
-#include <stddef.h>
-#include <sys/types.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
 
 
 class VertexDecl {
@@ -41,36 +36,66 @@ struct VertexPNTC {
 };
 
 class DataBuffer {
-public:
+protected:
     DataBuffer() = delete;
-    DataBuffer(uint target, const void* data, ptrdiff_t size);
+    DataBuffer(uint32_t target, const void* data, size_t size);
+
+public:
     ~DataBuffer() = default;
+
+public:
+    void Delete();
+
+protected:
+    uint32_t m_handle;
+};
+
+class VertexBuffer : public DataBuffer {
+public:
+    VertexBuffer(const void* data, size_t size);
 
 public:
     void Bind() const;
     void Unbind() const;
-    void Delete();
+};
+
+class IndexBuffer : public DataBuffer {
+public:
+    explicit IndexBuffer(const uint16_t* data, size_t size);
+    explicit IndexBuffer(const uint32_t* data, size_t size);
+
+public:
+    uint32_t Count() const noexcept {
+        return m_count;
+    }
+
+    uint32_t Type() const noexcept {
+        return m_type;
+    }
+
+    void Bind() const;
+    void Unbind() const;
 
 private:
-    uint m_target;
-    uint m_handle;
+    uint32_t m_count;
+    uint32_t m_type;
 };
 
 class Mesh {
 public:
     Mesh() = delete;
-    Mesh(const VertexDecl& vDecl, const DataBuffer& vertexBuffer, const DataBuffer& indexBuffer);
+    Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
     ~Mesh() = default;
 
 public:
     void Bind() const;
     void Unbind() const;
-    void Draw(GLsizei count, GLenum type) const;
+    void Draw() const;
     void Delete();
 
 private:
-    uint m_handle;
+    uint32_t m_handle;
     VertexDecl m_vDecl;
-    DataBuffer m_vertexBuffer;
-    DataBuffer m_indexBuffer;
+    VertexBuffer m_vertexBuffer;
+    IndexBuffer m_indexBuffer;
 };

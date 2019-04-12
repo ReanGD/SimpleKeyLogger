@@ -1,7 +1,5 @@
 #include "mesh/mesh_generator.h"
 
-#define GLEW_STATIC
-#include <GL/glew.h>
 
 Mesh MeshGenerator::CreateSolidCube() {
     VertexPNTC vb[24];
@@ -49,7 +47,7 @@ Mesh MeshGenerator::CreateSolidCube() {
 // 		box.Add(LockVB[i].Position);
         vb[i].Tangent = glm::vec3(0.0f,1.0f,0.0f);
     }
-    DataBuffer vertexBuffer(GL_ARRAY_BUFFER, vb, sizeof(vb));
+    VertexBuffer vertexBuffer(vb, sizeof(vb));
 
     uint16_t ib[12 * 3];
     for(uint16_t i=0,j=0;i<6;++i) {
@@ -57,7 +55,7 @@ Mesh MeshGenerator::CreateSolidCube() {
         ib[j++]=sm; ib[j++]=sm+1; ib[j++]=sm+2;
         ib[j++]=sm; ib[j++]=sm+2; ib[j++]=sm+3;
     }
-    DataBuffer indexBuffer(GL_ELEMENT_ARRAY_BUFFER, ib, sizeof(ib));
+    IndexBuffer indexBuffer(ib, sizeof(ib));
 
     return Mesh(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }

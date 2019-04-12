@@ -107,7 +107,7 @@ int main() {
         shader->SetMat4("uWorld", matWorld);
 
         cube.Bind();
-        cube.Draw(12 * 3, GL_UNSIGNED_SHORT);
+        cube.Draw();
         cube.Unbind();
 
         shader->Unbind();

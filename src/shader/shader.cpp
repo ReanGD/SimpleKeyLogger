@@ -19,7 +19,7 @@ std::pair<GLchar*, GLint> read(const char* filepath) {
 
     struct stat sb;
     fstat(fd, &sb);
-    std::size_t length = static_cast<std::size_t>(sb.st_size);
+    auto length = static_cast<std::size_t>(sb.st_size);
 
     GLchar* data = new GLchar[length];
     read(fd, data, length);
@@ -32,7 +32,8 @@ nonstd::expected<GLuint, std::string> LoadShader(std::filesystem::path&& filepat
     auto [data, length] = read(filepath.c_str());
 
     if (data == nullptr) {
-        return nonstd::make_unexpected(fmt::format("Сouldn't read the shader from the file: '{}'", filepath.c_str()));
+        auto msg = fmt::format("Сouldn't read the shader from the file: '{}'", filepath.c_str());
+        return nonstd::make_unexpected(msg);
     }
 
     GLuint shader = glCreateShader(shaderType);
@@ -41,18 +42,19 @@ nonstd::expected<GLuint, std::string> LoadShader(std::filesystem::path&& filepat
 
     delete[] data;
 
-    GLint success;    
+    GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-        return nonstd::make_unexpected(fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog));
+        auto msg = fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog);
+        return nonstd::make_unexpected(msg);
     }
 
     return shader;
 }
 
-Shader::Shader(uint shaderHandle)
+Shader::Shader(uint32_t shaderHandle)
     : m_handle(shaderHandle) {
 
 }
@@ -72,24 +74,24 @@ void Shader::Delete() {
     }
 }
 
-void Shader::SetBool(const char* name, bool value) const {  
-    glUniform1i(glGetUniformLocation(m_handle, name), static_cast<int>(value)); 
+void Shader::SetBool(const char* name, bool value) const {
+    glUniform1i(glGetUniformLocation(m_handle, name), static_cast<int>(value));
 }
 
-void Shader::SetInt(const char* name, int value) const {
-    glUniform1i(glGetUniformLocation(m_handle, name), value); 
+void Shader::SetInt(const char* name, int32_t value) const {
+    glUniform1i(glGetUniformLocation(m_handle, name), value);
 }
 
 void Shader::SetFloat(const char* name, float value) const {
-    glUniform1f(glGetUniformLocation(m_handle, name), value); 
+    glUniform1f(glGetUniformLocation(m_handle, name), value);
 }
 
 void Shader::SetVec2(const char* name, const glm::vec2& vec) const {
-    glUniform2fv(glGetUniformLocation(m_handle, name), 1, glm::value_ptr(vec)); 
+    glUniform2fv(glGetUniformLocation(m_handle, name), 1, glm::value_ptr(vec));
 }
 
 void Shader::SetVec2(const char* name, float x, float y) const {
-    glUniform2f(glGetUniformLocation(m_handle, name), x, y); 
+    glUniform2f(glGetUniformLocation(m_handle, name), x, y);
 }
 
 void Shader::SetVec3(const char* name, const glm::vec3& vec) const {
@@ -97,15 +99,15 @@ void Shader::SetVec3(const char* name, const glm::vec3& vec) const {
 }
 
 void Shader::SetVec3(const char* name, float x, float y, float z) const {
-    glUniform3f(glGetUniformLocation(m_handle, name), x, y, z); 
+    glUniform3f(glGetUniformLocation(m_handle, name), x, y, z);
 }
 
 void Shader::SetVec4(const char* name, const glm::vec4& vec) const {
-    glUniform4fv(glGetUniformLocation(m_handle, name), 1, glm::value_ptr(vec)); 
+    glUniform4fv(glGetUniformLocation(m_handle, name), 1, glm::value_ptr(vec));
 }
 
 void Shader::SetVec4(const char* name, float x, float y, float z, float w) const {
-    glUniform4f(glGetUniformLocation(m_handle, name), x, y, z, w); 
+    glUniform4f(glGetUniformLocation(m_handle, name), x, y, z, w);
 }
 
 void Shader::SetMat2(const char* name, const glm::mat2& mat) const {
@@ -129,7 +131,7 @@ nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexSh
     }
     auto fragmentShader = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER);
     if (!fragmentShader) {
-        glDeleteShader(*vertexShader);
+        glDeleteShader(*fragmentShader);
         return nonstd::make_unexpected(fragmentShader.error());
     }
 
@@ -145,9 +147,9 @@ nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexSh
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
-        return nonstd::make_unexpected(fmt::format(
-            "Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
-            vertexShaderName, fragmentShaderName, infoLog));
+        auto msg = fmt::format("Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
+            vertexShaderName, fragmentShaderName, infoLog);
+        return nonstd::make_unexpected(msg);
     }
 
     return Shader(shaderProgram);
