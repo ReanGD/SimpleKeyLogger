@@ -25,4 +25,9 @@ struct MeshGenerator {
           17------18
     */
     static Mesh CreateSolidCube();
+    /*!
+        Creates a sphere with a center at the beginning of coordinates and a diameter equal to one
+        cntVertexCircle - Number of vertices in the circle
+    */
+    static Mesh CreateSolidSphere(uint16_t cntVertexCircle);
 };

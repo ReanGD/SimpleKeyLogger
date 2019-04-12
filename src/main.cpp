@@ -51,6 +51,7 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     Mesh cube = MeshGenerator::CreateSolidCube();
+    Mesh sphere = MeshGenerator::CreateSolidSphere(30);
     auto shader = Shader::Create("vertex", "fragment");
      if (!shader) {
         std::cout << shader.error() << std::endl;
@@ -106,9 +107,13 @@ int main() {
         shader->SetMat4("uView", camera->GetViewMatrix());
         shader->SetMat4("uWorld", matWorld);
 
-        cube.Bind();
-        cube.Draw();
-        cube.Unbind();
+        // cube.Bind();
+        // cube.Draw();
+        // cube.Unbind();
+
+        sphere.Bind();
+        sphere.Draw();
+        sphere.Unbind();
 
         shader->Unbind();
 
@@ -117,6 +122,7 @@ int main() {
 
     shader->Delete();
     cube.Delete();
+    sphere.Delete();
 
     glfwTerminate();
     return 0;
