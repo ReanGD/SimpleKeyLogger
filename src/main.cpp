@@ -50,8 +50,10 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
+    Mesh plane = MeshGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
     Mesh cube = MeshGenerator::CreateSolidCube();
     Mesh sphere = MeshGenerator::CreateSolidSphere(30);
+
     auto shader = Shader::Create("vertex", "fragment");
      if (!shader) {
         std::cout << shader.error() << std::endl;
@@ -81,7 +83,7 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);
-    camera->SetViewParams(glm::vec3(-10, 0, 0), glm::vec3(1, 0, 0));
+    camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
     cameraFps.AttachCamera(camera);
 
     auto timeLast = std::chrono::steady_clock::now();
@@ -102,18 +104,29 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture);
         shader->SetInt("ourTexture1", 0);
 
-        auto matWorld = glm::mat4(1.0f);
         shader->SetMat4("uProj", camera->GetProjMatrix());
         shader->SetMat4("uView", camera->GetViewMatrix());
+
+        auto matWorld = glm::mat4(1.0f);
         shader->SetMat4("uWorld", matWorld);
 
-        // cube.Bind();
-        // cube.Draw();
-        // cube.Unbind();
+        cube.Bind();
+        cube.Draw();
+        cube.Unbind();
+
+        matWorld = glm::mat4(1.0f);
+        shader->SetMat4("uWorld", matWorld);
 
         sphere.Bind();
         sphere.Draw();
         sphere.Unbind();
+
+        matWorld = glm::scale(glm::mat4(1.0), glm::vec3(10.0f));
+        shader->SetMat4("uWorld", matWorld);
+
+        plane.Bind();
+        plane.Draw();
+        plane.Unbind();
 
         shader->Unbind();
 
@@ -121,8 +134,9 @@ int main() {
     }
 
     shader->Delete();
-    cube.Delete();
     sphere.Delete();
+    cube.Delete();
+    plane.Delete();
 
     glfwTerminate();
     return 0;
