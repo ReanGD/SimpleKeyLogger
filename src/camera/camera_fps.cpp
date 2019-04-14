@@ -3,11 +3,11 @@
 
 
 void CameraFps::SetMovementSpeed(float value) noexcept {
-	m_movementSpeed	= value;
+    m_movementSpeed	= value;
 }
 
 void CameraFps::SetMouseSensitivity(float value) noexcept {
-	m_mouseSensitivity = value;
+    m_mouseSensitivity = value;
 }
 
 void CameraFps::SetPosition(const glm::vec3& value) {
@@ -17,29 +17,29 @@ void CameraFps::SetPosition(const glm::vec3& value) {
 }
 
 void CameraFps::SetTurn(float yaw, float pitch) noexcept {
-	m_yaw = yaw;
-	m_pitch	= pitch;
+    m_yaw = yaw;
+    m_pitch	= pitch;
 }
 
 void CameraFps::MoveForward() noexcept {
-	m_posOffset.x += 1.0f;
+    m_posOffset.x += 1.0f;
 }
 
 void CameraFps::MoveBackward() noexcept {
-	m_posOffset.x -= 1.0f;
+    m_posOffset.x -= 1.0f;
 }
 
 void CameraFps::MoveLeft() noexcept {
-	m_posOffset.y -= 1.0f;
+    m_posOffset.y -= 1.0f;
 }
 
 void CameraFps::MoveRight() noexcept {
-	m_posOffset.y += 1.0f;
+    m_posOffset.y += 1.0f;
 }
 
-void CameraFps::Rotate(float yaw, float pitch) noexcept {
-	m_yawOffset += yaw;
-	m_pitchOffset += pitch;
+void CameraFps::Rotate(float dtYaw, float dtPitch) noexcept {
+    m_yawOffset += dtYaw;
+    m_pitchOffset += dtPitch;
 }
 
 void CameraFps::AttachCamera(std::shared_ptr<Camera> camera) {
@@ -62,9 +62,9 @@ void CameraFps::Update(float dt) {
         m_posOffset = glm::vec3(0);
     }
 
-	m_yawOffsetPrevious += (m_yawOffset * m_mouseSensitivity * dt);
+    m_yawOffsetPrevious += (m_yawOffset * m_mouseSensitivity * dt);
     m_yawOffset	= 0;
-	m_yaw += m_yawOffsetPrevious;
+    m_yaw += m_yawOffsetPrevious;
     if (m_yaw >= glm::two_pi<float>()) {
         m_yaw -= glm::two_pi<float>();
     } else if (m_yaw <= -glm::two_pi<float>()) {
@@ -72,16 +72,18 @@ void CameraFps::Update(float dt) {
     }
 
     m_pitchOffsetPrevious += (m_pitchOffset * m_mouseSensitivity * dt);
-	m_pitchOffset = 0;
-	m_pitch	= glm::min(glm::max(m_pitch + m_pitchOffsetPrevious, m_pitchMin), m_pitchMax);
-	
-    glm::vec3 direction =
-        glm::rotate(glm::mat4(1.0), m_pitch, glm::vec3(0.0f, 0.0f, 1.0f)) *
-        glm::rotate(glm::mat4(1.0), m_yaw, glm::vec3(0.0f, 1.0f, 0.0f)) *
-        glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    m_pitchOffset = 0;
+    m_pitch	= glm::min(glm::max(m_pitch + m_pitchOffsetPrevious, m_pitchMin), m_pitchMax);
+
+    const auto matOne = glm::mat4(1.0);
+    const auto yawAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+    const auto pitchAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+    const auto vecEye = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+    glm::vec3 direction = glm::rotate(matOne, m_yaw, yawAxis) * glm::rotate(matOne, m_pitch, pitchAxis) * vecEye;
 
     for(const auto& camera: m_cameras) {
-        auto position = 
+        auto position =
             camera->GetPosition() +
             camera->GetDirection() * m_posOffsetPrevious.x +
             camera->GetLeftVector() * m_posOffsetPrevious.y;

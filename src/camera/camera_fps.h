@@ -23,11 +23,11 @@ public:
 	void MoveLeft() noexcept;
 	void MoveRight() noexcept;
 	// mouse move: yaw - left/right, pitch - up/down
-	void Rotate(float yaw, float pitch) noexcept;
+	void Rotate(float dtYaw, float dtPitch) noexcept;
 
 	void Update(float dt);
 
-	void AttachCamera(std::shared_ptr<Camera> camera);	
+	void AttachCamera(std::shared_ptr<Camera> camera);
 private:
 	float m_movementSpeed = 2.0f;
 	float m_mouseSensitivity = 0.2f;
