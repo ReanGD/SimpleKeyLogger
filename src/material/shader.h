@@ -7,7 +7,7 @@ class Shader
 {
 private:
     Shader() = delete;
-    Shader(uint32_t shaderHandle);
+    Shader(uint32_t handle);
 public:
     ~Shader() = default;
 

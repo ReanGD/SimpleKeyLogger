@@ -44,7 +44,7 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clan
         -Wsign-conversion
         -Wsign-promo
     )
-    set(STB_ERRORS_FILE "${CMAKE_SOURCE_DIR}/src/main.cpp")
+    set(STB_ERRORS_FILE "${CMAKE_SOURCE_DIR}/src/material/texture.cpp")
     set(STB_ERRORS_EXCLUDE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-cast-qual -Wno-cast-align -Wno-implicit-int-conversion")
     set_source_files_properties(${STB_ERRORS_FILE} PROPERTIES COMPILE_FLAGS ${STB_ERRORS_EXCLUDE_FLAGS})
 endif()

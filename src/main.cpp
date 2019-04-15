@@ -6,12 +6,10 @@
 
 #include <GLFW/glfw3.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include "mesh/mesh_generator.h"
-#include "shader/shader.h"
+#include "material/shader.h"
+#include "material/texture.h"
 #include "camera/camera_fps.h"
 
 
@@ -41,6 +39,7 @@ int main() {
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cout << "Failed to initialize GLEW" << std::endl;
+        glfwTerminate();
         return -1;
     }
 
@@ -55,32 +54,18 @@ int main() {
     Mesh sphere = MeshGenerator::CreateSolidSphere(30);
 
     auto shader = Shader::Create("vertex", "fragment");
-     if (!shader) {
+    if (!shader) {
         std::cout << shader.error() << std::endl;
+        glfwTerminate();
         return -1;
     }
 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // Set our texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // Set texture filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int texWidth, texHeight, texChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *texData = stbi_load("data/textures/brice.jpg",
-                                    &texWidth,
-                                    &texHeight,
-                                    &texChannels,
-                                    STBI_rgb);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texData);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(texData);
-    glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
+    auto texture = Texture::Create("brice.jpg");
+    if (!texture) {
+        std::cout << texture.error() << std::endl;
+        glfwTerminate();
+        return -1;
+    }
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -101,7 +86,8 @@ int main() {
         shader->Bind();
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        texture->Bind();
+
         shader->SetInt("ourTexture1", 0);
 
         shader->SetMat4("uProj", camera->GetProjMatrix());
@@ -128,11 +114,13 @@ int main() {
         plane.Draw();
         plane.Unbind();
 
+        texture->Unbind();
         shader->Unbind();
 
         glfwSwapBuffers(window);
     }
 
+    texture->Delete();
     shader->Delete();
     sphere.Delete();
     cube.Delete();

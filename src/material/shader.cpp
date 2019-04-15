@@ -1,4 +1,4 @@
-#include "shader/shader.h"
+#include "material/shader.h"
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -54,8 +54,8 @@ nonstd::expected<GLuint, std::string> LoadShader(std::filesystem::path&& filepat
     return shader;
 }
 
-Shader::Shader(uint32_t shaderHandle)
-    : m_handle(shaderHandle) {
+Shader::Shader(uint32_t handle)
+    : m_handle(handle) {
 
 }
 
