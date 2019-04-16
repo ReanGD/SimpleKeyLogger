@@ -131,7 +131,7 @@ nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexSh
     }
     auto fragmentShader = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER);
     if (!fragmentShader) {
-        glDeleteShader(*fragmentShader);
+        glDeleteShader(*vertexShader);
         return nonstd::make_unexpected(fragmentShader.error());
     }
 

@@ -60,6 +60,13 @@ int main() {
         return -1;
     }
 
+    auto shaderLight = Shader::Create("vertex_light", "fragment_light");
+    if (!shaderLight) {
+        std::cout << shaderLight.error() << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+
     auto texture = Texture::Create("brice.jpg");
     if (!texture) {
         std::cout << texture.error() << std::endl;
@@ -94,20 +101,14 @@ int main() {
         shader->SetMat4("uView", camera->GetViewMatrix());
 
         auto matWorld = glm::mat4(1.0f);
+        matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 0));
         shader->SetMat4("uWorld", matWorld);
 
         cube.Bind();
         cube.Draw();
         cube.Unbind();
 
-        matWorld = glm::mat4(1.0f);
-        shader->SetMat4("uWorld", matWorld);
-
-        sphere.Bind();
-        sphere.Draw();
-        sphere.Unbind();
-
-        matWorld = glm::scale(glm::mat4(1.0), glm::vec3(10.0f));
+        matWorld = glm::scale(glm::mat4(1.0), glm::vec3(20.0f));
         shader->SetMat4("uWorld", matWorld);
 
         plane.Bind();
@@ -117,11 +118,35 @@ int main() {
         texture->Unbind();
         shader->Unbind();
 
+
+
+        shaderLight->Bind();
+
+        glActiveTexture(GL_TEXTURE0);
+        texture->Bind();
+
+        shaderLight->SetInt("ourTexture1", 0);
+
+        shaderLight->SetMat4("uProj", camera->GetProjMatrix());
+        shaderLight->SetMat4("uView", camera->GetViewMatrix());
+
+        matWorld = glm::mat4(1.0f);
+        matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 3.0f));
+        shaderLight->SetMat4("uWorld", matWorld);
+
+        sphere.Bind();
+        sphere.Draw();
+        sphere.Unbind();
+
+        texture->Unbind();
+        shaderLight->Unbind();
+
         glfwSwapBuffers(window);
     }
 
     texture->Delete();
     shader->Delete();
+    shaderLight->Delete();
     sphere.Delete();
     cube.Delete();
     plane.Delete();

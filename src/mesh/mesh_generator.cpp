@@ -67,7 +67,7 @@ Mesh MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
     uint16_t plg = cntVertexCircle/2 - 1;
 
     // CAABB box;
-    float B = glm::half_pi<float>();
+    float B = -glm::half_pi<float>();
     float stepB = glm::pi<float>() / float(plg + 1);
     float stepA = glm::two_pi<float>() / float(cntVertexCircle - 1);
 
@@ -116,7 +116,7 @@ Mesh MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
     }
 
     uint16_t iy = cntVertexCircle*(plg-1);
-    for(uint16_t ix=1; ix<cntVertexCircle; ix++) {
+    for(uint16_t ix=1; ix!=cntVertexCircle; ix++) {
         ib[ind++]=ix;       ib[ind++]=ix+1;   ib[ind++]=0;
         ib[ind++]=iy+ix+1;  ib[ind++]=iy+ix;  ib[ind++]=vertexCnt-1;
     }
