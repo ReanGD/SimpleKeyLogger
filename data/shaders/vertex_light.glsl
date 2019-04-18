@@ -7,12 +7,13 @@ layout (location = 3) in vec2 vTexCoord;
 smooth out vec3 pNormal;
 smooth out vec2 pTexCoord;
 
-uniform mat4 uProj;
-uniform mat4 uView;
-uniform mat4 uWorld;
+uniform mat4 uProjMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uWorldMatrix;
+uniform mat3 uNormalMatrix;
 
 void main() {
-	gl_Position = uProj * uView * uWorld * vec4(vPosition, 1.0f);
-    pNormal		= mat3(uWorld) * vNormal;
+	gl_Position = uProjMatrix * uViewMatrix * uWorldMatrix * vec4(vPosition, 1.0f);
+    pNormal		= uNormalMatrix * vNormal;
 	pTexCoord   = vTexCoord;
 }

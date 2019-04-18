@@ -5,23 +5,42 @@ smooth in vec2 pTexCoord;
 
 out vec4 color;
 
-uniform sampler2D ourTexture1;
+uniform sampler2D uTextureDiffuse;
+uniform vec3 uToEyeDirection;
+
+const vec3 uToLightDirection = vec3(0, 1, 0);
+// rgb - цвет источника света, a - ambient интенсивность
+const vec4 uLightColor = vec4(1, 0, 1, 0.1);
+// uShininess > 0
+const float uShininess = 20.0;
 
 /*
-    N - нормаль
-    L - обратное направление света (RLightDir)
+	Расчитать освещение по модели Фонга
+	Все вектора должны передаваться нормализоваными
 
-    Все вектора нормализованы
+	N - нормаль
+	L - вектор направленный к источнику света (обратный направлению луча) (uToLightDirection)
+	V - вектор обратный направлению взгляда (uToEyeDirection)
+	facture  - цвет текстуры или материала
 */
-float lambert(vec3 N, vec3 L) {
-    float cosNL = dot(N, L);
-    return max(cosNL, 0.0);
+vec3 PhongLighting(vec3 N, vec3 L, vec3 V, vec3 facture) {
+	float cosNL = dot(N, L);
+	vec3 reflection = 2.0f * N * cosNL - L;
+	float cosRV = max(0, dot(reflection, V));
+	float powSpecular = pow(cosRV, uShininess);
+
+	// Ambient = facture * uLightColor.a * uLightColor.rgb
+	// Diffuse = facture * cosNL * uLightColor.rgb
+	// Specular = powSpecular * uLightColor.rgb
+	vec3 color = (facture * (uLightColor.a + cosNL) + powSpecular) * uLightColor.rgb;
+
+	return min(color, vec3(1));
 }
 
 void main() {
-    vec3 Normal = normalize(pNormal);
-    vec3 RLightDir = normalize(vec3(0, 1, 0));
-    vec3 Facture = vec3(0.5, 0.5, 0.5);
+    vec3 normal = normalize(pNormal);
+    vec3 facture = vec3(0.6, 0.1, 0.1);
 
-    color = vec4(Facture * lambert(Normal, RLightDir), 1.0);
+    vec3 clr = PhongLighting(normal, uToLightDirection, uToEyeDirection, facture);
+    color = vec4(clr, 1.0);
 }

@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 #include "mesh/mesh_generator.h"
 #include "material/shader.h"
 #include "material/texture.h"
@@ -103,6 +104,8 @@ int main() {
         auto matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 0));
         shader->SetMat4("uWorld", matWorld);
+        glm::mat3 matNorm = glm::inverseTranspose(glm::mat3(matWorld));
+        shader->SetMat3("uNorm", matNorm);
 
         cube.Bind();
         cube.Draw();
@@ -110,6 +113,8 @@ int main() {
 
         matWorld = glm::scale(glm::mat4(1.0), glm::vec3(20.0f));
         shader->SetMat4("uWorld", matWorld);
+        matNorm = glm::inverseTranspose(glm::mat3(matWorld));
+        shader->SetMat3("uNorm", matNorm);
 
         plane.Bind();
         plane.Draw();
@@ -125,14 +130,29 @@ int main() {
         glActiveTexture(GL_TEXTURE0);
         texture->Bind();
 
-        shaderLight->SetInt("ourTexture1", 0);
+        shaderLight->SetInt("uTextureDiffuse", 0);
 
-        shaderLight->SetMat4("uProj", camera->GetProjMatrix());
-        shaderLight->SetMat4("uView", camera->GetViewMatrix());
+        shaderLight->SetMat4("uProjMatrix", camera->GetProjMatrix());
+        shaderLight->SetMat4("uViewMatrix", camera->GetViewMatrix());
+        shaderLight->SetVec3("uToEyeDirection", -camera->GetDirection());
 
         matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 3.0f));
-        shaderLight->SetMat4("uWorld", matWorld);
+        matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
+        shaderLight->SetMat4("uWorldMatrix", matWorld);
+        matNorm = glm::inverseTranspose(glm::mat3(matWorld));
+        shaderLight->SetMat3("uNormalMatrix", matNorm);
+
+        sphere.Bind();
+        sphere.Draw();
+        sphere.Unbind();
+
+        matWorld = glm::mat4(1.0f);
+        matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 6.0f));
+        matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
+        shaderLight->SetMat4("uWorldMatrix", matWorld);
+        matNorm = glm::mat3(matWorld);
+        shaderLight->SetMat3("uNormalMatrix", matNorm);
 
         sphere.Bind();
         sphere.Draw();

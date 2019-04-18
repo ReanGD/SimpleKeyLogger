@@ -48,8 +48,8 @@ private:
 	// screenWidth / screenHeight
 	float m_aspectRatio = 3.0/4.0;
 	float m_nearPlane = 0.1f;
-	float m_farPlane = 100.0;	
-	
+	float m_farPlane = 100.0;
+
 	glm::mat4 m_matProj;
 	glm::mat4 m_matView;
 };

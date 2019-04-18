@@ -4,7 +4,7 @@ RTGE - game engine
 * Install externan packages:
 
 ```console
-yay -S conan
+sudo pip install conan
 ```
 
 * Build
