@@ -12,40 +12,40 @@
 #include "material/shader.h"
 #include "material/texture.h"
 #include "camera/camera_fps.h"
+#include "window/window.h"
+
+
+using defer = std::shared_ptr<void>;
+using error = std::string;
 
 
 void processInput(GLFWwindow *window);
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 CameraFps cameraFps;
-const GLuint WIDTH = 1024, HEIGHT = 768;
+// const GLuint WIDTH = 1024, HEIGHT = 768;
+const GLuint WIDTH = 1920, HEIGHT = 1080;
 
-int main() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "RTGE", nullptr, nullptr);
-    if (window == nullptr) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
+std::string run() {
+    Window window(WIDTH, HEIGHT);
+
+    std::string err;
+    if (!window.Init(false, err)) {
+        return err;
     }
-    glfwMakeContextCurrent(window);
-    glfwSetCursorPosCallback(window, mouseCallback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSetCursorPosCallback(window.m_handle, mouseCallback);
+    // glfwSetInputMode(window.m_handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window.m_handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
-        std::cout << "Failed to initialize GLEW" << std::endl;
-        glfwTerminate();
-        return -1;
+        return "Failed to initialize GLEW";
     }
 
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(window.m_handle, &width, &height);
     glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
@@ -56,23 +56,17 @@ int main() {
 
     auto shader = Shader::Create("vertex", "fragment");
     if (!shader) {
-        std::cout << shader.error() << std::endl;
-        glfwTerminate();
-        return -1;
+        return shader.error();
     }
 
     auto shaderLight = Shader::Create("vertex_light", "fragment_light");
     if (!shaderLight) {
-        std::cout << shaderLight.error() << std::endl;
-        glfwTerminate();
-        return -1;
+        return shaderLight.error();
     }
 
     auto texture = Texture::Create("brice.jpg");
     if (!texture) {
-        std::cout << texture.error() << std::endl;
-        glfwTerminate();
-        return -1;
+        return texture.error();
     }
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);
@@ -80,12 +74,12 @@ int main() {
     cameraFps.AttachCamera(camera);
 
     auto timeLast = std::chrono::steady_clock::now();
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window.m_handle)) {
         auto now = std::chrono::steady_clock::now();
         cameraFps.Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;
 
-        processInput(window);
+        processInput(window.m_handle);
 
         glfwPollEvents();
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -124,7 +118,6 @@ int main() {
         shader->Unbind();
 
 
-
         shaderLight->Bind();
 
         glActiveTexture(GL_TEXTURE0);
@@ -161,7 +154,7 @@ int main() {
         texture->Unbind();
         shaderLight->Unbind();
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(window.m_handle);
     }
 
     texture->Delete();
@@ -171,8 +164,7 @@ int main() {
     cube.Delete();
     plane.Delete();
 
-    glfwTerminate();
-    return 0;
+    return std::string();
 }
 
 void processInput(GLFWwindow *window) {
@@ -211,4 +203,30 @@ void mouseCallback(GLFWwindow* window __attribute__((unused)), double xpos, doub
 
     lastX = xpos;
     lastY = ypos;
+}
+
+void glfwErrorCallback(int error, const char* description) {
+    std::cout << "GLFW error (" << error << "): " << description << std::endl;
+}
+
+int main() {
+    glfwSetErrorCallback(glfwErrorCallback);
+
+    if (glfwInit() != GLFW_TRUE) {
+        return EXIT_FAILURE;
+    }
+    defer _(nullptr, [](...){ glfwTerminate(); });
+
+    try {
+        auto err = run();
+        if (!err.empty()) {
+            std::cerr << "Error: " << err << std::endl;
+            return EXIT_FAILURE;
+        }
+    } catch(const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
