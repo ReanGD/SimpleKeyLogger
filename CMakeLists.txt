@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(rtge VERSION 0.1 LANGUAGES CXX)
 
-find_package(glfw3 3.3 REQUIRED)
-find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-find_package(GLEW REQUIRED)
-
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
    file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.14/conan.cmake"
@@ -52,18 +48,8 @@ endif()
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_executable(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SOURCE_FILES})
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "src"
-    ${GLFW_INCLUDE_DIRS}
-    ${OPENGL_INCLUDE_DIR}
-    ${GLEW_INCLUDE_DIRS})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    "glfw"
-    ${OPENGL_LIBRARY}
-    ${GLEW_LIBRARIES}
-    ${CONAN_LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE "src")
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
