@@ -33,7 +33,7 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clan
         -Wctor-dtor-privacy
         -Wenum-compare
         -Wfloat-equal
-        -Wnon-virtual-dtor
+        # -Wnon-virtual-dtor
         -Wold-style-cast
         -Woverloaded-virtual
         -Wredundant-decls

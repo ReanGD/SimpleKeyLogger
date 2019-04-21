@@ -64,7 +64,38 @@ bool Window::Init(bool fullscreen, std::string& error) {
         centerWindow(monitor, mode, m_handle);
     }
 
+    glfwSetInputMode(m_handle, GLFW_STICKY_KEYS, GLFW_TRUE);
+
     glfwMakeContextCurrent(m_handle);
+    glfwSwapInterval(1);
 
     return true;
+}
+
+void Window::SetInputHandler(std::shared_ptr<InputHandler> handler) {
+    m_inputHandler = handler;
+}
+
+bool Window::IsPressed(int key) const {
+    return glfwGetKey(m_handle, key) == GLFW_PRESS;
+}
+
+void Window::Close() const {
+    glfwSetWindowShouldClose(m_handle, GL_TRUE);
+}
+
+bool Window::StartFrame() {
+    if (glfwWindowShouldClose(m_handle)) {
+        return false;
+    }
+
+    return true;
+}
+
+void Window::EndFrame() {
+    glfwSwapBuffers(m_handle);
+    glfwPollEvents();
+    if (m_inputHandler) {
+        m_inputHandler->KeyHandler(this);
+    }
 }

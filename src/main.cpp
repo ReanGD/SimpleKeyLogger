@@ -22,10 +22,50 @@ using error = std::string;
 void processInput(GLFWwindow *window);
 void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
-CameraFps cameraFps;
 // const GLuint WIDTH = 1024, HEIGHT = 768;
 const GLuint WIDTH = 1920, HEIGHT = 1080;
 
+class Manipulator final : public InputHandler {
+public:
+    Manipulator() = delete;
+    Manipulator(std::shared_ptr<Camera> camera) {
+        m_cameraFps.AttachCamera(camera);
+    }
+    ~Manipulator() = default;
+private:
+    void KeyHandler(const Window* window) override;
+    void MouseHandler(float , float ) override {}
+
+public:
+    void Update(float dt) {
+        m_cameraFps.Update(dt);
+    }
+
+private:
+    CameraFps m_cameraFps;
+};
+
+void Manipulator::KeyHandler(const Window* window) {
+    if (window->IsPressed(GLFW_KEY_ESCAPE)) {
+        window->Close();
+    }
+
+    if (window->IsPressed(GLFW_KEY_W)) {
+        m_cameraFps.MoveForward();
+    }
+
+    if (window->IsPressed(GLFW_KEY_S)) {
+        m_cameraFps.MoveBackward();
+    }
+
+    if (window->IsPressed(GLFW_KEY_A)) {
+        m_cameraFps.MoveLeft();
+    }
+
+    if (window->IsPressed(GLFW_KEY_D)) {
+        m_cameraFps.MoveRight();
+    }
+}
 
 std::string run() {
     Window window(WIDTH, HEIGHT);
@@ -71,17 +111,18 @@ std::string run() {
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
-    cameraFps.AttachCamera(camera);
+
+    auto manipulator = std::make_shared<Manipulator>(camera);
+    window.SetInputHandler(manipulator);
 
     auto timeLast = std::chrono::steady_clock::now();
-    while (!glfwWindowShouldClose(window.m_handle)) {
+    while (window.StartFrame()) {
         auto now = std::chrono::steady_clock::now();
-        cameraFps.Update(std::chrono::duration<float>(now - timeLast).count());
+        manipulator->Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;
 
-        processInput(window.m_handle);
+        glViewport(0, 0, width, height);
 
-        glfwPollEvents();
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -153,8 +194,7 @@ std::string run() {
 
         texture->Unbind();
         shaderLight->Unbind();
-
-        glfwSwapBuffers(window.m_handle);
+        window.EndFrame();
     }
 
     texture->Delete();
@@ -167,42 +207,20 @@ std::string run() {
     return std::string();
 }
 
-void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    }
+// bool firstMouse = true;
+// double lastX = WIDTH / 2.0f;
+// double lastY = HEIGHT / 2.0f;
+void mouseCallback(GLFWwindow* window __attribute__((unused)), double xpos __attribute__((unused)), double ypos __attribute__((unused))) {
+    // if (firstMouse) {
+    //     lastX = xpos;
+    //     lastY = ypos;
+    //     firstMouse = false;
+    // }
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraFps.MoveForward();
-    }
+    // cameraFps.Rotate(float(lastX - xpos), float(lastY - ypos));
 
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraFps.MoveBackward();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraFps.MoveLeft();
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraFps.MoveRight();
-    }
-}
-
-bool firstMouse = true;
-double lastX = WIDTH / 2.0f;
-double lastY = HEIGHT / 2.0f;
-void mouseCallback(GLFWwindow* window __attribute__((unused)), double xpos, double ypos) {
-    if (firstMouse) {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    cameraFps.Rotate(float(lastX - xpos), float(lastY - ypos));
-
-    lastX = xpos;
-    lastY = ypos;
+    // lastX = xpos;
+    // lastY = ypos;
 }
 
 void glfwErrorCallback(int error, const char* description) {
