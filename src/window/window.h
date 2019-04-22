@@ -4,10 +4,25 @@
 #include <memory>
 
 struct GLFWwindow;
-class Window;
-
 struct InputHandler {
-    virtual void KeyHandler(const Window* window) = 0;
+    struct Executor {
+        Executor() = delete;
+        Executor(const Executor&) = delete;
+        Executor(Executor&&) = delete;
+        Executor& operator=(const Executor&) = delete;
+        Executor& operator=(Executor&&) = delete;
+
+        Executor(GLFWwindow* handle);
+
+        void Close() const;
+        bool IsPressed(int key) const;
+    private:
+        GLFWwindow* m_handle = nullptr;
+    };
+
+    InputHandler() = default;
+    virtual ~InputHandler() = default;
+    virtual void KeyHandler(const Executor& e) = 0;
     virtual void MouseHandler(float dtX, float dtY) = 0;
 };
 
@@ -24,9 +39,7 @@ public:
 
 public:
     bool Init(bool fullscreen, std::string& error);
-    void SetInputHandler(std::shared_ptr<InputHandler> handler);
-    bool IsPressed(int key) const;
-    void Close() const;
+    void SetInputHandler(std::weak_ptr<InputHandler> handler);
     bool StartFrame();
     void EndFrame();
 
@@ -34,7 +47,7 @@ private:
     uint32_t m_width = 800;
     uint32_t m_height = 600;
 
-    std::shared_ptr<InputHandler> m_inputHandler = nullptr;
+    std::weak_ptr<InputHandler> m_inputHandler;
 public:
-    GLFWwindow* m_handle = nullptr;
+    GLFWwindow* m_window = nullptr;
 };

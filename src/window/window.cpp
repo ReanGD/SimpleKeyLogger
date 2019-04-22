@@ -14,6 +14,35 @@ void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwindow* win
 	glfwSetWindowPos(window, xpos, ypos);
 }
 
+struct CursorManager {
+    static void Update(GLFWwindow*, double xpos, double ypos) {
+        if (auto handler = m_handler.lock(); handler) {
+            handler->MouseHandler(float(m_curposX - xpos), float(m_curposY - ypos));
+        }
+        m_curposX = xpos;
+        m_curposY = ypos;
+    }
+    static double m_curposX;
+    static double m_curposY;
+    static std::weak_ptr<InputHandler> m_handler;
+};
+
+double CursorManager::m_curposX = 0;
+double CursorManager::m_curposY = 0;
+std::weak_ptr<InputHandler> CursorManager::m_handler;
+
+InputHandler::Executor::Executor(GLFWwindow* handle)
+    : m_handle(handle) {
+
+}
+
+void InputHandler::Executor::Close() const {
+    glfwSetWindowShouldClose(m_handle, GL_TRUE);
+}
+
+bool InputHandler::Executor::IsPressed(int key) const {
+    return glfwGetKey(m_handle, key) == GLFW_PRESS;
+}
 
 Window::Window(uint32_t width, uint32_t height)
     : m_width(width)
@@ -22,9 +51,10 @@ Window::Window(uint32_t width, uint32_t height)
 }
 
 Window::~Window() {
-    if (m_handle != nullptr) {
-        glfwDestroyWindow(m_handle);
-        m_handle = nullptr;
+    if (m_window != nullptr) {
+        glfwSetCursorPosCallback(m_window, [](GLFWwindow*, double, double) {});
+        glfwDestroyWindow(m_window);
+        m_window = nullptr;
     }
 }
 
@@ -54,38 +84,41 @@ bool Window::Init(bool fullscreen, std::string& error) {
         m_height = static_cast<uint32_t>(mode->height);
     }
 
-    m_handle = glfwCreateWindow(static_cast<int>(m_width), static_cast<int>(m_height), "RTGE", windowMonitor, nullptr);
-    if (m_handle == nullptr) {
+    m_window = glfwCreateWindow(static_cast<int>(m_width), static_cast<int>(m_height), "RTGE", windowMonitor, nullptr);
+    if (m_window == nullptr) {
         error = "Failed to create window";
         return false;
     }
 
     if (!fullscreen) {
-        centerWindow(monitor, mode, m_handle);
+        centerWindow(monitor, mode, m_window);
     }
 
-    glfwSetInputMode(m_handle, GLFW_STICKY_KEYS, GLFW_TRUE);
-
-    glfwMakeContextCurrent(m_handle);
+    glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1);
 
     return true;
 }
 
-void Window::SetInputHandler(std::shared_ptr<InputHandler> handler) {
+void Window::SetInputHandler(std::weak_ptr<InputHandler> handler) {
+    if (!handler.lock()) {
+        return;
+    }
+    glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (glfwRawMouseMotionSupported()) {
+        glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
+
+    glfwGetCursorPos(m_window, &CursorManager::m_curposX, &CursorManager::m_curposY);
+    CursorManager::m_handler = handler;
+    glfwSetCursorPosCallback(m_window, CursorManager::Update);
+
     m_inputHandler = handler;
 }
 
-bool Window::IsPressed(int key) const {
-    return glfwGetKey(m_handle, key) == GLFW_PRESS;
-}
-
-void Window::Close() const {
-    glfwSetWindowShouldClose(m_handle, GL_TRUE);
-}
-
 bool Window::StartFrame() {
-    if (glfwWindowShouldClose(m_handle)) {
+    if (glfwWindowShouldClose(m_window)) {
         return false;
     }
 
@@ -93,9 +126,9 @@ bool Window::StartFrame() {
 }
 
 void Window::EndFrame() {
-    glfwSwapBuffers(m_handle);
+    glfwSwapBuffers(m_window);
     glfwPollEvents();
-    if (m_inputHandler) {
-        m_inputHandler->KeyHandler(this);
+    if (auto handler = m_inputHandler.lock(); handler) {
+        handler->KeyHandler(InputHandler::Executor(m_window));
     }
 }

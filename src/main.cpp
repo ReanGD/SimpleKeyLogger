@@ -25,16 +25,16 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 // const GLuint WIDTH = 1024, HEIGHT = 768;
 const GLuint WIDTH = 1920, HEIGHT = 1080;
 
-class Manipulator final : public InputHandler {
+class Manipulator : public InputHandler {
 public:
     Manipulator() = delete;
     Manipulator(std::shared_ptr<Camera> camera) {
         m_cameraFps.AttachCamera(camera);
     }
-    ~Manipulator() = default;
+    ~Manipulator() override = default;
 private:
-    void KeyHandler(const Window* window) override;
-    void MouseHandler(float , float ) override {}
+    void KeyHandler(const Executor& e) override;
+    void MouseHandler(float dtX, float dtY) override;
 
 public:
     void Update(float dt) {
@@ -45,26 +45,30 @@ private:
     CameraFps m_cameraFps;
 };
 
-void Manipulator::KeyHandler(const Window* window) {
-    if (window->IsPressed(GLFW_KEY_ESCAPE)) {
-        window->Close();
+void Manipulator::KeyHandler(const Executor& e) {
+    if (e.IsPressed(GLFW_KEY_ESCAPE)) {
+        e.Close();
     }
 
-    if (window->IsPressed(GLFW_KEY_W)) {
+    if (e.IsPressed(GLFW_KEY_W)) {
         m_cameraFps.MoveForward();
     }
 
-    if (window->IsPressed(GLFW_KEY_S)) {
+    if (e.IsPressed(GLFW_KEY_S)) {
         m_cameraFps.MoveBackward();
     }
 
-    if (window->IsPressed(GLFW_KEY_A)) {
+    if (e.IsPressed(GLFW_KEY_A)) {
         m_cameraFps.MoveLeft();
     }
 
-    if (window->IsPressed(GLFW_KEY_D)) {
+    if (e.IsPressed(GLFW_KEY_D)) {
         m_cameraFps.MoveRight();
     }
+}
+
+void Manipulator::MouseHandler(float dtX, float dtY) {
+    m_cameraFps.Rotate(dtX, dtY);
 }
 
 std::string run() {
@@ -75,17 +79,13 @@ std::string run() {
         return err;
     }
 
-    glfwSetCursorPosCallback(window.m_handle, mouseCallback);
-    // glfwSetInputMode(window.m_handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetInputMode(window.m_handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         return "Failed to initialize GLEW";
     }
 
     int width, height;
-    glfwGetFramebufferSize(window.m_handle, &width, &height);
+    glfwGetFramebufferSize(window.m_window, &width, &height);
     glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
@@ -205,22 +205,6 @@ std::string run() {
     plane.Delete();
 
     return std::string();
-}
-
-// bool firstMouse = true;
-// double lastX = WIDTH / 2.0f;
-// double lastY = HEIGHT / 2.0f;
-void mouseCallback(GLFWwindow* window __attribute__((unused)), double xpos __attribute__((unused)), double ypos __attribute__((unused))) {
-    // if (firstMouse) {
-    //     lastX = xpos;
-    //     lastY = ypos;
-    //     firstMouse = false;
-    // }
-
-    // cameraFps.Rotate(float(lastX - xpos), float(lastY - ypos));
-
-    // lastX = xpos;
-    // lastY = ypos;
 }
 
 void glfwErrorCallback(int error, const char* description) {
