@@ -14,22 +14,13 @@ void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwindow* win
 	glfwSetWindowPos(window, xpos, ypos);
 }
 
-struct CursorManager {
-    static void Update(GLFWwindow*, double xpos, double ypos) {
-        if (auto handler = m_handler.lock(); handler) {
-            handler->MouseHandler(float(m_curposX - xpos), float(m_curposY - ypos));
-        }
-        m_curposX = xpos;
-        m_curposY = ypos;
-    }
-    static double m_curposX;
-    static double m_curposY;
-    static std::weak_ptr<InputHandler> m_handler;
-};
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    static_cast<Window*>(glfwGetWindowUserPointer(window))->OnFramebufferSizeChanged(width, height);
+}
 
-double CursorManager::m_curposX = 0;
-double CursorManager::m_curposY = 0;
-std::weak_ptr<InputHandler> CursorManager::m_handler;
+void cursorPosCallback(GLFWwindow* window, double posX, double posY) {
+    static_cast<Window*>(glfwGetWindowUserPointer(window))->OnCursorPositionChanged(posX, posY);
+}
 
 InputHandler::Executor::Executor(GLFWwindow* handle)
     : m_handle(handle) {
@@ -52,7 +43,8 @@ Window::Window(uint32_t width, uint32_t height)
 
 Window::~Window() {
     if (m_window != nullptr) {
-        glfwSetCursorPosCallback(m_window, [](GLFWwindow*, double, double) {});
+        glfwSetCursorPosCallback(m_window, nullptr);
+        glfwSetFramebufferSizeCallback(m_window, nullptr);
         glfwDestroyWindow(m_window);
         m_window = nullptr;
     }
@@ -89,12 +81,23 @@ bool Window::Init(bool fullscreen, std::string& error) {
         error = "Failed to create window";
         return false;
     }
+    glfwSetWindowUserPointer(m_window, this);
 
     if (!fullscreen) {
         centerWindow(monitor, mode, m_window);
     }
 
     glfwMakeContextCurrent(m_window);
+
+    int width, height;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    OnFramebufferSizeChanged(width, height);
+
+    glfwGetCursorPos(m_window, &m_cursorX, &m_cursorY);
+
+    glfwSetFramebufferSizeCallback(m_window, framebufferSizeCallback);
+    glfwSetCursorPosCallback(m_window, cursorPosCallback);
+
     glfwSwapInterval(1);
 
     return true;
@@ -110,11 +113,11 @@ void Window::SetInputHandler(std::weak_ptr<InputHandler> handler) {
         glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
-    glfwGetCursorPos(m_window, &CursorManager::m_curposX, &CursorManager::m_curposY);
-    CursorManager::m_handler = handler;
-    glfwSetCursorPosCallback(m_window, CursorManager::Update);
-
     m_inputHandler = handler;
+
+    int width, height;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    OnFramebufferSizeChanged(width, height);
 }
 
 bool Window::StartFrame() {
@@ -131,4 +134,19 @@ void Window::EndFrame() {
     if (auto handler = m_inputHandler.lock(); handler) {
         handler->KeyHandler(InputHandler::Executor(m_window));
     }
+}
+
+void Window::OnFramebufferSizeChanged(int width, int height) {
+    glViewport(0, 0, width, height);
+    if (auto handler = m_inputHandler.lock(); handler) {
+        handler->ScreenHandler(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+    }
+}
+
+void Window::OnCursorPositionChanged(double posX, double posY) {
+    if (auto handler = m_inputHandler.lock(); handler) {
+        handler->MouseHandler(float(m_cursorX - posX), float(m_cursorY - posY));
+    }
+    m_cursorX = posX;
+    m_cursorY = posY;
 }

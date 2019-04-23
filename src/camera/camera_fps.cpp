@@ -42,7 +42,15 @@ void CameraFps::Rotate(float dtYaw, float dtPitch) noexcept {
     m_pitchOffset += dtPitch;
 }
 
+void CameraFps::ScreenHandler(uint32_t width, uint32_t height) {
+    m_aspectRatio = float(width) / float(height);
+    for(const auto& camera: m_cameras) {
+        camera->SetAspectRatio(m_aspectRatio);
+    }
+}
+
 void CameraFps::AttachCamera(std::shared_ptr<Camera> camera) {
+    camera->SetAspectRatio(m_aspectRatio);
     m_cameras.push_back(camera);
 }
 

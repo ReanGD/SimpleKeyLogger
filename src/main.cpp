@@ -19,12 +19,6 @@ using defer = std::shared_ptr<void>;
 using error = std::string;
 
 
-void processInput(GLFWwindow *window);
-void mouseCallback(GLFWwindow* window, double xpos, double ypos);
-
-// const GLuint WIDTH = 1024, HEIGHT = 768;
-const GLuint WIDTH = 1920, HEIGHT = 1080;
-
 class Manipulator : public InputHandler {
 public:
     Manipulator() = delete;
@@ -35,6 +29,7 @@ public:
 private:
     void KeyHandler(const Executor& e) override;
     void MouseHandler(float dtX, float dtY) override;
+    void ScreenHandler(uint32_t width, uint32_t height) override;
 
 public:
     void Update(float dt) {
@@ -71,8 +66,13 @@ void Manipulator::MouseHandler(float dtX, float dtY) {
     m_cameraFps.Rotate(dtX, dtY);
 }
 
+void Manipulator::ScreenHandler(uint32_t width, uint32_t height) {
+    m_cameraFps.ScreenHandler(width, height);
+}
+
+
 std::string run() {
-    Window window(WIDTH, HEIGHT);
+    Window window(1024, 768);
 
     std::string err;
     if (!window.Init(false, err)) {
@@ -83,10 +83,6 @@ std::string run() {
     if (glewInit() != GLEW_OK) {
         return "Failed to initialize GLEW";
     }
-
-    int width, height;
-    glfwGetFramebufferSize(window.m_window, &width, &height);
-    glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -109,7 +105,7 @@ std::string run() {
         return texture.error();
     }
 
-    auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), width, height, 0.1f, 100.0);
+    auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
 
     auto manipulator = std::make_shared<Manipulator>(camera);
@@ -120,8 +116,6 @@ std::string run() {
         auto now = std::chrono::steady_clock::now();
         manipulator->Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;
-
-        glViewport(0, 0, width, height);
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

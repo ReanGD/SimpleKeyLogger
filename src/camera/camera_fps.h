@@ -24,6 +24,7 @@ public:
 	void MoveRight() noexcept;
 	// mouse move: yaw - left/right, pitch - up/down
 	void Rotate(float dtYaw, float dtPitch) noexcept;
+	void ScreenHandler(uint32_t width, uint32_t height);
 
 	void Update(float dt);
 
@@ -33,6 +34,7 @@ private:
 	float m_mouseSensitivity = 0.2f;
 	float m_pitchMax = glm::half_pi<float>() - 0.2f;
 	float m_pitchMin = -(glm::half_pi<float>() - 0.2f);
+	float m_aspectRatio = 4.0f / 3.0f;
 
 	// Offset in the current frame
 	glm::vec3 m_posOffset = glm::vec3(0);

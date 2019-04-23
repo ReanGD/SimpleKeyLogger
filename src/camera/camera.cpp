@@ -7,20 +7,16 @@ Camera::Camera() {
 	recalcViewMatrix();
 }
 
-Camera::Camera(float fovy, uint width, uint height, float nearPlane, float farPlane)
+Camera::Camera(float fovy, float nearPlane, float farPlane)
 	: m_fovy(fovy)
-	, m_aspectRatio(float(width) / float(height))
 	, m_nearPlane(nearPlane)
 	, m_farPlane(farPlane) {
 	recalcProjMatrix();
 	recalcViewMatrix();
 }
 
-void Camera::SetProjParams(float fovy, float aspectRatio, float nearPlane, float farPlane) {
-	m_nearPlane		= nearPlane;
-	m_farPlane		= farPlane;
-	m_fovy			= fovy;
-	m_aspectRatio	= aspectRatio;
+void Camera::SetAspectRatio(float value) {
+	m_aspectRatio = value;
 	recalcProjMatrix();
 }
 

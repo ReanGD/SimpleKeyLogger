@@ -3,14 +3,15 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/constants.hpp>
 
+
 class Camera {
 public:
 	Camera();
-	Camera(float fovy, uint width, uint height, float nearPlane, float farPlane);
+	Camera(float fovy, float nearPlane, float farPlane);
 	~Camera() = default;
 
 public:
-	void SetProjParams(float fovy, float aspectRatio, float nearPlane, float farPlane);
+	void SetAspectRatio(float value);
 
 	void SetPosition(const glm::vec3& value);
 	void SetDirection(const glm::vec3& value);
@@ -46,7 +47,7 @@ private:
 	// In the radians (45 degrees)
 	float m_fovy = glm::quarter_pi<float>();
 	// screenWidth / screenHeight
-	float m_aspectRatio = 3.0/4.0;
+	float m_aspectRatio = 4.0f / 3.0f;
 	float m_nearPlane = 0.1f;
 	float m_farPlane = 100.0;
 
