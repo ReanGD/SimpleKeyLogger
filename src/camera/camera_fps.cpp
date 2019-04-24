@@ -10,36 +10,42 @@ void CameraFps::SetMouseSensitivity(float value) noexcept {
     m_mouseSensitivity = value;
 }
 
-void CameraFps::SetPosition(const glm::vec3& value) {
-    for(const auto& camera: m_cameras) {
-        camera->SetPosition(value);
+void CameraFps::AttachCamera(std::shared_ptr<Camera> camera) {
+    camera->SetAspectRatio(m_aspectRatio);
+    m_cameras.push_back(camera);
+}
+
+void CameraFps::KeyHandler(const Executor& e) {
+    if (e.IsPressed(Key::ESCAPE)) {
+        e.Close();
+    }
+
+    // move forward
+    if (e.IsPressed(Key::W)) {
+        m_posOffset.x += 1.0f;
+    }
+
+    // move backward
+    if (e.IsPressed(Key::S)) {
+        m_posOffset.x -= 1.0f;
+    }
+
+    // move left
+    if (e.IsPressed(Key::A)) {
+        m_posOffset.y -= 1.0f;
+    }
+
+    // move right
+    if (e.IsPressed(Key::D)) {
+        m_posOffset.y += 1.0f;
     }
 }
 
-void CameraFps::SetTurn(float yaw, float pitch) noexcept {
-    m_yaw = yaw;
-    m_pitch	= pitch;
-}
-
-void CameraFps::MoveForward() noexcept {
-    m_posOffset.x += 1.0f;
-}
-
-void CameraFps::MoveBackward() noexcept {
-    m_posOffset.x -= 1.0f;
-}
-
-void CameraFps::MoveLeft() noexcept {
-    m_posOffset.y -= 1.0f;
-}
-
-void CameraFps::MoveRight() noexcept {
-    m_posOffset.y += 1.0f;
-}
-
-void CameraFps::Rotate(float dtYaw, float dtPitch) noexcept {
-    m_yawOffset += dtYaw;
-    m_pitchOffset += dtPitch;
+void CameraFps::MouseHandler(float dtX, float dtY) {
+    // yaw - left/right
+    m_yawOffset += dtX;
+    // pitch - up/down
+    m_pitchOffset += dtY;
 }
 
 void CameraFps::ScreenHandler(uint32_t width, uint32_t height) {
@@ -49,13 +55,10 @@ void CameraFps::ScreenHandler(uint32_t width, uint32_t height) {
     }
 }
 
-void CameraFps::AttachCamera(std::shared_ptr<Camera> camera) {
-    camera->SetAspectRatio(m_aspectRatio);
-    m_cameras.push_back(camera);
-}
-
 void CameraFps::Update(float dt) {
-    const float factor = 0.3f;
+    constexpr const float factor = 0.3f;
+    constexpr const float pitchMax = glm::half_pi<float>() - 0.2f;
+    constexpr const float pitchMin = -(glm::half_pi<float>() - 0.2f);
 
     dt *= (1.0f - factor);
 
@@ -81,7 +84,7 @@ void CameraFps::Update(float dt) {
 
     m_pitchOffsetPrevious += (m_pitchOffset * m_mouseSensitivity * dt);
     m_pitchOffset = 0;
-    m_pitch	= glm::min(glm::max(m_pitch + m_pitchOffsetPrevious, m_pitchMin), m_pitchMax);
+    m_pitch = glm::min(glm::max(m_pitch + m_pitchOffsetPrevious, pitchMin), pitchMax);
 
     const auto matOne = glm::mat4(1.0);
     const auto yawAxis = glm::vec3(0.0f, 1.0f, 0.0f);

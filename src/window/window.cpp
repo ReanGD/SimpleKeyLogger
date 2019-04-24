@@ -31,8 +31,8 @@ void InputHandler::Executor::Close() const {
     glfwSetWindowShouldClose(m_handle, GL_TRUE);
 }
 
-bool InputHandler::Executor::IsPressed(int key) const {
-    return glfwGetKey(m_handle, key) == GLFW_PRESS;
+bool InputHandler::Executor::IsPressed(Key value) const {
+    return glfwGetKey(m_handle, static_cast<int>(value)) == GLFW_PRESS;
 }
 
 Window::Window(uint32_t width, uint32_t height)

@@ -19,58 +19,6 @@ using defer = std::shared_ptr<void>;
 using error = std::string;
 
 
-class Manipulator : public InputHandler {
-public:
-    Manipulator() = delete;
-    Manipulator(std::shared_ptr<Camera> camera) {
-        m_cameraFps.AttachCamera(camera);
-    }
-    ~Manipulator() override = default;
-private:
-    void KeyHandler(const Executor& e) override;
-    void MouseHandler(float dtX, float dtY) override;
-    void ScreenHandler(uint32_t width, uint32_t height) override;
-
-public:
-    void Update(float dt) {
-        m_cameraFps.Update(dt);
-    }
-
-private:
-    CameraFps m_cameraFps;
-};
-
-void Manipulator::KeyHandler(const Executor& e) {
-    if (e.IsPressed(GLFW_KEY_ESCAPE)) {
-        e.Close();
-    }
-
-    if (e.IsPressed(GLFW_KEY_W)) {
-        m_cameraFps.MoveForward();
-    }
-
-    if (e.IsPressed(GLFW_KEY_S)) {
-        m_cameraFps.MoveBackward();
-    }
-
-    if (e.IsPressed(GLFW_KEY_A)) {
-        m_cameraFps.MoveLeft();
-    }
-
-    if (e.IsPressed(GLFW_KEY_D)) {
-        m_cameraFps.MoveRight();
-    }
-}
-
-void Manipulator::MouseHandler(float dtX, float dtY) {
-    m_cameraFps.Rotate(dtX, dtY);
-}
-
-void Manipulator::ScreenHandler(uint32_t width, uint32_t height) {
-    m_cameraFps.ScreenHandler(width, height);
-}
-
-
 std::string run() {
     Window window(1024, 768);
 
@@ -108,7 +56,8 @@ std::string run() {
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
 
-    auto manipulator = std::make_shared<Manipulator>(camera);
+    auto manipulator = std::make_shared<CameraFps>();
+    manipulator->AttachCamera(camera);
     window.SetInputHandler(manipulator);
 
     auto timeLast = std::chrono::steady_clock::now();
@@ -162,7 +111,7 @@ std::string run() {
 
         shaderLight->SetMat4("uProjMatrix", camera->GetProjMatrix());
         shaderLight->SetMat4("uViewMatrix", camera->GetViewMatrix());
-        shaderLight->SetVec3("uToEyeDirection", -camera->GetDirection());
+        shaderLight->SetVec3("uToEyeDirection", camera->GetToEyeDirection());
 
         matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 3.0f));
