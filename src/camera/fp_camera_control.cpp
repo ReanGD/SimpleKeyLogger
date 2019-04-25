@@ -1,21 +1,21 @@
-#include "camera/camera_fps.h"
+#include "camera/fp_camera_control.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 
-void CameraFps::SetMovementSpeed(float value) noexcept {
+void FPCameraControl::SetMovementSpeed(float value) noexcept {
     m_movementSpeed	= value;
 }
 
-void CameraFps::SetMouseSensitivity(float value) noexcept {
+void FPCameraControl::SetMouseSensitivity(float value) noexcept {
     m_mouseSensitivity = value;
 }
 
-void CameraFps::AttachCamera(std::shared_ptr<Camera> camera) {
+void FPCameraControl::AttachCamera(std::shared_ptr<Camera> camera) {
     camera->SetAspectRatio(m_aspectRatio);
     m_cameras.push_back(camera);
 }
 
-void CameraFps::KeyHandler(const Executor& e) {
+void FPCameraControl::KeyHandler(const Executor& e) {
     if (e.IsPressed(Key::ESCAPE)) {
         e.Close();
     }
@@ -41,21 +41,21 @@ void CameraFps::KeyHandler(const Executor& e) {
     }
 }
 
-void CameraFps::MouseHandler(float dtX, float dtY) {
+void FPCameraControl::MouseHandler(float dtX, float dtY) {
     // yaw - left/right
     m_yawOffset += dtX;
     // pitch - up/down
     m_pitchOffset += dtY;
 }
 
-void CameraFps::ScreenHandler(uint32_t width, uint32_t height) {
+void FPCameraControl::ScreenHandler(uint32_t width, uint32_t height) {
     m_aspectRatio = float(width) / float(height);
     for(const auto& camera: m_cameras) {
         camera->SetAspectRatio(m_aspectRatio);
     }
 }
 
-void CameraFps::Update(float dt) {
+void FPCameraControl::Update(float dt) {
     constexpr const float factor = 0.3f;
     constexpr const float pitchMax = glm::half_pi<float>() - 0.2f;
     constexpr const float pitchMin = -(glm::half_pi<float>() - 0.2f);

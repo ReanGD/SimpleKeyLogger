@@ -11,13 +11,11 @@
 #include "mesh/mesh_generator.h"
 #include "material/shader.h"
 #include "material/texture.h"
-#include "camera/camera_fps.h"
+#include "camera/fp_camera_control.h"
 #include "window/window.h"
 
 
 using defer = std::shared_ptr<void>;
-using error = std::string;
-
 
 std::string run() {
     Window window(1024, 768);
@@ -56,14 +54,14 @@ std::string run() {
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
 
-    auto manipulator = std::make_shared<CameraFps>();
-    manipulator->AttachCamera(camera);
-    window.SetInputHandler(manipulator);
+    auto controller = std::make_shared<FPCameraControl>();
+    controller->AttachCamera(camera);
+    window.SetInputHandler(controller);
 
     auto timeLast = std::chrono::steady_clock::now();
     while (window.StartFrame()) {
         auto now = std::chrono::steady_clock::now();
-        manipulator->Update(std::chrono::duration<float>(now - timeLast).count());
+        controller->Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);

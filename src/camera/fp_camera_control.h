@@ -6,10 +6,11 @@
 #include "window/window.h"
 
 
-class CameraFps : public InputHandler {
+// First person camera control
+class FPCameraControl : public InputHandler {
 public:
-    CameraFps() = default;
-    ~CameraFps() = default;
+    FPCameraControl() = default;
+    ~FPCameraControl() = default;
 
 public:
     void SetMovementSpeed(float value) noexcept;
