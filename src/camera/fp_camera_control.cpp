@@ -1,6 +1,9 @@
 #include "camera/fp_camera_control.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+FPCameraControl::FPCameraControl() {
+    m_supportMode &= ~ProcessMode::Editor;
+}
 
 void FPCameraControl::SetMovementSpeed(float value) noexcept {
     m_movementSpeed	= value;
@@ -16,10 +19,6 @@ void FPCameraControl::AttachCamera(std::shared_ptr<Camera> camera) {
 }
 
 void FPCameraControl::KeyHandler(const Executor& e) {
-    if (e.IsPressed(Key::ESCAPE)) {
-        e.Close();
-    }
-
     // move forward
     if (e.IsPressed(Key::W)) {
         m_posOffset.x += 1.0f;

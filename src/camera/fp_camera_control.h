@@ -9,7 +9,7 @@
 // First person camera control
 class FPCameraControl : public InputHandler {
 public:
-    FPCameraControl() = default;
+    FPCameraControl();
     ~FPCameraControl() = default;
 
 public:

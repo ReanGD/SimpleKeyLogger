@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <memory>
 
 struct GLFWwindow;
@@ -128,6 +129,17 @@ struct InputHandler {
         MENU          = 348,
     };
 
+    enum class Action : uint8_t {
+        RELEASE = 0,
+        PRESS = 1,
+        REPEAT = 2,
+    };
+
+    enum ProcessMode : uint8_t {
+        Editor = 1 << 0,
+        FirstPerson = 1 << 1,
+    };
+
     struct Executor {
         Executor() = delete;
         Executor(const Executor&) = delete;
@@ -143,38 +155,41 @@ struct InputHandler {
         GLFWwindow* m_handle = nullptr;
     };
 
-    InputHandler() = default;
     virtual ~InputHandler() = default;
-    virtual void KeyHandler(const Executor& e) = 0;
-    virtual void MouseHandler(float dtX, float dtY) = 0;
-    virtual void ScreenHandler(uint32_t width, uint32_t height) = 0;
+    virtual void KeyHandler(const Executor& /*e*/) {}
+    virtual void KeyPressHandler(Key /*key*/,  Action /*action*/) {}
+    virtual void MouseHandler(float /*dtX*/,  float /*dtY*/) {}
+    virtual void ScreenHandler(uint32_t /*width*/,  uint32_t /*height*/) {}
+
+    uint8_t m_supportMode = ProcessMode::Editor | ProcessMode::FirstPerson;
 };
 
 class Window {
 public:
-    Window() = delete;
+    Window() = default;
     Window(const Window&) = delete;
     Window(Window&&) = delete;
     Window& operator=(const Window&) = delete;
     Window& operator=(Window&&) = delete;
-
-    Window(uint32_t width, uint32_t height);
     ~Window();
 
 public:
-    bool Init(bool fullscreen, std::string& error);
-    void SetInputHandler(std::weak_ptr<InputHandler> handler);
+    bool Init(bool fullscreen, float windowMultiplier, std::string& error);
     bool StartFrame();
     void EndFrame();
+    void Close();
 
-    void OnFramebufferSizeChanged(int width, int height);
+    void AttachInputHandler(std::weak_ptr<InputHandler> handlerWeak);
+    void EditorModeInverse();
+
+    void OnFramebufferSizeChanged(uint32_t width, uint32_t height);
     void OnCursorPositionChanged(double posX, double posY);
+    void OnKeyPressed(InputHandler::Key key, InputHandler::Action action);
 private:
-    uint32_t m_width = 800;
-    uint32_t m_height = 600;
     double m_cursorX = 0;
     double m_cursorY = 0;
 
-    std::weak_ptr<InputHandler> m_inputHandler;
+    uint8_t m_mode = InputHandler::ProcessMode::FirstPerson;
+    std::vector<std::weak_ptr<InputHandler>> m_inputHandlers;
     GLFWwindow* m_window = nullptr;
 };
