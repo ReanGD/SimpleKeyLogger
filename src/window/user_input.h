@@ -136,9 +136,11 @@ enum class Key : uint8_t {
         MouseRight     = 125,          // GLFW_MOUSE_BUTTON_RIGHT
         MouseMiddle    = 126,          // GLFW_MOUSE_BUTTON_MIDDLE
 
-        Last           = MouseMiddle,
+        FirstMod       = LeftShift,
         LastKeyboard   = RightSuper,
-        Size           = 127,
+        FirstMouse     = MouseLeft,
+        LastMouse      = MouseMiddle,
+        Last           = MouseMiddle,
 };
 
 enum KeyModifier : uint8_t {
@@ -166,9 +168,10 @@ public:
 
     void Update();
     void OnKeyEvent(Key code, KeyAction action, uint8_t mods);
-    void OnKeyEvent(char16_t ch);
+    void OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods);
+    void OnCharEvent(char16_t ch);
 private:
     // FirstReleaseMask, FirstPress, IsDownMask, Super, Alt, Control, Shift
-    uint8_t m_isKeyDown[static_cast<size_t>(Key::Size)];
+    uint8_t m_isKeyDown[static_cast<size_t>(Key::Last) + 1];
     std::u16string m_userInput;
 };

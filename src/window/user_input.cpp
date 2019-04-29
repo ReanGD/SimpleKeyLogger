@@ -46,7 +46,7 @@ std::u16string UserInput::GetInput() {
 
 void UserInput::Update() {
     m_userInput.clear();
-    for(size_t i=0; i!=static_cast<size_t>(Key::Size); ++i) {
+    for(size_t i=0; i!=(static_cast<size_t>(Key::Last) + 1); ++i) {
         if ((m_isKeyDown[i] & IsDownMask) != 0) {
             // clear FirstPress and FirstRelease bits
             m_isKeyDown[i] &= ~(FirstPressMask | FirstReleaseMask);
@@ -78,8 +78,59 @@ void UserInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) {
         break;
     }
     m_isKeyDown[static_cast<size_t>(code)] = state;
+
+    // modifier key processing
+    switch (code)
+    {
+    case Key::LeftShift:
+    case Key::RightShift:
+        m_isKeyDown[static_cast<size_t>(Key::Shift)] = state;
+        break;
+
+    case Key::LeftControl:
+    case Key::RightControl:
+        m_isKeyDown[static_cast<size_t>(Key::Control)] = state;
+        break;
+
+    case Key::LeftAlt:
+    case Key::RightAlt:
+        m_isKeyDown[static_cast<size_t>(Key::Alt)] = state;
+        break;
+
+    case Key::LeftSuper:
+    case Key::RightSuper:
+        m_isKeyDown[static_cast<size_t>(Key::Super)] = state;
+        break;
+
+    default:
+        break;
+    }
+
 }
 
-void UserInput::OnKeyEvent(char16_t ch) {
+void UserInput::OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) {
+    if ((code < Key::FirstMouse) || (code > Key::LastMouse)  || ((action != KeyAction::Release) && (action != KeyAction::Press))) {
+        return;
+    }
+
+    uint8_t state = m_isKeyDown[static_cast<size_t>(code)] | (mods & KeyModifier::Mask);
+    switch (action)
+    {
+    case KeyAction::Release:
+        state |= FirstReleaseMask;
+        // clear KeyModifier bits and IsDownMask bit
+        state &= ~(KeyModifier::Mask | IsDownMask);
+        break;
+    case KeyAction::Press:
+        state |= FirstPressMask;
+        state |= IsDownMask;
+        break;
+    case KeyAction::Repeat:
+        break;
+    }
+    m_isKeyDown[static_cast<size_t>(code)] = state;
+}
+
+void UserInput::OnCharEvent(char16_t ch) {
     m_userInput += ch;
 }
