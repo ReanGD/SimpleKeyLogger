@@ -5,6 +5,14 @@ static constexpr const uint8_t IsDownMask = 1 << 4;
 static constexpr const uint8_t FirstPressMask = 1 << 5;
 static constexpr const uint8_t FirstReleaseMask = 1 << 6;
 
+float UserInput::GetScrollOffsetY() {
+    return static_cast<float>(m_scrollOffsetY);
+}
+
+void UserInput::GetScrollOffset(float& offsetX, float& offsetY) {
+    offsetX = static_cast<float>(m_scrollOffsetX);
+    offsetY = static_cast<float>(m_scrollOffsetY);
+}
 
 bool UserInput::IsKeyPressedFirstTime(Key code) {
     if (code > Key::Last) {
@@ -45,6 +53,8 @@ std::u16string UserInput::GetInput() {
 }
 
 void UserInput::Update() {
+    m_scrollOffsetX = 0;
+    m_scrollOffsetY = 0;
     m_userInput.clear();
     for(size_t i=0; i!=(static_cast<size_t>(Key::Last) + 1); ++i) {
         if ((m_isKeyDown[i] & IsDownMask) != 0) {
@@ -54,6 +64,11 @@ void UserInput::Update() {
             m_isKeyDown[i] = 0;
         }
     }
+}
+
+void UserInput::OnScrollEvent(double offsetX, double offsetY) {
+    m_scrollOffsetX += offsetX;
+    m_scrollOffsetY += offsetY;
 }
 
 void UserInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) {

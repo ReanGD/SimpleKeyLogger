@@ -160,6 +160,8 @@ enum KeyAction : uint8_t {
 
 class UserInput {
 public:
+    float GetScrollOffsetY();
+    void GetScrollOffset(float& offsetX, float& offsetY);
     bool IsKeyPressedFirstTime(Key code);
     bool IsKeyReleasedFirstTime(Key code);
     bool IsKeyDown(Key code);
@@ -167,11 +169,15 @@ public:
     std::u16string GetInput();
 
     void Update();
+    void OnScrollEvent(double offsetX, double offsetY);
     void OnKeyEvent(Key code, KeyAction action, uint8_t mods);
     void OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods);
     void OnCharEvent(char16_t ch);
+
 private:
+    double m_scrollOffsetX = 0;
+    double m_scrollOffsetY = 0;
     // FirstReleaseMask, FirstPress, IsDownMask, Super, Alt, Control, Shift
-    uint8_t m_isKeyDown[static_cast<size_t>(Key::Last) + 1];
+    uint8_t m_isKeyDown[static_cast<size_t>(Key::Last) + 1] = { 0 };
     std::u16string m_userInput;
 };
