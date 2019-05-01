@@ -5,6 +5,16 @@ static constexpr const uint8_t IsDownMask = 1 << 4;
 static constexpr const uint8_t FirstPressMask = 1 << 5;
 static constexpr const uint8_t FirstReleaseMask = 1 << 6;
 
+void UserInput::GetCursorPosition(float& posX, float& posY) {
+    posX = static_cast<float>(m_cursorPosX);
+    posY = static_cast<float>(m_cursorPosY);
+}
+
+void UserInput::GetCursorOffet(float& offsetX, float& offsetY) {
+    offsetX = static_cast<float>(m_cursorLastPosX - m_cursorPosX);
+    offsetY = static_cast<float>(m_cursorLastPosY - m_cursorPosY);
+}
+
 float UserInput::GetScrollOffsetY() {
     return static_cast<float>(m_scrollOffsetY);
 }
@@ -52,9 +62,19 @@ std::u16string UserInput::GetInput() {
     return m_userInput;
 }
 
-void UserInput::Update() {
+void UserInput::Update(double cursorPosX, double cursorPosY) {
+    m_cursorLastPosX = m_cursorPosX;
+    m_cursorLastPosY = m_cursorPosX;
+    m_cursorPosX = cursorPosX;
+    m_cursorPosY = cursorPosY;
     m_scrollOffsetX = 0;
     m_scrollOffsetY = 0;
+    if (m_firstUpdate) {
+        m_firstUpdate = false;
+        m_cursorLastPosX = m_cursorPosX;
+        m_cursorLastPosY = m_cursorPosX;
+    }
+
     m_userInput.clear();
     for(size_t i=0; i!=(static_cast<size_t>(Key::Last) + 1); ++i) {
         if ((m_isKeyDown[i] & IsDownMask) != 0) {

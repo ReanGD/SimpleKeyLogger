@@ -160,21 +160,39 @@ enum KeyAction : uint8_t {
 
 class UserInput {
 public:
+    UserInput() = default;
+    ~UserInput() = default;
+    UserInput(const UserInput&) = delete;
+    UserInput(UserInput&&) = delete;
+    UserInput& operator=(const UserInput&) = delete;
+    UserInput& operator=(UserInput&&) = delete;
+
+public:
+    void GetCursorPosition(float& posX, float& posY);
+    void GetCursorOffet(float& offsetX, float& offsetY);
+
     float GetScrollOffsetY();
     void GetScrollOffset(float& offsetX, float& offsetY);
+
     bool IsKeyPressedFirstTime(Key code);
     bool IsKeyReleasedFirstTime(Key code);
     bool IsKeyDown(Key code);
     bool GetKeyDownState(Key code, uint8_t& mods);
+
     std::u16string GetInput();
 
-    void Update();
+    void Update(double cursorPosX, double cursorPosY);
     void OnScrollEvent(double offsetX, double offsetY);
     void OnKeyEvent(Key code, KeyAction action, uint8_t mods);
     void OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods);
     void OnCharEvent(char16_t ch);
 
 private:
+    bool m_firstUpdate = true;
+    double m_cursorPosX = 0;
+    double m_cursorPosY = 0;
+    double m_cursorLastPosX = 0;
+    double m_cursorLastPosY = 0;
     double m_scrollOffsetX = 0;
     double m_scrollOffsetY = 0;
     // FirstReleaseMask, FirstPress, IsDownMask, Super, Alt, Control, Shift
