@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdint.h>
 #include <string>
 
 enum class Key : uint8_t {
@@ -135,6 +134,8 @@ enum class Key : uint8_t {
         MouseLeft      = 124,          // GLFW_MOUSE_BUTTON_LEFT
         MouseRight     = 125,          // GLFW_MOUSE_BUTTON_RIGHT
         MouseMiddle    = 126,          // GLFW_MOUSE_BUTTON_MIDDLE
+
+        Unknown        = 127,
 
         FirstMod       = LeftShift,
         LastKeyboard   = RightSuper,

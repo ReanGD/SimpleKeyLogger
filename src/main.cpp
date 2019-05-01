@@ -18,36 +18,13 @@
 
 using defer = std::shared_ptr<void>;
 
-struct HotheysHandler : public InputHandler {
-    void KeyPressHandler(Key key, Action action) override {
-        if (m_keyPressHandler) {
-            m_keyPressHandler(key, action);
-        }
-    }
-
-    std::function<void (Key key, Action action)> m_keyPressHandler = nullptr;
-};
-
 std::string run() {
     Window window;
-
-    auto hotkeys = std::make_shared<HotheysHandler>();
-    hotkeys->m_keyPressHandler = [&](InputHandler::Key key, InputHandler::Action action) {
-        if ((key == InputHandler::Key::ESCAPE) && (action == InputHandler::Action::RELEASE)) {
-            window.Close();
-        }
-
-        if ((key == InputHandler::Key::F2) && (action == InputHandler::Action::RELEASE)) {
-            window.EditorModeInverse();
-        }
-    };
 
     std::string err;
     if (!window.Init(false, 0.8f, err)) {
         return err;
     }
-
-    window.AttachInputHandler(hotkeys);
 
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
@@ -81,9 +58,16 @@ std::string run() {
     auto controller = std::make_shared<FPCameraControl>();
     controller->AttachCamera(camera);
     window.AttachInputHandler(controller);
+    window.EditorModeInverse();
 
     auto timeLast = std::chrono::steady_clock::now();
     while (window.StartFrame()) {
+        UserInput& wio = window.GetIO();
+
+        if (wio.IsKeyReleasedFirstTime(Key::Escape)) {
+            window.Close();
+        }
+
         auto now = std::chrono::steady_clock::now();
         controller->Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;
