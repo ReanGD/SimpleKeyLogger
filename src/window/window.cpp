@@ -177,6 +177,15 @@ Key TranslateKeyCode(int key) {
     }
 }
 
+Key TranslateMouseKeyCode(int key) {
+    switch (key) {
+    case GLFW_MOUSE_BUTTON_LEFT: return Key::MouseLeft;
+    case GLFW_MOUSE_BUTTON_RIGHT: return Key::MouseRight;
+    case GLFW_MOUSE_BUTTON_MIDDLE: return Key::MouseMiddle;
+    default: return Key::Unknown;
+    }
+}
+
 struct GLFWCallbacks {
     static GLFWframebuffersizefun m_prevFramebufferSize;
     static void FramebufferSize(GLFWwindow* window, int width, int height) {
@@ -197,17 +206,21 @@ struct GLFWCallbacks {
     }
 
     static GLFWmousebuttonfun m_prevMouseButton;
-    static void MouseButton(GLFWwindow* window, int button, int action, int mods) {
+    static void MouseButton(GLFWwindow* window, int key, int action, int mods) {
         if (m_prevMouseButton != nullptr) {
-            m_prevMouseButton(window, button, action, mods);
+            m_prevMouseButton(window, key, action, mods);
         }
+        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        w->GetIO().OnMouseKeyEvent(TranslateMouseKeyCode(key), static_cast<KeyAction>(action), static_cast<uint8_t>(mods));
     }
 
     static GLFWscrollfun m_prevScroll;
-    static void Scroll(GLFWwindow* window, double xoffset, double yoffset) {
+    static void Scroll(GLFWwindow* window, double offsetX, double offsetY) {
         if (m_prevScroll != nullptr) {
-            m_prevScroll(window, xoffset, yoffset);
+            m_prevScroll(window, offsetX, offsetY);
         }
+        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        w->GetIO().OnScrollEvent(offsetX, offsetY);
     }
 
     static GLFWkeyfun m_prevKey;
@@ -224,10 +237,12 @@ struct GLFWCallbacks {
     }
 
     static GLFWcharfun m_prevChar;
-    static void Char(GLFWwindow* window, unsigned int c) {
+    static void Char(GLFWwindow* window, unsigned int ch) {
         if (m_prevChar != nullptr) {
-            m_prevChar(window, c);
+            m_prevChar(window, ch);
         }
+        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        w->GetIO().OnCharEvent(static_cast<char16_t>(ch));
     }
 
     static void SetAll(GLFWwindow* window) {
@@ -325,8 +340,12 @@ bool Window::StartFrame() {
 
 void Window::EndFrame() {
     glfwSwapBuffers(m_window);
-    m_io.Update(0, 0);
+
+    double cursorPosX, cursorPosY;
+    glfwGetCursorPos(m_window, &cursorPosX, &cursorPosY);
+    m_io.Update(cursorPosX, cursorPosY);
     glfwPollEvents();
+
     for (auto& handlerWeak : m_inputHandlers) {
         if (auto handler = handlerWeak.lock(); handler && ((handler->m_supportMode & m_mode) != 0)) {
             handler->KeyHandler(InputHandler::Executor(m_window));
@@ -361,7 +380,6 @@ uint8_t Window::EditorModeInverse() {
         m_mode = InputHandler::ProcessMode::Editor;
         m_prevChar = glfwSetCharCallback(m_window, m_prevChar);
     }
-
 
     glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & InputHandler::ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
