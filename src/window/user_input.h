@@ -177,8 +177,11 @@ public:
 
     bool IsKeyPressedFirstTime(Key code);
     bool IsKeyReleasedFirstTime(Key code);
+    // Current state
     bool IsKeyDown(Key code);
-    bool GetKeyDownState(Key code, uint8_t& mods);
+    // Down state per frame
+    bool IsKeyStickyDown(Key code);
+    bool GetKeyStickyDownState(Key code, uint8_t& mods);
 
     std::u16string GetInput();
 
@@ -196,7 +199,7 @@ private:
     double m_cursorLastPosY = 0;
     double m_scrollOffsetX = 0;
     double m_scrollOffsetY = 0;
-    // FirstReleaseMask, FirstPress, IsDownMask, Super, Alt, Control, Shift
+    // FirstRelease, FirstPress, IsStickyDown, IsDown, Super, Alt, Control, Shift
     uint8_t m_isKeyDown[static_cast<size_t>(Key::Last) + 1] = { 0 };
     std::u16string m_userInput;
 };

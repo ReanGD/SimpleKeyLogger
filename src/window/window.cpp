@@ -230,10 +230,6 @@ struct GLFWCallbacks {
         }
         auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
         w->GetIO().OnKeyEvent(TranslateKeyCode(key), static_cast<KeyAction>(action), static_cast<uint8_t>(mods));
-
-        if (key != GLFW_KEY_UNKNOWN) {
-            w->OnKeyPressed(static_cast<InputHandler::Key>(key), static_cast<InputHandler::Action>(action));
-        }
     }
 
     static GLFWcharfun m_prevChar;
@@ -282,15 +278,6 @@ GLFWscrollfun GLFWCallbacks::m_prevScroll = nullptr;
 GLFWkeyfun GLFWCallbacks::m_prevKey = nullptr;
 GLFWcharfun GLFWCallbacks::m_prevChar = nullptr;
 
-
-InputHandler::Executor::Executor(GLFWwindow* handle)
-    : m_handle(handle) {
-
-}
-
-bool InputHandler::Executor::IsPressed(Key value) const {
-    return glfwGetKey(m_handle, static_cast<int>(value)) == GLFW_PRESS;
-}
 
 Window::~Window() {
     if (m_window != nullptr) {
@@ -345,12 +332,6 @@ void Window::EndFrame() {
     glfwGetCursorPos(m_window, &cursorPosX, &cursorPosY);
     m_io.Update(cursorPosX, cursorPosY);
     glfwPollEvents();
-
-    for (auto& handlerWeak : m_inputHandlers) {
-        if (auto handler = handlerWeak.lock(); handler && ((handler->m_supportMode & m_mode) != 0)) {
-            handler->KeyHandler(InputHandler::Executor(m_window));
-        }
-    }
 }
 
 void Window::Close() {
@@ -404,14 +385,6 @@ void Window::OnCursorPositionChanged(double posX, double posY) {
     for (auto& handlerWeak : m_inputHandlers) {
         if (auto handler = handlerWeak.lock(); handler && ((handler->m_supportMode & m_mode) != 0)) {
             handler->MouseHandler(dtX, dtY);
-        }
-    }
-}
-
-void Window::OnKeyPressed(InputHandler::Key key, InputHandler::Action action) {
-    for (auto& handlerWeak : m_inputHandlers) {
-        if (auto handler = handlerWeak.lock(); handler && ((handler->m_supportMode & m_mode) != 0)) {
-            handler->KeyPressHandler(key, action);
         }
     }
 }

@@ -17,7 +17,12 @@ public:
     void SetMouseSensitivity(float value) noexcept;
     void AttachCamera(std::shared_ptr<Camera> camera);
 
-    void KeyHandler(const Executor& e) override;
+    void MoveForward() noexcept;
+    void MoveBackward() noexcept;
+    void MoveLeft() noexcept;
+    void MoveRight() noexcept;
+    void Rotate(float dtYaw, float dtPitch) noexcept;
+
     void MouseHandler(float dtX, float dtY) override;
     void ScreenHandler(uint32_t width, uint32_t height) override;
 

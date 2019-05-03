@@ -68,6 +68,18 @@ std::string run() {
             window.Close();
         }
 
+        if (wio.IsKeyStickyDown(Key::W)) {
+            controller->MoveForward();
+        }
+        if (wio.IsKeyStickyDown(Key::S)) {
+            controller->MoveBackward();
+        }
+        if (wio.IsKeyStickyDown(Key::A)) {
+            controller->MoveLeft();
+        }
+        if (wio.IsKeyStickyDown(Key::D)) {
+            controller->MoveRight();
+        }
         auto now = std::chrono::steady_clock::now();
         controller->Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;

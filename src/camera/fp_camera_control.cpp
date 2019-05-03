@@ -18,26 +18,25 @@ void FPCameraControl::AttachCamera(std::shared_ptr<Camera> camera) {
     m_cameras.push_back(camera);
 }
 
-void FPCameraControl::KeyHandler(const Executor& e) {
-    // move forward
-    if (e.IsPressed(Key::W)) {
-        m_posOffset.x += 1.0f;
-    }
+void FPCameraControl::MoveForward() noexcept {
+    m_posOffset.x += 1.0f;
+}
 
-    // move backward
-    if (e.IsPressed(Key::S)) {
-        m_posOffset.x -= 1.0f;
-    }
+void FPCameraControl::MoveBackward() noexcept {
+    m_posOffset.x -= 1.0f;
+}
 
-    // move left
-    if (e.IsPressed(Key::A)) {
-        m_posOffset.y -= 1.0f;
-    }
+void FPCameraControl::MoveLeft() noexcept {
+    m_posOffset.y -= 1.0f;
+}
 
-    // move right
-    if (e.IsPressed(Key::D)) {
-        m_posOffset.y += 1.0f;
-    }
+void FPCameraControl::MoveRight() noexcept {
+    m_posOffset.y += 1.0f;
+}
+
+void FPCameraControl::Rotate(float dtYaw, float dtPitch) noexcept {
+    m_yawOffset += dtYaw;
+    m_pitchOffset += dtPitch;
 }
 
 void FPCameraControl::MouseHandler(float dtX, float dtY) {

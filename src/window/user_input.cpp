@@ -2,8 +2,9 @@
 
 
 static constexpr const uint8_t IsDownMask = 1 << 4;
-static constexpr const uint8_t FirstPressMask = 1 << 5;
-static constexpr const uint8_t FirstReleaseMask = 1 << 6;
+static constexpr const uint8_t IsStickyDownMask = 1 << 5;
+static constexpr const uint8_t FirstPressMask = 1 << 6;
+static constexpr const uint8_t FirstReleaseMask = 1 << 7;
 
 void UserInput::GetCursorPosition(float& posX, float& posY) {
     posX = static_cast<float>(m_cursorPosX);
@@ -48,14 +49,22 @@ bool UserInput::IsKeyDown(Key code) {
     return (m_isKeyDown[static_cast<size_t>(code)] & IsDownMask) != 0;
 }
 
-bool UserInput::GetKeyDownState(Key code, uint8_t& mods) {
+bool UserInput::IsKeyStickyDown(Key code) {
+    if (code > Key::Last) {
+        return false;
+    }
+
+    return (m_isKeyDown[static_cast<size_t>(code)] & IsStickyDownMask) != 0;
+}
+
+bool UserInput::GetKeyStickyDownState(Key code, uint8_t& mods) {
     if (code > Key::Last) {
         return false;
     }
 
     uint8_t state = m_isKeyDown[static_cast<size_t>(code)];
     mods = state & KeyModifier::Mask;
-    return (state & IsDownMask) != 0;
+    return (state & IsStickyDownMask) != 0;
 }
 
 std::u16string UserInput::GetInput() {
@@ -106,9 +115,11 @@ void UserInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) {
         break;
     case KeyAction::Press:
         state |= FirstPressMask;
+        state |= IsStickyDownMask;
         state |= IsDownMask;
         break;
     case KeyAction::Repeat:
+        state |= IsStickyDownMask;
         state |= IsDownMask;
         break;
     }
@@ -158,6 +169,7 @@ void UserInput::OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) {
         break;
     case KeyAction::Press:
         state |= FirstPressMask;
+        state |= IsStickyDownMask;
         state |= IsDownMask;
         break;
     case KeyAction::Repeat:
