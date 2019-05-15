@@ -197,14 +197,6 @@ struct GLFWCallbacks {
             static_cast<uint32_t>(height));
     }
 
-    static GLFWcursorposfun m_prevCursorPos;
-    static void CursorPos(GLFWwindow* window, double posX, double posY) {
-        if (m_prevCursorPos != nullptr) {
-            m_prevCursorPos(window, posX, posY);
-        }
-        static_cast<Window*>(glfwGetWindowUserPointer(window))->OnCursorPositionChanged(posX, posY);
-    }
-
     static GLFWmousebuttonfun m_prevMouseButton;
     static void MouseButton(GLFWwindow* window, int key, int action, int mods) {
         if (m_prevMouseButton != nullptr) {
@@ -243,7 +235,6 @@ struct GLFWCallbacks {
 
     static void SetAll(GLFWwindow* window) {
         m_prevFramebufferSize = glfwSetFramebufferSizeCallback(window, FramebufferSize);
-        m_prevCursorPos = glfwSetCursorPosCallback(window, CursorPos);
         m_prevMouseButton = glfwSetMouseButtonCallback(window, MouseButton);
         m_prevScroll = glfwSetScrollCallback(window, Scroll);
         m_prevKey = glfwSetKeyCallback(window, Key);
@@ -253,9 +244,6 @@ struct GLFWCallbacks {
     static void ResetAll(GLFWwindow* window) {
         glfwSetFramebufferSizeCallback(window, m_prevFramebufferSize);
         m_prevFramebufferSize = nullptr;
-
-        glfwSetCursorPosCallback(window, m_prevCursorPos);
-        m_prevCursorPos = nullptr;
 
         glfwSetMouseButtonCallback(window, m_prevMouseButton);
         m_prevMouseButton = nullptr;
@@ -272,7 +260,6 @@ struct GLFWCallbacks {
 };
 
 GLFWframebuffersizefun GLFWCallbacks::m_prevFramebufferSize = nullptr;
-GLFWcursorposfun GLFWCallbacks::m_prevCursorPos = nullptr;
 GLFWmousebuttonfun GLFWCallbacks::m_prevMouseButton = nullptr;
 GLFWscrollfun GLFWCallbacks::m_prevScroll = nullptr;
 GLFWkeyfun GLFWCallbacks::m_prevKey = nullptr;
@@ -311,7 +298,6 @@ bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
     int width, height;
     glfwGetFramebufferSize(m_window, &width, &height);
     glViewport(0, 0, width, height);
-    glfwGetCursorPos(m_window, &m_cursorX, &m_cursorY);
     GLFWCallbacks::SetAll(m_window);
 
     return true;
@@ -372,19 +358,6 @@ void Window::OnFramebufferSizeChanged(uint32_t width, uint32_t height) {
     for (auto& handlerWeak : m_inputHandlers) {
         if (auto handler = handlerWeak.lock(); handler) {
             handler->ScreenHandler(width, height);
-        }
-    }
-}
-
-void Window::OnCursorPositionChanged(double posX, double posY) {
-    float dtX = static_cast<float>(m_cursorX - posX);
-    float dtY = static_cast<float>(m_cursorY - posY);
-    m_cursorX = posX;
-    m_cursorY = posY;
-
-    for (auto& handlerWeak : m_inputHandlers) {
-        if (auto handler = handlerWeak.lock(); handler && ((handler->m_supportMode & m_mode) != 0)) {
-            handler->MouseHandler(dtX, dtY);
         }
     }
 }

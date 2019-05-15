@@ -73,7 +73,7 @@ std::u16string UserInput::GetInput() {
 
 void UserInput::Update(double cursorPosX, double cursorPosY) {
     m_cursorLastPosX = m_cursorPosX;
-    m_cursorLastPosY = m_cursorPosX;
+    m_cursorLastPosY = m_cursorPosY;
     m_cursorPosX = cursorPosX;
     m_cursorPosY = cursorPosY;
     m_scrollOffsetX = 0;
@@ -81,7 +81,7 @@ void UserInput::Update(double cursorPosX, double cursorPosY) {
     if (m_firstUpdate) {
         m_firstUpdate = false;
         m_cursorLastPosX = m_cursorPosX;
-        m_cursorLastPosY = m_cursorPosX;
+        m_cursorLastPosY = m_cursorPosY;
     }
 
     m_userInput.clear();

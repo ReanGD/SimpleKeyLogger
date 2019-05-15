@@ -13,7 +13,6 @@ struct InputHandler {
     };
 
     virtual ~InputHandler() = default;
-    virtual void MouseHandler(float /*dtX*/,  float /*dtY*/) {}
     virtual void ScreenHandler(uint32_t /*width*/,  uint32_t /*height*/) {}
 
     uint8_t m_supportMode = ProcessMode::Editor | ProcessMode::FirstPerson;
@@ -40,11 +39,7 @@ public:
     uint8_t EditorModeInverse();
 
     void OnFramebufferSizeChanged(uint32_t width, uint32_t height);
-    void OnCursorPositionChanged(double posX, double posY);
 private:
-    double m_cursorX = 0;
-    double m_cursorY = 0;
-
     uint8_t m_mode = InputHandler::ProcessMode::Editor;
     std::vector<std::weak_ptr<InputHandler>> m_inputHandlers;
     UserInput m_io;

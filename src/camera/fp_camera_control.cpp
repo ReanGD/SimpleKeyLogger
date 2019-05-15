@@ -39,13 +39,6 @@ void FPCameraControl::Rotate(float dtYaw, float dtPitch) noexcept {
     m_pitchOffset += dtPitch;
 }
 
-void FPCameraControl::MouseHandler(float dtX, float dtY) {
-    // yaw - left/right
-    m_yawOffset += dtX;
-    // pitch - up/down
-    m_pitchOffset += dtY;
-}
-
 void FPCameraControl::ScreenHandler(uint32_t width, uint32_t height) {
     m_aspectRatio = float(width) / float(height);
     for(const auto& camera: m_cameras) {

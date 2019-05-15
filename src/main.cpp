@@ -80,6 +80,12 @@ std::string run() {
         if (wio.IsKeyStickyDown(Key::D)) {
             controller->MoveRight();
         }
+        float offsetX, offsetY;
+        wio.GetCursorOffet(offsetX, offsetY);
+        controller->Rotate(offsetX, offsetY);
+
+        if (wio.IsKeyReleasedFirstTime(Key::F2)) {
+        }
         auto now = std::chrono::steady_clock::now();
         controller->Update(std::chrono::duration<float>(now - timeLast).count());
         timeLast = now;

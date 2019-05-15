@@ -23,7 +23,6 @@ public:
     void MoveRight() noexcept;
     void Rotate(float dtYaw, float dtPitch) noexcept;
 
-    void MouseHandler(float dtX, float dtY) override;
     void ScreenHandler(uint32_t width, uint32_t height) override;
 
     void Update(float dt);
