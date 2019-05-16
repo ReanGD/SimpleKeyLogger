@@ -62,7 +62,7 @@ std::string run() {
 
     auto timeLast = std::chrono::steady_clock::now();
     while (window.StartFrame()) {
-        UserInput& wio = window.GetIO();
+        WindowInput& wio = window.GetIO();
 
         if (wio.IsKeyReleasedFirstTime(Key::Escape)) {
             window.Close();

@@ -159,40 +159,45 @@ enum KeyAction : uint8_t {
     Last    = Repeat,
 };
 
-class UserInput {
+class WindowInput {
 public:
-    UserInput() = default;
-    ~UserInput() = default;
-    UserInput(const UserInput&) = delete;
-    UserInput(UserInput&&) = delete;
-    UserInput& operator=(const UserInput&) = delete;
-    UserInput& operator=(UserInput&&) = delete;
+    WindowInput() = default;
+    ~WindowInput() = default;
+    WindowInput(const WindowInput&) = delete;
+    WindowInput(WindowInput&&) = delete;
+    WindowInput& operator=(const WindowInput&) = delete;
+    WindowInput& operator=(WindowInput&&) = delete;
 
 public:
-    void GetCursorPosition(float& posX, float& posY);
-    void GetCursorOffet(float& offsetX, float& offsetY);
+    bool GetFramebufferSize(uint32_t& width, uint32_t& height) const noexcept;
 
-    float GetScrollOffsetY();
-    void GetScrollOffset(float& offsetX, float& offsetY);
+    void GetCursorPosition(float& posX, float& posY) const noexcept;
+    void GetCursorOffet(float& offsetX, float& offsetY) const noexcept;
 
-    bool IsKeyPressedFirstTime(Key code);
-    bool IsKeyReleasedFirstTime(Key code);
+    float GetScrollOffsetY() const noexcept;
+    void GetScrollOffset(float& offsetX, float& offsetY) const noexcept;
+
+    bool IsKeyPressedFirstTime(Key code) const noexcept;
+    bool IsKeyReleasedFirstTime(Key code) const noexcept;
     // Current state
-    bool IsKeyDown(Key code);
+    bool IsKeyDown(Key code) const noexcept;
     // Down state per frame
-    bool IsKeyStickyDown(Key code);
-    bool GetKeyStickyDownState(Key code, uint8_t& mods);
+    bool IsKeyStickyDown(Key code) const noexcept;
+    bool GetKeyStickyDownState(Key code, uint8_t& mods) const noexcept;
 
-    std::u16string GetInput();
+    std::u16string GetInput() const noexcept;
 
-    void Update(double cursorPosX, double cursorPosY);
-    void OnScrollEvent(double offsetX, double offsetY);
-    void OnKeyEvent(Key code, KeyAction action, uint8_t mods);
-    void OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods);
+    void Update(uint32_t fbWidth, uint32_t fbHeight, double cursorPosX, double cursorPosY) noexcept;
+    void OnScrollEvent(double offsetX, double offsetY) noexcept;
+    void OnKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept;
+    void OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept;
     void OnCharEvent(char16_t ch);
 
 private:
     bool m_firstUpdate = true;
+    bool m_fbChanged = false;
+    uint32_t m_fbWidth = 0;
+    uint32_t m_fbHeight = 0;
     double m_cursorPosX = 0;
     double m_cursorPosY = 0;
     double m_cursorLastPosX = 0;

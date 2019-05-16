@@ -316,7 +316,9 @@ void Window::EndFrame() {
 
     double cursorPosX, cursorPosY;
     glfwGetCursorPos(m_window, &cursorPosX, &cursorPosY);
-    m_io.Update(cursorPosX, cursorPosY);
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(m_window, &fbWidth, &fbHeight);
+    m_io.Update(static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight), cursorPosX, cursorPosY);
     glfwPollEvents();
 }
 
@@ -324,7 +326,7 @@ void Window::Close() {
     glfwSetWindowShouldClose(m_window, GL_TRUE);
 }
 
-UserInput& Window::GetIO() {
+WindowInput& Window::GetIO() {
     return m_io;
 }
 

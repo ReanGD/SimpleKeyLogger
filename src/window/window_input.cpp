@@ -1,4 +1,4 @@
-#include "window/user_input.h"
+#include "window/window_input.h"
 
 
 static constexpr const uint8_t IsDownMask = 1 << 4;
@@ -6,26 +6,33 @@ static constexpr const uint8_t IsStickyDownMask = 1 << 5;
 static constexpr const uint8_t FirstPressMask = 1 << 6;
 static constexpr const uint8_t FirstReleaseMask = 1 << 7;
 
-void UserInput::GetCursorPosition(float& posX, float& posY) {
+bool WindowInput::GetFramebufferSize(uint32_t& width, uint32_t& height) const noexcept {
+    width = m_fbWidth;
+    height = m_fbHeight;
+
+    return m_fbChanged;
+}
+
+void WindowInput::GetCursorPosition(float& posX, float& posY) const noexcept {
     posX = static_cast<float>(m_cursorPosX);
     posY = static_cast<float>(m_cursorPosY);
 }
 
-void UserInput::GetCursorOffet(float& offsetX, float& offsetY) {
+void WindowInput::GetCursorOffet(float& offsetX, float& offsetY) const noexcept {
     offsetX = static_cast<float>(m_cursorLastPosX - m_cursorPosX);
     offsetY = static_cast<float>(m_cursorLastPosY - m_cursorPosY);
 }
 
-float UserInput::GetScrollOffsetY() {
+float WindowInput::GetScrollOffsetY() const noexcept {
     return static_cast<float>(m_scrollOffsetY);
 }
 
-void UserInput::GetScrollOffset(float& offsetX, float& offsetY) {
+void WindowInput::GetScrollOffset(float& offsetX, float& offsetY) const noexcept {
     offsetX = static_cast<float>(m_scrollOffsetX);
     offsetY = static_cast<float>(m_scrollOffsetY);
 }
 
-bool UserInput::IsKeyPressedFirstTime(Key code) {
+bool WindowInput::IsKeyPressedFirstTime(Key code) const noexcept {
     if (code > Key::Last) {
         return false;
     }
@@ -33,7 +40,7 @@ bool UserInput::IsKeyPressedFirstTime(Key code) {
     return (m_isKeyDown[static_cast<size_t>(code)] & FirstPressMask) != 0;
 }
 
-bool UserInput::IsKeyReleasedFirstTime(Key code) {
+bool WindowInput::IsKeyReleasedFirstTime(Key code) const noexcept {
     if (code > Key::Last) {
         return false;
     }
@@ -41,7 +48,7 @@ bool UserInput::IsKeyReleasedFirstTime(Key code) {
     return (m_isKeyDown[static_cast<size_t>(code)] & FirstReleaseMask) != 0;
 }
 
-bool UserInput::IsKeyDown(Key code) {
+bool WindowInput::IsKeyDown(Key code) const noexcept {
     if (code > Key::Last) {
         return false;
     }
@@ -49,7 +56,7 @@ bool UserInput::IsKeyDown(Key code) {
     return (m_isKeyDown[static_cast<size_t>(code)] & IsDownMask) != 0;
 }
 
-bool UserInput::IsKeyStickyDown(Key code) {
+bool WindowInput::IsKeyStickyDown(Key code) const noexcept {
     if (code > Key::Last) {
         return false;
     }
@@ -57,7 +64,7 @@ bool UserInput::IsKeyStickyDown(Key code) {
     return (m_isKeyDown[static_cast<size_t>(code)] & IsStickyDownMask) != 0;
 }
 
-bool UserInput::GetKeyStickyDownState(Key code, uint8_t& mods) {
+bool WindowInput::GetKeyStickyDownState(Key code, uint8_t& mods) const noexcept {
     if (code > Key::Last) {
         return false;
     }
@@ -67,11 +74,16 @@ bool UserInput::GetKeyStickyDownState(Key code, uint8_t& mods) {
     return (state & IsStickyDownMask) != 0;
 }
 
-std::u16string UserInput::GetInput() {
+std::u16string WindowInput::GetInput() const noexcept {
     return m_userInput;
 }
 
-void UserInput::Update(double cursorPosX, double cursorPosY) {
+void WindowInput::Update(uint32_t fbWidth, uint32_t fbHeight, double cursorPosX, double cursorPosY) noexcept {
+    m_fbChanged = ((m_fbWidth != fbWidth) || (m_fbHeight != fbHeight));
+    if (m_fbChanged) {
+        m_fbWidth = fbWidth;
+        m_fbHeight = fbHeight;
+    }
     m_cursorLastPosX = m_cursorPosX;
     m_cursorLastPosY = m_cursorPosY;
     m_cursorPosX = cursorPosX;
@@ -95,12 +107,12 @@ void UserInput::Update(double cursorPosX, double cursorPosY) {
     }
 }
 
-void UserInput::OnScrollEvent(double offsetX, double offsetY) {
+void WindowInput::OnScrollEvent(double offsetX, double offsetY) noexcept {
     m_scrollOffsetX += offsetX;
     m_scrollOffsetY += offsetY;
 }
 
-void UserInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) {
+void WindowInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept {
     if ((code > Key::LastKeyboard) || (action > KeyAction::Last)) {
         return;
     }
@@ -154,7 +166,7 @@ void UserInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) {
 
 }
 
-void UserInput::OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) {
+void WindowInput::OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept {
     if ((code < Key::FirstMouse) || (code > Key::LastMouse)  || ((action != KeyAction::Release) && (action != KeyAction::Press))) {
         return;
     }
@@ -178,6 +190,6 @@ void UserInput::OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) {
     m_isKeyDown[static_cast<size_t>(code)] = state;
 }
 
-void UserInput::OnCharEvent(char16_t ch) {
+void WindowInput::OnCharEvent(char16_t ch) {
     m_userInput += ch;
 }

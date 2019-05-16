@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "window/user_input.h"
+#include "window/window_input.h"
 
 struct GLFWwindow;
 struct InputHandler {
@@ -33,7 +33,7 @@ public:
     void EndFrame();
     void Close();
 
-    UserInput& GetIO();
+    WindowInput& GetIO();
 
     void AttachInputHandler(std::weak_ptr<InputHandler> handlerWeak);
     uint8_t EditorModeInverse();
@@ -42,6 +42,6 @@ public:
 private:
     uint8_t m_mode = InputHandler::ProcessMode::Editor;
     std::vector<std::weak_ptr<InputHandler>> m_inputHandlers;
-    UserInput m_io;
+    WindowInput m_io;
     GLFWwindow* m_window = nullptr;
 };
