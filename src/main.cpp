@@ -83,6 +83,11 @@ std::string run() {
         float offsetX, offsetY;
         wio.GetCursorOffet(offsetX, offsetY);
         controller->Rotate(offsetX, offsetY);
+        uint32_t width, height;
+        if (wio.GetFramebufferSize(width, height)) {
+            controller->SetScreenSize(width, height);
+            glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
+        }
 
         if (wio.IsKeyReleasedFirstTime(Key::F2)) {
         }

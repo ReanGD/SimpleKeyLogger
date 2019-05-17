@@ -187,16 +187,6 @@ Key TranslateMouseKeyCode(int key) {
 }
 
 struct GLFWCallbacks {
-    static GLFWframebuffersizefun m_prevFramebufferSize;
-    static void FramebufferSize(GLFWwindow* window, int width, int height) {
-        if (m_prevFramebufferSize != nullptr) {
-            m_prevFramebufferSize(window, width, height);
-        }
-        static_cast<Window*>(glfwGetWindowUserPointer(window))->OnFramebufferSizeChanged(
-            static_cast<uint32_t>(width),
-            static_cast<uint32_t>(height));
-    }
-
     static GLFWmousebuttonfun m_prevMouseButton;
     static void MouseButton(GLFWwindow* window, int key, int action, int mods) {
         if (m_prevMouseButton != nullptr) {
@@ -234,7 +224,6 @@ struct GLFWCallbacks {
     }
 
     static void SetAll(GLFWwindow* window) {
-        m_prevFramebufferSize = glfwSetFramebufferSizeCallback(window, FramebufferSize);
         m_prevMouseButton = glfwSetMouseButtonCallback(window, MouseButton);
         m_prevScroll = glfwSetScrollCallback(window, Scroll);
         m_prevKey = glfwSetKeyCallback(window, Key);
@@ -242,9 +231,6 @@ struct GLFWCallbacks {
     }
 
     static void ResetAll(GLFWwindow* window) {
-        glfwSetFramebufferSizeCallback(window, m_prevFramebufferSize);
-        m_prevFramebufferSize = nullptr;
-
         glfwSetMouseButtonCallback(window, m_prevMouseButton);
         m_prevMouseButton = nullptr;
 
@@ -259,7 +245,6 @@ struct GLFWCallbacks {
     }
 };
 
-GLFWframebuffersizefun GLFWCallbacks::m_prevFramebufferSize = nullptr;
 GLFWmousebuttonfun GLFWCallbacks::m_prevMouseButton = nullptr;
 GLFWscrollfun GLFWCallbacks::m_prevScroll = nullptr;
 GLFWkeyfun GLFWCallbacks::m_prevKey = nullptr;
@@ -290,14 +275,11 @@ bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1);
 
-    glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & InputHandler::ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported()) {
         glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
-    int width, height;
-    glfwGetFramebufferSize(m_window, &width, &height);
-    glViewport(0, 0, width, height);
     GLFWCallbacks::SetAll(m_window);
 
     return true;
@@ -330,36 +312,17 @@ WindowInput& Window::GetIO() {
     return m_io;
 }
 
-void Window::AttachInputHandler(std::weak_ptr<InputHandler> handlerWeak) {
-    if (auto handler = handlerWeak.lock(); handler) {
-        m_inputHandlers.push_back(handler);
-
-        int width, height;
-        glfwGetFramebufferSize(m_window, &width, &height);
-        handler->ScreenHandler(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-    }
-}
-
 uint8_t Window::EditorModeInverse() {
     static GLFWcharfun m_prevChar = nullptr;
-    if ((m_mode & InputHandler::ProcessMode::Editor) != 0) {
-        m_mode = InputHandler::ProcessMode::FirstPerson;
+    if ((m_mode & ProcessMode::Editor) != 0) {
+        m_mode = ProcessMode::FirstPerson;
         m_prevChar = glfwSetCharCallback(m_window, nullptr);
     } else {
-        m_mode = InputHandler::ProcessMode::Editor;
+        m_mode = ProcessMode::Editor;
         m_prevChar = glfwSetCharCallback(m_window, m_prevChar);
     }
 
-    glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & InputHandler::ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 
     return m_mode;
-}
-
-void Window::OnFramebufferSizeChanged(uint32_t width, uint32_t height) {
-    glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
-    for (auto& handlerWeak : m_inputHandlers) {
-        if (auto handler = handlerWeak.lock(); handler) {
-            handler->ScreenHandler(width, height);
-        }
-    }
 }

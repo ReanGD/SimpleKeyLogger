@@ -1,9 +1,6 @@
 #include "camera/fp_camera_control.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-FPCameraControl::FPCameraControl() {
-    m_supportMode &= ~ProcessMode::Editor;
-}
 
 void FPCameraControl::SetMovementSpeed(float value) noexcept {
     m_movementSpeed	= value;
@@ -39,7 +36,7 @@ void FPCameraControl::Rotate(float dtYaw, float dtPitch) noexcept {
     m_pitchOffset += dtPitch;
 }
 
-void FPCameraControl::ScreenHandler(uint32_t width, uint32_t height) {
+void FPCameraControl::SetScreenSize(uint32_t width, uint32_t height) {
     m_aspectRatio = float(width) / float(height);
     for(const auto& camera: m_cameras) {
         camera->SetAspectRatio(m_aspectRatio);

@@ -7,9 +7,9 @@
 
 
 // First person camera control
-class FPCameraControl : public InputHandler {
+class FPCameraControl {
 public:
-    FPCameraControl();
+    FPCameraControl() = default;
     ~FPCameraControl() = default;
 
 public:
@@ -22,8 +22,7 @@ public:
     void MoveLeft() noexcept;
     void MoveRight() noexcept;
     void Rotate(float dtYaw, float dtPitch) noexcept;
-
-    void ScreenHandler(uint32_t width, uint32_t height) override;
+    void SetScreenSize(uint32_t width, uint32_t height);
 
     void Update(float dt);
 private:
