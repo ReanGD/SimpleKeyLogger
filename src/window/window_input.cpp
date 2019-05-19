@@ -74,6 +74,15 @@ bool WindowInput::GetKeyStickyDownState(Key code, uint8_t& mods) const noexcept 
     return (state & IsStickyDownMask) != 0;
 }
 
+void WindowInput::FillKeyboardKeysDown(bool* keysDown) const noexcept {
+    if (keysDown == nullptr) {
+        return;
+    }
+    for(size_t i=0; i!=(static_cast<size_t>(Key::LastKeyboard) + 1); ++i) {
+        keysDown[i] = (m_isKeyDown[i] & IsDownMask) != 0;
+    }
+}
+
 std::u16string WindowInput::GetInput() const noexcept {
     return m_userInput;
 }
@@ -142,22 +151,22 @@ void WindowInput::OnKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept 
     {
     case Key::LeftShift:
     case Key::RightShift:
-        m_isKeyDown[static_cast<size_t>(Key::Shift)] = state;
+        m_isKeyDown[static_cast<size_t>(Key::Shift)] = m_isKeyDown[static_cast<size_t>(Key::LeftShift)] | m_isKeyDown[static_cast<size_t>(Key::RightShift)];
         break;
 
     case Key::LeftControl:
     case Key::RightControl:
-        m_isKeyDown[static_cast<size_t>(Key::Control)] = state;
+        m_isKeyDown[static_cast<size_t>(Key::Control)] = m_isKeyDown[static_cast<size_t>(Key::LeftControl)] | m_isKeyDown[static_cast<size_t>(Key::RightControl)];
         break;
 
     case Key::LeftAlt:
     case Key::RightAlt:
-        m_isKeyDown[static_cast<size_t>(Key::Alt)] = state;
+        m_isKeyDown[static_cast<size_t>(Key::Alt)] = m_isKeyDown[static_cast<size_t>(Key::LeftAlt)] | m_isKeyDown[static_cast<size_t>(Key::RightAlt)];
         break;
 
     case Key::LeftSuper:
     case Key::RightSuper:
-        m_isKeyDown[static_cast<size_t>(Key::Super)] = state;
+        m_isKeyDown[static_cast<size_t>(Key::Super)] = m_isKeyDown[static_cast<size_t>(Key::LeftSuper)] | m_isKeyDown[static_cast<size_t>(Key::RightSuper)];
         break;
 
     default:

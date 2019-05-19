@@ -14,6 +14,7 @@
 #include "material/texture.h"
 #include "camera/fp_camera_control.h"
 #include "window/window.h"
+#include "gui/gui.h"
 
 
 using defer = std::shared_ptr<void>;
@@ -29,6 +30,11 @@ std::string run() {
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         return "Failed to initialize GLEW";
+    }
+
+    Gui gui;
+    if (!gui.Init(err)) {
+        return err;
     }
 
     glEnable(GL_DEPTH_TEST);

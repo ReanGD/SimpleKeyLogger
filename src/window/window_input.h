@@ -184,6 +184,7 @@ public:
     // Down state per frame
     bool IsKeyStickyDown(Key code) const noexcept;
     bool GetKeyStickyDownState(Key code, uint8_t& mods) const noexcept;
+    void FillKeyboardKeysDown(bool* keysDown) const noexcept;
 
     std::u16string GetInput() const noexcept;
 
