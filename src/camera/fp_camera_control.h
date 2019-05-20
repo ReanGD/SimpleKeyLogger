@@ -24,7 +24,7 @@ public:
     void Rotate(float dtYaw, float dtPitch) noexcept;
     void SetScreenSize(uint32_t width, uint32_t height);
 
-    void Update(float dt);
+    void Update(float deltaTime);
 private:
     float m_movementSpeed = 2.0f;
     float m_mouseSensitivity = 0.2f;

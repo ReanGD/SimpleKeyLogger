@@ -43,12 +43,12 @@ void FPCameraControl::SetScreenSize(uint32_t width, uint32_t height) {
     }
 }
 
-void FPCameraControl::Update(float dt) {
+void FPCameraControl::Update(float deltaTime) {
     constexpr const float factor = 0.3f;
     constexpr const float pitchMax = glm::half_pi<float>() - 0.2f;
     constexpr const float pitchMin = -(glm::half_pi<float>() - 0.2f);
 
-    dt *= (1.0f - factor);
+    float dt = deltaTime * (1.0f - factor);
 
     m_posOffsetPrevious *= factor;
     m_yawOffsetPrevious *= factor;

@@ -2,8 +2,6 @@
 
 #include <imgui.h>
 
-#include "window/window_input.h"
-
 
 Gui::~Gui() {
     if (m_context != nullptr) {
@@ -50,4 +48,28 @@ bool Gui::Init(std::string& error) {
 
     ImGui::StyleColorsDark();
     return true;
+}
+
+void Gui::Update(WindowInput& wio, float deltaTime) {
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.DeltaTime = deltaTime;
+
+    float offsetX, offsetY;
+    wio.GetScrollOffset(offsetX, offsetY);
+    io.MouseWheelH += offsetX;
+    io.MouseWheel += offsetY;
+
+    wio.FillKeyboardKeysDown(io.KeysDown);
+    io.KeyCtrl = wio.IsKeyDown(Key::Control);
+    io.KeyShift = wio.IsKeyDown(Key::Shift);
+    io.KeyAlt = wio.IsKeyDown(Key::Alt);
+    io.KeySuper = wio.IsKeyDown(Key::Super);
+    io.MouseDown[0] = wio.IsKeyStickyDown(Key::MouseLeft);
+    io.MouseDown[1] = wio.IsKeyStickyDown(Key::MouseRight);
+    io.MouseDown[2] = wio.IsKeyStickyDown(Key::MouseMiddle);
+
+    for(const auto ch :wio.GetInput()) {
+        io.AddInputCharacter(ch);
+    }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include "window/window_input.h"
 
 
 struct ImGuiContext;
@@ -16,6 +16,7 @@ public:
 
 public:
     bool Init(std::string& error);
+    void Update(WindowInput& wio, float deltaTime);
 
 private:
     ImGuiContext* m_context = nullptr;

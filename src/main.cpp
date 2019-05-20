@@ -98,7 +98,9 @@ std::string run() {
         if (wio.IsKeyReleasedFirstTime(Key::F2)) {
         }
         auto now = std::chrono::steady_clock::now();
-        controller->Update(std::chrono::duration<float>(now - timeLast).count());
+        float deltaTime = std::chrono::duration<float>(now - timeLast).count();
+        controller->Update(deltaTime);
+        gui.Update(wio, deltaTime);
         timeLast = now;
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
