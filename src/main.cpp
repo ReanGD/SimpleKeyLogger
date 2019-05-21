@@ -20,6 +20,7 @@
 using defer = std::shared_ptr<void>;
 
 std::string run() {
+    bool editorMode = false;
     Window window;
 
     std::string err;
@@ -72,6 +73,15 @@ std::string run() {
 
         if (wio.IsKeyReleasedFirstTime(Key::Escape)) {
             window.Close();
+        }
+
+        if (wio.IsKeyReleasedFirstTime(Key::F2)) {
+            editorMode = !editorMode;
+            if (!editorMode) {
+                window.SetCursor(CursorType::Disabled);
+            } else {
+                window.SetCursor(CursorType::Arrow);
+            }
         }
 
         if (wio.IsKeyStickyDown(Key::W)) {

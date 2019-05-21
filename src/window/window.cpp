@@ -253,6 +253,11 @@ GLFWcharfun GLFWCallbacks::m_prevChar = nullptr;
 
 Window::~Window() {
     if (m_window != nullptr) {
+        for (int i=0; i!=LastStandartCursor+1; ++i) {
+            glfwDestroyCursor(m_cursors[i]);
+            m_cursors[i] = nullptr;
+        }
+
         GLFWCallbacks::ResetAll(m_window);
         glfwDestroyWindow(m_window);
         m_window = nullptr;
@@ -275,14 +280,27 @@ bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1);
 
-    glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-    if (glfwRawMouseMotionSupported()) {
-        glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    }
+    m_cursors[CursorType::Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    m_cursors[CursorType::IBeam] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+    m_cursors[CursorType::Crosshair] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    m_cursors[CursorType::Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    m_cursors[CursorType::ResizeH] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    m_cursors[CursorType::ResizeV] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+
+    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    m_currentCursor = CursorType::Disabled;
+
+    // if (glfwRawMouseMotionSupported()) {
+    //     glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    // }
 
     GLFWCallbacks::SetAll(m_window);
 
     return true;
+}
+
+void Window::Close() {
+    glfwSetWindowShouldClose(m_window, GL_TRUE);
 }
 
 bool Window::StartFrame() {
@@ -304,25 +322,34 @@ void Window::EndFrame() {
     glfwPollEvents();
 }
 
-void Window::Close() {
-    glfwSetWindowShouldClose(m_window, GL_TRUE);
+void Window::SetCursor(CursorType value) {
+    if (m_currentCursor == value) {
+        return;
+    }
+    switch (value) {
+    case CursorType::Arrow:
+    case CursorType::IBeam:
+    case CursorType::Crosshair:
+    case CursorType::Hand:
+    case CursorType::ResizeH:
+    case CursorType::ResizeV:
+        glfwSetCursor(m_window, m_cursors[value]);
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        m_currentCursor = value;
+        break;
+
+    case CursorType::Hidden:
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        m_currentCursor = value;
+        break;
+
+    case CursorType::Disabled:
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        m_currentCursor = value;
+        break;
+    }
 }
 
 WindowInput& Window::GetIO() {
     return m_io;
-}
-
-uint8_t Window::EditorModeInverse() {
-    static GLFWcharfun m_prevChar = nullptr;
-    if ((m_mode & ProcessMode::Editor) != 0) {
-        m_mode = ProcessMode::FirstPerson;
-        m_prevChar = glfwSetCharCallback(m_window, nullptr);
-    } else {
-        m_mode = ProcessMode::Editor;
-        m_prevChar = glfwSetCharCallback(m_window, m_prevChar);
-    }
-
-    glfwSetInputMode(m_window, GLFW_CURSOR, ((m_mode & ProcessMode::Editor) != 0) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-
-    return m_mode;
 }

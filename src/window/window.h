@@ -5,12 +5,23 @@
 
 #include "window/window_input.h"
 
-struct GLFWwindow;
-enum ProcessMode : uint8_t {
-    Editor = 1 << 0,
-    FirstPerson = 1 << 1,
+
+enum CursorType : uint8_t {
+    Arrow = 0,      // GLFW_ARROW_CURSOR
+    IBeam = 1,      // GLFW_IBEAM_CURSOR
+    Crosshair = 2,  // GLFW_CROSSHAIR_CURSOR
+    Hand = 3,       // GLFW_HAND_CURSOR
+    ResizeH = 4,    // GLFW_HRESIZE_CURSOR
+    ResizeV = 5,    // GLFW_VRESIZE_CURSOR
+
+    Hidden = 6,
+    Disabled = 7,
+
+    LastStandartCursor = ResizeV,
 };
 
+struct GLFWwindow;
+struct GLFWcursor;
 class Window {
 public:
     Window() = default;
@@ -22,15 +33,17 @@ public:
 
 public:
     bool Init(bool fullscreen, float windowMultiplier, std::string& error);
-    bool StartFrame();
-    void EndFrame();
     void Close();
 
-    WindowInput& GetIO();
+    bool StartFrame();
+    void EndFrame();
 
-    uint8_t EditorModeInverse();
+    void SetCursor(CursorType value);
+
+    WindowInput& GetIO();
 private:
-    uint8_t m_mode = ProcessMode::Editor;
     WindowInput m_io;
+    CursorType m_currentCursor = CursorType::Disabled;
+    GLFWcursor* m_cursors[static_cast<size_t>(CursorType::LastStandartCursor) + 1] = { nullptr };
     GLFWwindow* m_window = nullptr;
 };

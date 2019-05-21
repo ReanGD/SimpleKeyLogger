@@ -22,6 +22,7 @@ bool Gui::Init(std::string& error) {
     io.ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableSetMousePos;
     io.BackendFlags = ImGuiBackendFlags_HasMouseCursors | ImGuiBackendFlags_HasSetMousePos;
     io.BackendPlatformName = "imgui_impl_glfw";
+    io.MouseDrawCursor = false;
 
     io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
     io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::ArrowLeft);
