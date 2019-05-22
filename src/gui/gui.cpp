@@ -3,6 +3,44 @@
 #include <imgui.h>
 
 
+static void UpdateMouseCursor(Window& window, ImGuiIO& io) {
+    if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) {
+        return;
+    }
+
+    ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+    if (io.MouseDrawCursor) {
+        imgui_cursor = ImGuiMouseCursor_None;
+    }
+    switch (imgui_cursor)
+    {
+    case ImGuiMouseCursor_None:
+        window.SetCursor(CursorType::Hidden);
+        break;
+    case ImGuiMouseCursor_Arrow:
+    case ImGuiMouseCursor_ResizeAll: // FIXME: GLFW doesn't have this.
+    case ImGuiMouseCursor_ResizeNESW: // FIXME: GLFW doesn't have this.
+    case ImGuiMouseCursor_ResizeNWSE: // FIXME: GLFW doesn't have this.
+        window.SetCursor(CursorType::Arrow);
+        break;
+    case ImGuiMouseCursor_TextInput:
+        window.SetCursor(CursorType::IBeam);
+        break;
+    case ImGuiMouseCursor_ResizeNS:
+        window.SetCursor(CursorType::ResizeV);
+        break;
+    case ImGuiMouseCursor_ResizeEW:
+        window.SetCursor(CursorType::ResizeH);
+        break;
+    case ImGuiMouseCursor_Hand:
+        window.SetCursor(CursorType::Hand);
+        break;
+    default:
+        window.SetCursor(CursorType::Arrow);
+        break;
+    }
+}
+
 Gui::~Gui() {
     if (m_context != nullptr) {
         ImGui::DestroyContext(m_context);
@@ -51,26 +89,44 @@ bool Gui::Init(std::string& error) {
     return true;
 }
 
-void Gui::Update(WindowInput& wio, float deltaTime) {
+void Gui::EnableInput(bool value) {
+    m_enableInput = value;
+}
+
+void Gui::Update(Window& window, float deltaTime) {
+    WindowInput& wio = window.GetIO();
     ImGuiIO& io = ImGui::GetIO();
 
     io.DeltaTime = deltaTime;
 
-    float offsetX, offsetY;
-    wio.GetScrollOffset(offsetX, offsetY);
-    io.MouseWheelH += offsetX;
-    io.MouseWheel += offsetY;
+    if (m_enableInput) {
+        float offsetX, offsetY;
+        wio.GetScrollOffset(offsetX, offsetY);
+        io.MouseWheelH += offsetX;
+        io.MouseWheel += offsetY;
+        UpdateMouseCursor(window, io);
 
-    wio.FillKeyboardKeysDown(io.KeysDown);
-    io.KeyCtrl = wio.IsKeyDown(Key::Control);
-    io.KeyShift = wio.IsKeyDown(Key::Shift);
-    io.KeyAlt = wio.IsKeyDown(Key::Alt);
-    io.KeySuper = wio.IsKeyDown(Key::Super);
-    io.MouseDown[0] = wio.IsKeyStickyDown(Key::MouseLeft);
-    io.MouseDown[1] = wio.IsKeyStickyDown(Key::MouseRight);
-    io.MouseDown[2] = wio.IsKeyStickyDown(Key::MouseMiddle);
+        wio.FillKeyboardKeysDown(io.KeysDown);
+        io.KeyCtrl = wio.IsKeyDown(Key::Control);
+        io.KeyShift = wio.IsKeyDown(Key::Shift);
+        io.KeyAlt = wio.IsKeyDown(Key::Alt);
+        io.KeySuper = wio.IsKeyDown(Key::Super);
+        io.MouseDown[0] = wio.IsKeyStickyDown(Key::MouseLeft);
+        io.MouseDown[1] = wio.IsKeyStickyDown(Key::MouseRight);
+        io.MouseDown[2] = wio.IsKeyStickyDown(Key::MouseMiddle);
 
-    for(const auto ch :wio.GetInput()) {
-        io.AddInputCharacter(ch);
+        for(const auto ch :wio.GetInput()) {
+            io.AddInputCharacter(ch);
+        }
+    } else {
+        std::fill(std::begin(io.KeysDown), std::end(io.KeysDown), false);
+
+        io.KeyCtrl = false;
+        io.KeyShift = false;
+        io.KeyAlt = false;
+        io.KeySuper = false;
+        io.MouseDown[0] = false;
+        io.MouseDown[1] = false;
+        io.MouseDown[2] = false;
     }
 }
