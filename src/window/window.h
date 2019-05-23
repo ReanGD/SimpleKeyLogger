@@ -39,6 +39,9 @@ public:
     void EndFrame();
 
     void SetCursor(CursorType value);
+    void SetCursorPosition(float posX, float posY);
+    bool IsFocused();
+    void GetWindowSize(uint32_t& width, uint32_t& height);
 
     WindowInput& GetIO();
 private:

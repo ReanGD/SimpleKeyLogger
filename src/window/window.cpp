@@ -350,6 +350,21 @@ void Window::SetCursor(CursorType value) {
     }
 }
 
+void Window::SetCursorPosition(float posX, float posY) {
+    glfwSetCursorPos(m_window, static_cast<double>(posX), static_cast<double>(posY));
+}
+
+bool Window::IsFocused() {
+    return glfwGetWindowAttrib(m_window, GLFW_FOCUSED) != 0;
+}
+
+void Window::GetWindowSize(uint32_t& width, uint32_t& height) {
+    int w, h;
+    glfwGetWindowSize(m_window, &w, &h);
+    width = static_cast<uint32_t>(w);
+    height = static_cast<uint32_t>(h);
+}
+
 WindowInput& Window::GetIO() {
     return m_io;
 }

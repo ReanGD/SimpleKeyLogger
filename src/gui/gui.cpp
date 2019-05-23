@@ -99,11 +99,34 @@ void Gui::Update(Window& window, float deltaTime) {
 
     io.DeltaTime = deltaTime;
 
+    uint32_t w, h;
+    window.GetWindowSize(w, h);
+    io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
+
+    if (w > 0 && h > 0) {
+        uint32_t fbWidth, fbHeight;
+        wio.GetFramebufferSize(fbWidth, fbHeight);
+        io.DisplayFramebufferScale = ImVec2(static_cast<float>(fbWidth) / w, static_cast<float>(fbHeight) / h);
+    }
+
     if (m_enableInput) {
-        float offsetX, offsetY;
-        wio.GetScrollOffset(offsetX, offsetY);
-        io.MouseWheelH += offsetX;
-        io.MouseWheel += offsetY;
+        if (window.IsFocused()) {
+            float offsetX, offsetY;
+            wio.GetScrollOffset(offsetX, offsetY);
+            io.MouseWheelH += offsetX;
+            io.MouseWheel += offsetY;
+
+            if (io.WantSetMousePos) {
+                window.SetCursorPosition(io.MousePos.x, io.MousePos.y);
+            } else {
+                float posX, posY;
+                wio.GetCursorPosition(posX, posY);
+                io.MousePos = ImVec2(posX, posY);
+            }
+        } else {
+            io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+        }
+
         UpdateMouseCursor(window, io);
 
         wio.FillKeyboardKeysDown(io.KeysDown);
