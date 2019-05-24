@@ -187,13 +187,30 @@ Key TranslateMouseKeyCode(int key) {
 }
 
 struct GLFWCallbacks {
+    static Window* m_window;
+
+    static const char* GetClipboardText() {
+        if (m_window != nullptr) {
+            return m_window->GetClipboardText();
+        }
+
+        return nullptr;
+    }
+
+    static void SetClipboardText(const char* text) {
+        if (m_window != nullptr) {
+            return m_window->SetClipboardText(text);
+        }
+    }
+
     static GLFWmousebuttonfun m_prevMouseButton;
     static void MouseButton(GLFWwindow* window, int key, int action, int mods) {
         if (m_prevMouseButton != nullptr) {
             m_prevMouseButton(window, key, action, mods);
         }
-        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        w->GetIO().OnMouseKeyEvent(TranslateMouseKeyCode(key), static_cast<KeyAction>(action), static_cast<uint8_t>(mods));
+        if (m_window != nullptr) {
+            m_window->GetIO().OnMouseKeyEvent(TranslateMouseKeyCode(key), static_cast<KeyAction>(action), static_cast<uint8_t>(mods));
+        }
     }
 
     static GLFWscrollfun m_prevScroll;
@@ -201,8 +218,9 @@ struct GLFWCallbacks {
         if (m_prevScroll != nullptr) {
             m_prevScroll(window, offsetX, offsetY);
         }
-        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        w->GetIO().OnScrollEvent(offsetX, offsetY);
+        if (m_window != nullptr) {
+            m_window->GetIO().OnScrollEvent(offsetX, offsetY);
+        }
     }
 
     static GLFWkeyfun m_prevKey;
@@ -210,8 +228,9 @@ struct GLFWCallbacks {
         if (m_prevKey != nullptr) {
             m_prevKey(window, key, scancode, action, mods);
         }
-        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        w->GetIO().OnKeyEvent(TranslateKeyCode(key), static_cast<KeyAction>(action), static_cast<uint8_t>(mods));
+        if (m_window != nullptr) {
+            m_window->GetIO().OnKeyEvent(TranslateKeyCode(key), static_cast<KeyAction>(action), static_cast<uint8_t>(mods));
+        }
     }
 
     static GLFWcharfun m_prevChar;
@@ -219,32 +238,37 @@ struct GLFWCallbacks {
         if (m_prevChar != nullptr) {
             m_prevChar(window, ch);
         }
-        auto w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        w->GetIO().OnCharEvent(static_cast<char16_t>(ch));
+        if (m_window != nullptr) {
+            m_window->GetIO().OnCharEvent(static_cast<char16_t>(ch));
+        }
     }
 
-    static void SetAll(GLFWwindow* window) {
-        m_prevMouseButton = glfwSetMouseButtonCallback(window, MouseButton);
-        m_prevScroll = glfwSetScrollCallback(window, Scroll);
-        m_prevKey = glfwSetKeyCallback(window, Key);
-        m_prevChar = glfwSetCharCallback(window, Char);
+    static void Init(Window* window, GLFWwindow* glfwWindow) {
+        m_window = window;
+        m_prevMouseButton = glfwSetMouseButtonCallback(glfwWindow, MouseButton);
+        m_prevScroll = glfwSetScrollCallback(glfwWindow, Scroll);
+        m_prevKey = glfwSetKeyCallback(glfwWindow, Key);
+        m_prevChar = glfwSetCharCallback(glfwWindow, Char);
     }
 
-    static void ResetAll(GLFWwindow* window) {
-        glfwSetMouseButtonCallback(window, m_prevMouseButton);
+    static void Destroy(GLFWwindow* glfwWindow) {
+        m_window = nullptr;
+
+        glfwSetMouseButtonCallback(glfwWindow, m_prevMouseButton);
         m_prevMouseButton = nullptr;
 
-        glfwSetScrollCallback(window, m_prevScroll);
+        glfwSetScrollCallback(glfwWindow, m_prevScroll);
         m_prevScroll = nullptr;
 
-        glfwSetKeyCallback(window, m_prevKey);
+        glfwSetKeyCallback(glfwWindow, m_prevKey);
         m_prevKey = nullptr;
 
-        glfwSetCharCallback(window, m_prevChar);
+        glfwSetCharCallback(glfwWindow, m_prevChar);
         m_prevChar = nullptr;
     }
 };
 
+Window* GLFWCallbacks::m_window = nullptr;
 GLFWmousebuttonfun GLFWCallbacks::m_prevMouseButton = nullptr;
 GLFWscrollfun GLFWCallbacks::m_prevScroll = nullptr;
 GLFWkeyfun GLFWCallbacks::m_prevKey = nullptr;
@@ -258,7 +282,7 @@ Window::~Window() {
             m_cursors[i] = nullptr;
         }
 
-        GLFWCallbacks::ResetAll(m_window);
+        GLFWCallbacks::Destroy(m_window);
         glfwDestroyWindow(m_window);
         m_window = nullptr;
     }
@@ -276,7 +300,6 @@ bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
         return false;
     }
 
-    glfwSetWindowUserPointer(m_window, this);
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1);
 
@@ -294,7 +317,7 @@ bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
     //     glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     // }
 
-    GLFWCallbacks::SetAll(m_window);
+    GLFWCallbacks::Init(this, m_window);
 
     return true;
 }
@@ -363,6 +386,22 @@ void Window::GetWindowSize(uint32_t& width, uint32_t& height) {
     glfwGetWindowSize(m_window, &w, &h);
     width = static_cast<uint32_t>(w);
     height = static_cast<uint32_t>(h);
+}
+
+const char* Window::GetClipboardText() {
+    return glfwGetClipboardString(m_window);
+}
+
+void Window::SetClipboardText(const char* text) {
+    glfwSetClipboardString(m_window, text);
+}
+
+const char* Window::GetClipboardText(void*) {
+    return GLFWCallbacks::GetClipboardText();
+}
+
+void Window::SetClipboardText(void*, const char* text) {
+    GLFWCallbacks::SetClipboardText(text);
 }
 
 WindowInput& Window::GetIO() {

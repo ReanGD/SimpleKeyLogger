@@ -1,6 +1,7 @@
 #include "gui/gui.h"
 
 #include <imgui.h>
+#include <imgui_impl_opengl3.h>
 
 
 static void UpdateMouseCursor(Window& window, ImGuiIO& io) {
@@ -43,6 +44,7 @@ static void UpdateMouseCursor(Window& window, ImGuiIO& io) {
 
 Gui::~Gui() {
     if (m_context != nullptr) {
+        ImGui_ImplOpenGL3_Shutdown();
         ImGui::DestroyContext(m_context);
         m_context = nullptr;
     }
@@ -61,6 +63,12 @@ bool Gui::Init(std::string& error) {
     io.BackendFlags = ImGuiBackendFlags_HasMouseCursors | ImGuiBackendFlags_HasSetMousePos;
     io.BackendPlatformName = "imgui_impl_glfw";
     io.MouseDrawCursor = false;
+    io.SetClipboardTextFn = Window::SetClipboardText;
+    io.GetClipboardTextFn = Window::GetClipboardText;
+    io.ClipboardUserData = nullptr;
+    #if defined(_WIN32)
+        io.ImeWindowHandle = (void*)glfwGetWin32Window(window);
+    #endif
 
     io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
     io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::ArrowLeft);
@@ -86,6 +94,8 @@ bool Gui::Init(std::string& error) {
     io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
     ImGui::StyleColorsDark();
+    ImGui_ImplOpenGL3_Init("#version 330 core");
+
     return true;
 }
 

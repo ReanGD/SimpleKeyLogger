@@ -2,6 +2,9 @@
 #include <iostream>
 #include <functional>
 
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 
@@ -37,6 +40,7 @@ std::string run() {
     if (!gui.Init(err)) {
         return err;
     }
+    gui.EnableInput(editorMode);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -77,40 +81,38 @@ std::string run() {
 
         if (wio.IsKeyReleasedFirstTime(Key::F2)) {
             editorMode = !editorMode;
-            if (!editorMode) {
-                window.SetCursor(CursorType::Disabled);
-            } else {
-                window.SetCursor(CursorType::Arrow);
-            }
+            window.SetCursor(editorMode ? CursorType::Arrow : CursorType::Disabled);
+            gui.EnableInput(editorMode);
         }
 
-        if (wio.IsKeyStickyDown(Key::W)) {
-            controller->MoveForward();
+        if (!editorMode) {
+            if (wio.IsKeyStickyDown(Key::W)) {
+                controller->MoveForward();
+            }
+            if (wio.IsKeyStickyDown(Key::S)) {
+                controller->MoveBackward();
+            }
+            if (wio.IsKeyStickyDown(Key::A)) {
+                controller->MoveLeft();
+            }
+            if (wio.IsKeyStickyDown(Key::D)) {
+                controller->MoveRight();
+            }
+            float offsetX, offsetY;
+            wio.GetCursorOffet(offsetX, offsetY);
+            controller->Rotate(offsetX, offsetY);
         }
-        if (wio.IsKeyStickyDown(Key::S)) {
-            controller->MoveBackward();
-        }
-        if (wio.IsKeyStickyDown(Key::A)) {
-            controller->MoveLeft();
-        }
-        if (wio.IsKeyStickyDown(Key::D)) {
-            controller->MoveRight();
-        }
-        float offsetX, offsetY;
-        wio.GetCursorOffet(offsetX, offsetY);
-        controller->Rotate(offsetX, offsetY);
+
         uint32_t width, height;
         if (wio.GetFramebufferSize(width, height)) {
             controller->SetScreenSize(width, height);
             glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
         }
 
-        if (wio.IsKeyReleasedFirstTime(Key::F2)) {
-        }
         auto now = std::chrono::steady_clock::now();
         float deltaTime = std::chrono::duration<float>(now - timeLast).count();
         controller->Update(deltaTime);
-        gui.Update(wio, deltaTime);
+        gui.Update(window, deltaTime);
         timeLast = now;
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);

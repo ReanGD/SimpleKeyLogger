@@ -40,8 +40,14 @@ public:
 
     void SetCursor(CursorType value);
     void SetCursorPosition(float posX, float posY);
+
     bool IsFocused();
     void GetWindowSize(uint32_t& width, uint32_t& height);
+
+    const char* GetClipboardText();
+    void SetClipboardText(const char* text);
+    static const char* GetClipboardText(void*);
+    static void SetClipboardText(void*, const char* text);
 
     WindowInput& GetIO();
 private:
