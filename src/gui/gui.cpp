@@ -163,3 +163,13 @@ void Gui::Update(Window& window, float deltaTime) {
         io.MouseDown[2] = false;
     }
 }
+
+void Gui::NewFrame() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Gui::EndFrame() {
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}

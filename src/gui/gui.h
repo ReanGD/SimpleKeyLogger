@@ -19,6 +19,9 @@ public:
     void EnableInput(bool value);
     void Update(Window& window, float deltaTime);
 
+    void NewFrame();
+    void EndFrame();
+
 private:
     bool m_enableInput = true;
     ImGuiContext* m_context = nullptr;
