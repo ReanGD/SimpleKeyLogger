@@ -20,6 +20,8 @@ enum CursorType : uint8_t {
     LastStandartCursor = ResizeV,
 };
 
+struct GLFWmonitor;
+struct GLFWvidmode;
 struct GLFWwindow;
 struct GLFWcursor;
 class Window {
@@ -32,7 +34,9 @@ public:
     ~Window();
 
 public:
-    bool Init(bool fullscreen, float windowMultiplier, std::string& error);
+    bool Init(bool isFullscreen, float windowMultiplier, std::string& error);
+    void SetFullscreen(bool value);
+    bool IsFullscreen() const noexcept;
     void Close();
 
     bool StartFrame();
@@ -52,7 +56,11 @@ public:
     WindowInput& GetIO();
 private:
     WindowInput m_io;
+    bool m_fullscreen = false;
+    float m_windowMultiplier = 0.7f;
     CursorType m_currentCursor = CursorType::Disabled;
     GLFWcursor* m_cursors[static_cast<size_t>(CursorType::LastStandartCursor) + 1] = { nullptr };
+    GLFWmonitor* m_monitor = nullptr;
+    const GLFWvidmode* m_mode = nullptr;
     GLFWwindow* m_window = nullptr;
 };

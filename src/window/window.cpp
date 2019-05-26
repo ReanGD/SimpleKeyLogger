@@ -14,37 +14,23 @@ void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwindow* win
 	glfwSetWindowPos(window, xpos, ypos);
 }
 
-GLFWwindow* createWindow(bool fullscreen, float windowMultiplier, std::string& error) {
-    GLFWwindow* window = nullptr;
-
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    if (monitor == nullptr) {
-        error = "Failed to get primary monitor";
-        return window;
-    }
-
-    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    if (mode == nullptr) {
-        error = "Failed to get monitor mode";
-        return window;
-    }
-
+GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, bool isFullscreen, float windowMultiplier, std::string& error) {
     int width = mode->width;
     int height = mode->height;
     auto windowMonitor = monitor;
-    if (!fullscreen) {
+    if (!isFullscreen) {
         windowMonitor = nullptr;
         width = static_cast<int>(windowMultiplier * static_cast<float>(width));
         height = static_cast<int>(windowMultiplier * static_cast<float>(height));
     }
 
-    window = glfwCreateWindow(width, height, "RTGE", windowMonitor, nullptr);
+    GLFWwindow* window = glfwCreateWindow(width, height, "RTGE", windowMonitor, nullptr);
     if (window == nullptr) {
         error = "Failed to create window";
         return window;
     }
 
-    if (!fullscreen) {
+    if (!isFullscreen) {
         centerWindow(monitor, mode, window);
     }
 
@@ -276,6 +262,8 @@ GLFWcharfun GLFWCallbacks::m_prevChar = nullptr;
 
 
 Window::~Window() {
+    m_monitor = nullptr;
+    m_mode = nullptr;
     if (m_window != nullptr) {
         for (int i=0; i!=LastStandartCursor+1; ++i) {
             glfwDestroyCursor(m_cursors[i]);
@@ -288,14 +276,29 @@ Window::~Window() {
     }
 }
 
-bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
+bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
+    m_fullscreen = isFullscreen;
+    m_windowMultiplier = windowMultiplier;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     glfwWindowHint(GLFW_AUTO_ICONIFY, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    m_window = createWindow(fullscreen, windowMultiplier, error);
+    m_monitor = glfwGetPrimaryMonitor();
+    if (m_monitor == nullptr) {
+        error = "Failed to get primary monitor";
+        return false;
+    }
+
+    m_mode = glfwGetVideoMode(m_monitor);
+    if (m_mode == nullptr) {
+        error = "Failed to get monitor mode";
+        return false;
+    }
+
+
+    m_window = createWindow(m_monitor, m_mode, m_fullscreen, m_windowMultiplier, error);
     if (m_window == nullptr) {
         return false;
     }
@@ -320,6 +323,32 @@ bool Window::Init(bool fullscreen, float windowMultiplier, std::string& error) {
     GLFWCallbacks::Init(this, m_window);
 
     return true;
+}
+
+void Window::SetFullscreen(bool value) {
+    if (m_fullscreen == value) {
+        return;
+    }
+
+    m_fullscreen = value;
+    if (m_fullscreen) {
+        glfwSetWindowMonitor(m_window, m_monitor, 0, 0, m_mode->width, m_mode->height, m_mode->refreshRate);
+    } else {
+        int monitorX, monitorY;
+        glfwGetMonitorPos(m_monitor, &monitorX, &monitorY);
+
+        int windowWidth = static_cast<int>(m_windowMultiplier * static_cast<float>(m_mode->width));
+        int windowHeight = static_cast<int>(m_windowMultiplier * static_cast<float>(m_mode->height));
+
+        int xpos = monitorX + (m_mode->width - windowWidth) / 2;
+        int ypos = monitorY + (m_mode->height - windowHeight) / 2;
+
+        glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, windowWidth, windowHeight, m_mode->refreshRate);
+    }
+}
+
+bool Window::IsFullscreen() const noexcept {
+    return m_fullscreen;
 }
 
 void Window::Close() {

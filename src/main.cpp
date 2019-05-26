@@ -80,6 +80,10 @@ std::string run() {
             window.Close();
         }
 
+        if (wio.IsKeyReleasedFirstTime(Key::F11)) {
+            window.SetFullscreen(!window.IsFullscreen());
+        }
+
         if (wio.IsKeyReleasedFirstTime(Key::F2)) {
             editorMode = !editorMode;
             window.SetCursor(editorMode ? CursorType::Arrow : CursorType::Disabled);
