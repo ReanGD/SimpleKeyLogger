@@ -28,12 +28,12 @@ std::pair<GLchar*, GLint> read(const char* filepath) {
     return std::make_pair(data, length);
 }
 
-nonstd::expected<GLuint, std::string> LoadShader(std::filesystem::path&& filepath, GLenum shaderType) {
-    auto [data, length] = read(filepath.c_str());
+std::pair<GLuint, const std::string> LoadShader(std::filesystem::path&& filepath, GLenum shaderType) {
+    const auto [data, length] = read(filepath.c_str());
 
     if (data == nullptr) {
         auto msg = fmt::format("Сouldn't read the shader from the file: '{}'", filepath.c_str());
-        return nonstd::make_unexpected(msg);
+        return std::make_pair(0, msg);
     }
 
     GLuint shader = glCreateShader(shaderType);
@@ -48,13 +48,13 @@ nonstd::expected<GLuint, std::string> LoadShader(std::filesystem::path&& filepat
         GLchar infoLog[1024];
         glGetShaderInfoLog(shader, 1024, NULL, infoLog);
         auto msg = fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog);
-        return nonstd::make_unexpected(msg);
+        return std::make_pair(0, msg);
     }
 
-    return shader;
+    return std::make_pair(shader, std::string());
 }
 
-Shader::Shader(uint32_t handle)
+Shader::Shader(uint handle)
     : m_handle(handle) {
 
 }
@@ -78,7 +78,7 @@ void Shader::SetBool(const char* name, bool value) const {
     glUniform1i(glGetUniformLocation(m_handle, name), static_cast<int>(value));
 }
 
-void Shader::SetInt(const char* name, int32_t value) const {
+void Shader::SetInt(const char* name, int value) const {
     glUniform1i(glGetUniformLocation(m_handle, name), value);
 }
 
@@ -122,25 +122,25 @@ void Shader::SetMat4(const char* name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(m_handle, name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName) {
+std::pair<Shader, const std::string> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName) {
     const auto root = std::filesystem::current_path() / "data" / "shaders";
 
-    auto vertexShader = LoadShader(root / (vertexShaderName + ".glsl"), GL_VERTEX_SHADER);
-    if (!vertexShader) {
-        return nonstd::make_unexpected(vertexShader.error());
+    const auto [vertexShader, vErr] = LoadShader(root / (vertexShaderName + ".glsl"), GL_VERTEX_SHADER);
+    if (!vErr.empty()) {
+        return std::make_pair(Shader(), vErr);
     }
-    auto fragmentShader = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER);
-    if (!fragmentShader) {
-        glDeleteShader(*vertexShader);
-        return nonstd::make_unexpected(fragmentShader.error());
+    const auto [fragmentShader, fErr] = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER);
+    if (!fErr.empty()) {
+        glDeleteShader(vertexShader);
+        return std::make_pair(Shader(), fErr);
     }
 
     GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, *vertexShader);
-    glAttachShader(shaderProgram, *fragmentShader);
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
-    glDeleteShader(*vertexShader);
-    glDeleteShader(*fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     GLint success;
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
@@ -149,8 +149,8 @@ nonstd::expected<Shader, std::string> Shader::Create(const std::string& vertexSh
         glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
         auto msg = fmt::format("Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
             vertexShaderName, fragmentShaderName, infoLog);
-        return nonstd::make_unexpected(msg);
+        return std::make_pair(Shader(), msg);
     }
 
-    return Shader(shaderProgram);
+    return std::make_pair(Shader(shaderProgram), std::string());
 }

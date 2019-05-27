@@ -1,13 +1,13 @@
 #pragma once
 
+#include <string>
 #include <glm/mat4x4.hpp>
-#include <nonstd/expected.hpp>
 
-class Shader
-{
+
+class Shader {
 private:
-    Shader() = delete;
-    Shader(uint32_t handle);
+    Shader() = default;
+    Shader(uint handle);
 public:
     ~Shader() = default;
 
@@ -16,7 +16,7 @@ public:
     void Delete();
 
     void SetBool(const char* name, bool value) const;
-    void SetInt(const char* name, int32_t value) const;
+    void SetInt(const char* name, int value) const;
     void SetFloat(const char* name, float value) const;
     void SetVec2(const char* name, const glm::vec2& vec) const;
     void SetVec2(const char* name, float x, float y) const;
@@ -28,7 +28,7 @@ public:
     void SetMat3(const char* name, const glm::mat3& mat) const;
     void SetMat4(const char* name, const glm::mat4& mat) const;
 
-    static nonstd::expected<Shader, std::string> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName);
+    static std::pair<Shader, const std::string> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName);
 private:
-    uint32_t m_handle;
+    uint m_handle = 0;
 };

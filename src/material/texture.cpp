@@ -10,7 +10,7 @@
 #include <fmt/format.h>
 
 
-Texture::Texture(uint32_t handle)
+Texture::Texture(uint handle)
     : m_handle(handle) {
 
 }
@@ -30,14 +30,14 @@ void Texture::Delete() {
     }
 }
 
-nonstd::expected<Texture, std::string> Texture::Create(const std::string& path) {
+std::pair<Texture, const std::string> Texture::Create(const std::string& path) {
     const auto fullPath = std::filesystem::current_path() / "data" / "textures" / path;
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(fullPath.c_str(), &width, &height, &channels, STBI_rgb);
     if (data == nullptr) {
         auto msg = fmt::format("Failed to create a texture from file '{}', error: '{}'", fullPath.c_str(), stbi_failure_reason());
-        return nonstd::make_unexpected(msg);
+        return std::make_pair(Texture(), msg);
     }
 
     GLuint handle;
@@ -55,5 +55,5 @@ nonstd::expected<Texture, std::string> Texture::Create(const std::string& path) 
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    return Texture(handle);
+    return std::make_pair(Texture(handle), std::string());
 }

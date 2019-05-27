@@ -1,6 +1,6 @@
 #pragma once
 
-#include <array>
+#include <string>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
@@ -38,7 +38,7 @@ struct VertexPNTC {
 class DataBuffer {
 protected:
     DataBuffer() = delete;
-    DataBuffer(uint32_t target, const void* data, size_t size);
+    DataBuffer(uint target, const void* data, size_t size);
 
 public:
     ~DataBuffer() = default;
@@ -47,7 +47,7 @@ public:
     void Delete();
 
 protected:
-    uint32_t m_handle;
+    uint m_handle;
 };
 
 class VertexBuffer : public DataBuffer {
@@ -65,11 +65,11 @@ public:
     explicit IndexBuffer(const uint32_t* data, size_t size);
 
 public:
-    uint32_t Count() const noexcept {
+    uint Count() const noexcept {
         return m_count;
     }
 
-    uint32_t Type() const noexcept {
+    uint Type() const noexcept {
         return m_type;
     }
 
@@ -77,8 +77,8 @@ public:
     void Unbind() const;
 
 private:
-    uint32_t m_count;
-    uint32_t m_type;
+    uint m_type;
+    uint m_count;
 };
 
 class Mesh {
@@ -94,7 +94,7 @@ public:
     void Delete();
 
 private:
-    uint32_t m_handle;
+    uint m_handle;
     VertexDecl m_vDecl;
     VertexBuffer m_vertexBuffer;
     IndexBuffer m_indexBuffer;

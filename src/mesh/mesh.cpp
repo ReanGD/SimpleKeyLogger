@@ -1,5 +1,7 @@
 #include "mesh/mesh.h"
 
+#include <stdexcept>
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 
@@ -40,7 +42,7 @@ void VertexDecl::Bind() const {
     }
 }
 
-DataBuffer::DataBuffer(uint32_t target, const void* data, size_t size) {
+DataBuffer::DataBuffer(uint target, const void* data, size_t size) {
     glGenBuffers(1, &m_handle);
     glBindBuffer(static_cast<GLenum>(target), m_handle);
     glBufferData(static_cast<GLenum>(target), static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data), GL_STATIC_DRAW);
@@ -69,15 +71,15 @@ void VertexBuffer::Unbind() const {
 
 IndexBuffer::IndexBuffer(const uint16_t* data, size_t size)
     : DataBuffer(GL_ELEMENT_ARRAY_BUFFER, data, size)
-    , m_count(static_cast<uint32_t>(size/sizeof(*data)))
-    , m_type(GL_UNSIGNED_SHORT) {
+    , m_type(GL_UNSIGNED_SHORT)
+    , m_count(static_cast<uint>(size/sizeof(*data))) {
 
 }
 
 IndexBuffer::IndexBuffer(const uint32_t* data, size_t size)
     : DataBuffer(GL_ELEMENT_ARRAY_BUFFER, data, size)
-    , m_count(static_cast<uint32_t>(size/sizeof(*data)))
-    , m_type( GL_UNSIGNED_INT) {
+    , m_type(GL_UNSIGNED_INT)
+    , m_count(static_cast<uint>(size/sizeof(*data))) {
 
 }
 

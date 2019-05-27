@@ -1,6 +1,5 @@
 #include <chrono>
 #include <iostream>
-#include <functional>
 
 #include <imgui.h>
 
@@ -15,7 +14,6 @@
 #include "material/shader.h"
 #include "material/texture.h"
 #include "camera/fp_camera_control.h"
-#include "window/window.h"
 #include "gui/gui.h"
 
 
@@ -47,19 +45,19 @@ std::string run() {
     Mesh cube = MeshGenerator::CreateSolidCube();
     Mesh sphere = MeshGenerator::CreateSolidSphere(30);
 
-    auto shader = Shader::Create("vertex", "fragment");
-    if (!shader) {
-        return shader.error();
+    auto [shader, sErr] = Shader::Create("vertex", "fragment");
+    if (!sErr.empty()) {
+        return sErr;
     }
 
-    auto shaderLight = Shader::Create("vertex_light", "fragment_light");
-    if (!shaderLight) {
-        return shaderLight.error();
+    auto [shaderLight, slErr] = Shader::Create("vertex_light", "fragment_light");
+    if (!slErr.empty()) {
+        return slErr;
     }
 
-    auto texture = Texture::Create("brice.jpg");
-    if (!texture) {
-        return texture.error();
+    auto [texture, tErr] = Texture::Create("brice.jpg");
+    if (!tErr.empty()) {
+        return tErr;
     }
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
@@ -123,56 +121,56 @@ std::string run() {
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader->Bind();
+        shader.Bind();
 
         glActiveTexture(GL_TEXTURE0);
-        texture->Bind();
+        texture.Bind();
 
-        shader->SetInt("ourTexture1", 0);
+        shader.SetInt("ourTexture1", 0);
 
-        shader->SetMat4("uProj", camera->GetProjMatrix());
-        shader->SetMat4("uView", camera->GetViewMatrix());
+        shader.SetMat4("uProj", camera->GetProjMatrix());
+        shader.SetMat4("uView", camera->GetViewMatrix());
 
         auto matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 0));
-        shader->SetMat4("uWorld", matWorld);
+        shader.SetMat4("uWorld", matWorld);
         glm::mat3 matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-        shader->SetMat3("uNorm", matNorm);
+        shader.SetMat3("uNorm", matNorm);
 
         cube.Bind();
         cube.Draw();
         cube.Unbind();
 
         matWorld = glm::scale(glm::mat4(1.0), glm::vec3(20.0f));
-        shader->SetMat4("uWorld", matWorld);
+        shader.SetMat4("uWorld", matWorld);
         matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-        shader->SetMat3("uNorm", matNorm);
+        shader.SetMat3("uNorm", matNorm);
 
         plane.Bind();
         plane.Draw();
         plane.Unbind();
 
-        texture->Unbind();
-        shader->Unbind();
+        texture.Unbind();
+        shader.Unbind();
 
 
-        shaderLight->Bind();
+        shaderLight.Bind();
 
         glActiveTexture(GL_TEXTURE0);
-        texture->Bind();
+        texture.Bind();
 
-        shaderLight->SetInt("uTextureDiffuse", 0);
+        shaderLight.SetInt("uTextureDiffuse", 0);
 
-        shaderLight->SetMat4("uProjMatrix", camera->GetProjMatrix());
-        shaderLight->SetMat4("uViewMatrix", camera->GetViewMatrix());
-        shaderLight->SetVec3("uToEyeDirection", camera->GetToEyeDirection());
+        shaderLight.SetMat4("uProjMatrix", camera->GetProjMatrix());
+        shaderLight.SetMat4("uViewMatrix", camera->GetViewMatrix());
+        shaderLight.SetVec3("uToEyeDirection", camera->GetToEyeDirection());
 
         matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 3.0f));
         matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-        shaderLight->SetMat4("uWorldMatrix", matWorld);
+        shaderLight.SetMat4("uWorldMatrix", matWorld);
         matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-        shaderLight->SetMat3("uNormalMatrix", matNorm);
+        shaderLight.SetMat3("uNormalMatrix", matNorm);
 
         sphere.Bind();
         sphere.Draw();
@@ -181,16 +179,16 @@ std::string run() {
         matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 6.0f));
         matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-        shaderLight->SetMat4("uWorldMatrix", matWorld);
+        shaderLight.SetMat4("uWorldMatrix", matWorld);
         matNorm = glm::mat3(matWorld);
-        shaderLight->SetMat3("uNormalMatrix", matNorm);
+        shaderLight.SetMat3("uNormalMatrix", matNorm);
 
         sphere.Bind();
         sphere.Draw();
         sphere.Unbind();
 
-        texture->Unbind();
-        shaderLight->Unbind();
+        texture.Unbind();
+        shaderLight.Unbind();
 
         gui.NewFrame();
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -234,9 +232,9 @@ std::string run() {
         window.EndFrame();
     }
 
-    texture->Delete();
-    shader->Delete();
-    shaderLight->Delete();
+    texture.Delete();
+    shader.Delete();
+    shaderLight.Delete();
     sphere.Delete();
     cube.Delete();
     plane.Delete();

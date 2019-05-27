@@ -1,11 +1,12 @@
 #pragma once
 
-#include <nonstd/expected.hpp>
+#include <string>
+
 
 class Texture {
 private:
-    Texture() = delete;
-    Texture(uint32_t handle);
+    Texture() = default;
+    Texture(uint handle);
 public:
     ~Texture() = default;
 
@@ -13,7 +14,7 @@ public:
     void Unbind() const;
     void Delete();
 
-    static nonstd::expected<Texture, std::string> Create(const std::string& path);
+    static std::pair<Texture, const std::string> Create(const std::string& path);
 private:
-    uint32_t m_handle;
+    uint m_handle = 0;
 };
