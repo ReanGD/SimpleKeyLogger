@@ -5,7 +5,7 @@ smooth in vec2 pTexCoord;
 
 out vec4 color;
 
-uniform sampler2D uTextureDiffuse;
+uniform sampler2D uBaseTexture;
 uniform vec3 uToEyeDirection;
 
 const vec3 uToLightDirection = vec3(0, 1, 0);

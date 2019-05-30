@@ -9,11 +9,11 @@ smooth out vec2 pTexCoord;
 
 uniform mat4 uProjMatrix;
 uniform mat4 uViewMatrix;
-uniform mat4 uWorldMatrix;
+uniform mat4 uModelMatrix;
 uniform mat3 uNormalMatrix;
 
 void main() {
-	gl_Position = uProjMatrix * uViewMatrix * uWorldMatrix * vec4(vPosition, 1.0f);
+	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(vPosition, 1.0f);
     pNormal		= uNormalMatrix * vNormal;
 	pTexCoord   = vTexCoord;
 }

@@ -10,34 +10,14 @@
 #include <fmt/format.h>
 
 
-Texture::Texture(uint handle)
-    : m_handle(handle) {
-
-}
-
-void Texture::Bind() const {
-    glBindTexture(GL_TEXTURE_2D, m_handle);
-}
-
-void Texture::Unbind() const {
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Texture::Delete() {
-    if (m_handle != 0) {
-        glDeleteTextures(1, &m_handle);
-        m_handle = 0;
-    }
-}
-
-std::pair<Texture, const std::string> Texture::Create(const std::string& path) {
+bool Texture::Load(const std::string& path, std::string& error) {
     const auto fullPath = std::filesystem::current_path() / "data" / "textures" / path;
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(fullPath.c_str(), &width, &height, &channels, STBI_rgb);
     if (data == nullptr) {
-        auto msg = fmt::format("Failed to create a texture from file '{}', error: '{}'", fullPath.c_str(), stbi_failure_reason());
-        return std::make_pair(Texture(), msg);
+        error = fmt::format("Failed to create a texture from file '{}', error: '{}'", fullPath.c_str(), stbi_failure_reason());
+        return false;
     }
 
     GLuint handle;
@@ -55,5 +35,24 @@ std::pair<Texture, const std::string> Texture::Create(const std::string& path) {
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    return std::make_pair(Texture(handle), std::string());
+    m_handle = handle;
+
+    return true;
+}
+
+void Texture::Bind(uint unit) const {
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, m_handle);
+}
+
+void Texture::Unbind(uint unit) const {
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::Delete() {
+    if (m_handle != 0) {
+        glDeleteTextures(1, &m_handle);
+        m_handle = 0;
+    }
 }

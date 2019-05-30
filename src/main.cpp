@@ -13,6 +13,7 @@
 #include "mesh/mesh_generator.h"
 #include "material/shader.h"
 #include "material/texture.h"
+#include "material/material.h"
 #include "camera/fp_camera_control.h"
 #include "gui/gui.h"
 
@@ -55,10 +56,13 @@ std::string run() {
         return slErr;
     }
 
-    auto [texture, tErr] = Texture::Create("brice.jpg");
-    if (!tErr.empty()) {
-        return tErr;
+    Texture texture;
+    if(!texture.Load("brice.jpg", err)) {
+        return err;
     }
+
+    Material material(shaderLight);
+    material.SetBaseTexture(0, texture);
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -66,7 +70,7 @@ std::string run() {
     auto controller = std::make_shared<FPCameraControl>();
     controller->AttachCamera(camera);
 
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -123,8 +127,7 @@ std::string run() {
 
         shader.Bind();
 
-        glActiveTexture(GL_TEXTURE0);
-        texture.Bind();
+        texture.Bind(0);
 
         shader.SetInt("ourTexture1", 0);
 
@@ -150,45 +153,20 @@ std::string run() {
         plane.Draw();
         plane.Unbind();
 
-        texture.Unbind();
+        texture.Unbind(0);
         shader.Unbind();
 
-
-        shaderLight.Bind();
-
-        glActiveTexture(GL_TEXTURE0);
-        texture.Bind();
-
-        shaderLight.SetInt("uTextureDiffuse", 0);
-
-        shaderLight.SetMat4("uProjMatrix", camera->GetProjMatrix());
-        shaderLight.SetMat4("uViewMatrix", camera->GetViewMatrix());
-        shaderLight.SetVec3("uToEyeDirection", camera->GetToEyeDirection());
 
         matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 3.0f));
         matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-        shaderLight.SetMat4("uWorldMatrix", matWorld);
-        matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-        shaderLight.SetMat3("uNormalMatrix", matNorm);
+        material.Bind(camera, matWorld);
 
         sphere.Bind();
         sphere.Draw();
         sphere.Unbind();
 
-        matWorld = glm::mat4(1.0f);
-        matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 6.0f));
-        matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-        shaderLight.SetMat4("uWorldMatrix", matWorld);
-        matNorm = glm::mat3(matWorld);
-        shaderLight.SetMat3("uNormalMatrix", matNorm);
-
-        sphere.Bind();
-        sphere.Draw();
-        sphere.Unbind();
-
-        texture.Unbind();
-        shaderLight.Unbind();
+        material.Unbind();
 
         gui.NewFrame();
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
