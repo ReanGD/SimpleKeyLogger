@@ -35,6 +35,7 @@ bool Texture::Load(const std::string& path, std::string& error) {
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    Delete();
     m_handle = handle;
 
     return true;

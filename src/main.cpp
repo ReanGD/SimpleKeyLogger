@@ -51,7 +51,7 @@ std::string run() {
         return sErr;
     }
 
-    auto [shaderLight, slErr] = Shader::Create("vertex_light", "fragment_light");
+    auto [shaderLight, slErr] = Shader::Create("vertex", "fragment_light");
     if (!slErr.empty()) {
         return slErr;
     }
@@ -61,8 +61,10 @@ std::string run() {
         return err;
     }
 
-    Material material(shaderLight);
+    Material material(shader);
     material.SetBaseTexture(0, texture);
+    Material materialLight(shaderLight);
+    materialLight.SetBaseTexture(0, texture);
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -125,48 +127,28 @@ std::string run() {
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.Bind();
-
-        texture.Bind(0);
-
-        shader.SetInt("ourTexture1", 0);
-
-        shader.SetMat4("uProj", camera->GetProjMatrix());
-        shader.SetMat4("uView", camera->GetViewMatrix());
-
         auto matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 0));
-        shader.SetMat4("uWorld", matWorld);
-        glm::mat3 matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-        shader.SetMat3("uNorm", matNorm);
-
+        material.Bind(camera, matWorld);
         cube.Bind();
         cube.Draw();
         cube.Unbind();
+        material.Unbind();
 
         matWorld = glm::scale(glm::mat4(1.0), glm::vec3(20.0f));
-        shader.SetMat4("uWorld", matWorld);
-        matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-        shader.SetMat3("uNorm", matNorm);
-
+        material.Bind(camera, matWorld);
         plane.Bind();
         plane.Draw();
         plane.Unbind();
+        material.Unbind();
 
-        texture.Unbind(0);
-        shader.Unbind();
-
-
-        matWorld = glm::mat4(1.0f);
-        matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 3.0f));
+        matWorld = glm::translate(glm::mat4(1.0), glm::vec3(0, 0.51f, 3.0f));
         matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-        material.Bind(camera, matWorld);
-
+        materialLight.Bind(camera, matWorld);
         sphere.Bind();
         sphere.Draw();
         sphere.Unbind();
-
-        material.Unbind();
+        materialLight.Unbind();
 
         gui.NewFrame();
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).

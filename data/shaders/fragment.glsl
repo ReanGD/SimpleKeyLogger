@@ -1,11 +1,12 @@
 #version 330 core
 
-in vec2 pTexCoord;
+smooth in vec3 pNormal;
+smooth in vec2 pTexCoord;
 
 out vec4 color;
 
-uniform sampler2D ourTexture1;
+uniform sampler2D uBaseTexture;
 
 void main() {
-    color = texture(ourTexture1, pTexCoord);
+    color = texture(uBaseTexture, pTexCoord);
 }
