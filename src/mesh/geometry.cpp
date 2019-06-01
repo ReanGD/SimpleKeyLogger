@@ -1,4 +1,4 @@
-#include "mesh/mesh.h"
+#include "mesh/geometry.h"
 
 #include <stdexcept>
 
@@ -91,7 +91,7 @@ void IndexBuffer::Unbind() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-Mesh::Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
+Geometry::Geometry(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
     : m_vDecl(vDecl)
     , m_vertexBuffer(vertexBuffer)
     , m_indexBuffer(indexBuffer) {
@@ -108,19 +108,19 @@ Mesh::Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const Inde
     m_indexBuffer.Unbind();
 }
 
-void Mesh::Bind() const {
+void Geometry::Bind() const {
     glBindVertexArray(m_handle);
 }
 
-void Mesh::Unbind() const {
+void Geometry::Unbind() const {
     glBindVertexArray(0);
 }
 
-void Mesh::Draw() const {
+void Geometry::Draw() const {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexBuffer.Count()), static_cast<GLenum>(m_indexBuffer.Type()), 0);
 }
 
-void Mesh::Delete() {
+void Geometry::Delete() {
     if (m_handle != 0) {
         glDeleteVertexArrays(1, &m_handle);
         m_handle = 0;

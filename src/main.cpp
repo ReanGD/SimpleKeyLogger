@@ -9,8 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
-#include "mesh/mesh_generator.h"
+#include "mesh/geometry_generator.h"
 #include "material/shader.h"
 #include "material/texture.h"
 #include "material/material.h"
@@ -42,9 +41,9 @@ std::string run() {
 
     glEnable(GL_DEPTH_TEST);
 
-    Mesh plane = MeshGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
-    Mesh cube = MeshGenerator::CreateSolidCube();
-    Mesh sphere = MeshGenerator::CreateSolidSphere(30);
+    Geometry plane = GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
+    Geometry cube = GeometryGenerator::CreateSolidCube();
+    Geometry sphere = GeometryGenerator::CreateSolidSphere(30);
 
     auto [shader, sErr] = Shader::Create("vertex", "fragment");
     if (!sErr.empty()) {

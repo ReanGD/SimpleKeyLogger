@@ -81,11 +81,11 @@ private:
     uint m_count;
 };
 
-class Mesh {
+class Geometry {
 public:
-    Mesh() = delete;
-    Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
-    ~Mesh() = default;
+    Geometry() = delete;
+    Geometry(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
+    ~Geometry() = default;
 
 public:
     void Bind() const;

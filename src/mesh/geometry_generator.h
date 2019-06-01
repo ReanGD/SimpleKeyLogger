@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mesh/mesh.h"
+#include "mesh/geometry.h"
 
 
-struct MeshGenerator {
+struct GeometryGenerator {
     /*!
        Creates a solid cube with a center at the beginning of the coordinates and a long edge equal to 1
 
@@ -24,12 +24,12 @@ struct MeshGenerator {
             /       /
           17------18
     */
-    static Mesh CreateSolidCube();
+    static Geometry CreateSolidCube();
     /*!
         Creates a sphere with a center at the beginning of coordinates and a diameter equal to 1
         cntVertexCircle - Number of vertices in the circle
     */
-    static Mesh CreateSolidSphere(uint16_t cntVertexCircle);
+    static Geometry CreateSolidSphere(uint16_t cntVertexCircle);
     /*!
         Creates a square plane at the beginning of coordinates with an edge side equal to 1
         The plane is located in the X0Z plane, the normatives are directed along the OY
@@ -37,5 +37,5 @@ struct MeshGenerator {
         cntXSides - Number of vertices on 0X axis (cntXSides >= 2)
         cntZSides - Number of vertices on 0Z axis (cntZSides >= 2)
     */
-    static Mesh CreateSolidPlane(uint32_t cntXSides = 2, uint32_t cntZSides = 2, float scaleTextureX = 1.0f, float scaleTextureZ = 1.0f);
+    static Geometry CreateSolidPlane(uint32_t cntXSides = 2, uint32_t cntZSides = 2, float scaleTextureX = 1.0f, float scaleTextureZ = 1.0f);
 };

@@ -1,9 +1,9 @@
-#include "mesh/mesh_generator.h"
+#include "mesh/geometry_generator.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 
-Mesh MeshGenerator::CreateSolidCube() {
+Geometry GeometryGenerator::CreateSolidCube() {
     VertexPNTC vb[24];
     vb[ 0].Position	= glm::vec3(-0.5f,-0.5f,-0.5f);
     vb[ 1].Position	= glm::vec3(-0.5f, 0.5f,-0.5f);
@@ -59,10 +59,10 @@ Mesh MeshGenerator::CreateSolidCube() {
     }
     IndexBuffer indexBuffer(ib, sizeof(ib));
 
-    return Mesh(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return Geometry(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
-Mesh MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
+Geometry GeometryGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
     cntVertexCircle = glm::min(cntVertexCircle, uint16_t(363));
     uint16_t plg = cntVertexCircle/2 - 1;
 
@@ -128,10 +128,10 @@ Mesh MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
     IndexBuffer indexBuffer(ib, indexCnt * sizeof(*ib));
     delete []ib;
 
-    return Mesh(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return Geometry(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
-Mesh MeshGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
+Geometry GeometryGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
     const uint32_t cntSidesMax = 0xFFFF/3-1;
     const uint32_t cntSidesMin = 2;
     cntXSides = glm::max(glm::min(cntXSides, cntSidesMax), cntSidesMin);
@@ -180,5 +180,5 @@ Mesh MeshGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, flo
     IndexBuffer indexBuffer(ib, indexCnt * sizeof(*ib));
     delete []ib;
 
-    return Mesh(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return Geometry(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
