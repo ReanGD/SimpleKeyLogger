@@ -7,14 +7,12 @@
 #include <GL/glew.h>
 
 #include <GLFW/glfw3.h>
-
 #include <glm/gtc/matrix_transform.hpp>
-#include "mesh/geometry_generator.h"
-#include "material/shader.h"
-#include "material/texture.h"
-#include "material/material.h"
-#include "camera/fp_camera_control.h"
+
 #include "gui/gui.h"
+#include "mesh/mesh.h"
+#include "mesh/geometry_generator.h"
+#include "camera/fp_camera_control.h"
 
 
 using defer = std::shared_ptr<void>;
@@ -41,10 +39,6 @@ std::string run() {
 
     glEnable(GL_DEPTH_TEST);
 
-    Geometry plane = GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
-    Geometry cube = GeometryGenerator::CreateSolidCube();
-    Geometry sphere = GeometryGenerator::CreateSolidSphere(30);
-
     auto [shader, sErr] = Shader::Create("vertex", "fragment");
     if (!sErr.empty()) {
         return sErr;
@@ -64,6 +58,14 @@ std::string run() {
     material.SetBaseTexture(0, texture);
     Material materialLight(shaderLight);
     materialLight.SetBaseTexture(0, texture);
+
+    Geometry gmtrPlane = GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
+    Geometry gmtrCube = GeometryGenerator::CreateSolidCube();
+    Geometry gmtrSphere = GeometryGenerator::CreateSolidSphere(30);
+    Mesh plane, cube, sphere;
+    plane.Add(gmtrPlane, material);
+    cube.Add(gmtrCube, material);
+    sphere.Add(gmtrSphere, materialLight);
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -128,26 +130,14 @@ std::string run() {
 
         auto matWorld = glm::mat4(1.0f);
         matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 0));
-        material.Bind(camera, matWorld);
-        cube.Bind();
-        cube.Draw();
-        cube.Unbind();
-        material.Unbind();
+        cube.Draw(camera, matWorld);
 
         matWorld = glm::scale(glm::mat4(1.0), glm::vec3(20.0f));
-        material.Bind(camera, matWorld);
-        plane.Bind();
-        plane.Draw();
-        plane.Unbind();
-        material.Unbind();
+        plane.Draw(camera, matWorld);
 
         matWorld = glm::translate(glm::mat4(1.0), glm::vec3(0, 0.51f, 3.0f));
         matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-        materialLight.Bind(camera, matWorld);
-        sphere.Bind();
-        sphere.Draw();
-        sphere.Unbind();
-        materialLight.Unbind();
+        sphere.Draw(camera, matWorld);
 
         gui.NewFrame();
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -194,9 +184,9 @@ std::string run() {
     texture.Delete();
     shader.Delete();
     shaderLight.Delete();
-    sphere.Delete();
-    cube.Delete();
-    plane.Delete();
+    gmtrSphere.Delete();
+    gmtrCube.Delete();
+    gmtrPlane.Delete();
 
     return std::string();
 }
