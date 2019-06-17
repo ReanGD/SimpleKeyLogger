@@ -39,7 +39,7 @@ vec3 PhongLighting(vec3 N, vec3 L, vec3 V, vec3 facture) {
 
 void main() {
     vec3 normal = normalize(pNormal);
-    vec3 facture = vec3(0.6, 0.1, 0.1);
+    vec3 facture = texture(uBaseTexture, pTexCoord);
 
     vec3 clr = PhongLighting(normal, uToLightDirection, uToEyeDirection, facture);
     color = vec4(clr, 1.0);

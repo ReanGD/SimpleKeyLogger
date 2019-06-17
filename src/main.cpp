@@ -39,12 +39,12 @@ std::string run() {
 
     glEnable(GL_DEPTH_TEST);
 
-    auto [shader, sErr] = Shader::Create("vertex", "fragment");
+    auto [shaderTex, sErr] = Shader::Create("vertex", "fragment_tex");
     if (!sErr.empty()) {
         return sErr;
     }
 
-    auto [shaderLight, slErr] = Shader::Create("vertex", "fragment_light");
+    auto [shaderClrLight, slErr] = Shader::Create("vertex", "fragment_clr_light");
     if (!slErr.empty()) {
         return slErr;
     }
@@ -54,18 +54,18 @@ std::string run() {
         return err;
     }
 
-    Material material(shader);
-    material.SetBaseTexture(0, texture);
-    Material materialLight(shaderLight);
-    materialLight.SetBaseTexture(0, texture);
+    Material materialTex(shaderTex);
+    materialTex.SetBaseTexture(0, texture);
+    Material materialClrLight(shaderClrLight);
+    materialClrLight.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
 
-    Geometry gmtrPlane = GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
-    Geometry gmtrCube = GeometryGenerator::CreateSolidCube();
-    Geometry gmtrSphere = GeometryGenerator::CreateSolidSphere(30);
     Mesh plane, cube, sphere;
-    plane.Add(gmtrPlane, material);
-    cube.Add(gmtrCube, material);
-    sphere.Add(gmtrSphere, materialLight);
+    Geometry gmtrPlane = GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
+    plane.Add(gmtrPlane, materialTex);
+    Geometry gmtrCube = GeometryGenerator::CreateSolidCube();
+    cube.Add(gmtrCube, materialTex);
+    Geometry gmtrSphere = GeometryGenerator::CreateSolidSphere(30);
+    sphere.Add(gmtrSphere, materialClrLight);
 
     auto camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -182,8 +182,8 @@ std::string run() {
     }
 
     texture.Delete();
-    shader.Delete();
-    shaderLight.Delete();
+    shaderTex.Delete();
+    shaderClrLight.Delete();
     gmtrSphere.Delete();
     gmtrCube.Delete();
     gmtrPlane.Delete();
