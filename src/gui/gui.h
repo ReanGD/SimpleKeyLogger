@@ -19,8 +19,8 @@ public:
     void EnableInput(bool value);
     void Update(Window& window, float deltaTime);
 
-    void NewFrame();
-    void EndFrame();
+    void NewFrame() const;
+    void EndFrame() const;
 
 private:
     bool m_enableInput = true;

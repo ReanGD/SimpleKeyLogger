@@ -164,12 +164,12 @@ void Gui::Update(Window& window, float deltaTime) {
     }
 }
 
-void Gui::NewFrame() {
+void Gui::NewFrame() const {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 }
 
-void Gui::EndFrame() {
+void Gui::EndFrame() const {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
