@@ -11,7 +11,7 @@ public:
     UIInterface& operator=(UIInterface&&) = delete;
 
     UIInterface() = default;
-    ~UIInterface();
+    ~UIInterface() = default;
 
     void Draw(const Gui& gui);
 
