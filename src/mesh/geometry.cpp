@@ -49,7 +49,7 @@ DataBuffer::DataBuffer(uint target, const void* data, size_t size) {
     glBindBuffer(static_cast<GLenum>(target), 0);
 }
 
-void DataBuffer::Delete() {
+void DataBuffer::Destroy() {
     if (m_handle != 0) {
         glDeleteBuffers(1, &m_handle);
         m_handle = 0;
@@ -108,6 +108,10 @@ Geometry::Geometry(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, co
     m_indexBuffer.Unbind();
 }
 
+Geometry::~Geometry() {
+    Destroy();
+}
+
 void Geometry::Bind() const {
     glBindVertexArray(m_handle);
 }
@@ -120,12 +124,12 @@ void Geometry::Draw() const {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexBuffer.Count()), static_cast<GLenum>(m_indexBuffer.Type()), 0);
 }
 
-void Geometry::Delete() {
+void Geometry::Destroy() {
     if (m_handle != 0) {
         glDeleteVertexArrays(1, &m_handle);
         m_handle = 0;
     }
 
-    m_vertexBuffer.Delete();
-    m_indexBuffer.Delete();
+    m_vertexBuffer.Destroy();
+    m_indexBuffer.Destroy();
 }

@@ -12,7 +12,7 @@ public:
 
     void Bind(uint unit) const;
     void Unbind(uint unit) const;
-    void Delete();
+    void Destroy();
 private:
     uint m_handle = 0;
 };

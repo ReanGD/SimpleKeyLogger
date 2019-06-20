@@ -3,12 +3,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-Material::Material(const Shader& shader)
+Material::Material(const std::shared_ptr<Shader>& shader)
     : m_shader(shader) {
 
 }
 
-Material& Material::SetShader(const Shader& shader) noexcept {
+Material& Material::SetShader(const std::shared_ptr<Shader>& shader) noexcept {
     m_shader = shader;
 
     return *this;
@@ -28,21 +28,21 @@ Material& Material::SetBaseTexture(uint unit, const Texture& texture) noexcept {
 }
 
 void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matWorld) const {
-    m_shader.Bind();
+    m_shader->Bind();
     m_baseTexture.Bind(m_baseTextureUnit);
-    m_shader.SetInt("uBaseTexture", int(m_baseTextureUnit));
-    m_shader.SetVec3("uBaseColor", m_baseColor);
+    m_shader->SetInt("uBaseTexture", int(m_baseTextureUnit));
+    m_shader->SetVec3("uBaseColor", m_baseColor);
 
-    m_shader.SetMat4("uProjMatrix", camera->GetProjMatrix());
-    m_shader.SetMat4("uViewMatrix", camera->GetViewMatrix());
-    m_shader.SetVec3("uToEyeDirection", camera->GetToEyeDirection());
+    m_shader->SetMat4("uProjMatrix", camera->GetProjMatrix());
+    m_shader->SetMat4("uViewMatrix", camera->GetViewMatrix());
+    m_shader->SetVec3("uToEyeDirection", camera->GetToEyeDirection());
 
-    m_shader.SetMat4("uModelMatrix", matWorld);
+    m_shader->SetMat4("uModelMatrix", matWorld);
     glm::mat3 matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-    m_shader.SetMat3("uNormalMatrix", matNorm);
+    m_shader->SetMat3("uNormalMatrix", matNorm);
 }
 
 void Material::Unbind() const {
     m_baseTexture.Unbind(m_baseTextureUnit);
-    m_shader.Unbind();
+    m_shader->Unbind();
 }

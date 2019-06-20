@@ -1,6 +1,8 @@
 #pragma once
 
-#include "gui/gui.h"
+#include "mesh/mesh.h"
+#include "engine/engine.h"
+#include "editor/ui_interface.h"
 #include "camera/fp_camera_control.h"
 
 
@@ -14,14 +16,21 @@ public:
     Editor() = default;
     ~Editor() = default;
 
-    std::string Run();
+
+    bool Init(Engine& engine, std::string& error);
+    void Render(Engine& engine);
+    void Destroy();
 
 private:
-    void ProcessIO();
+    void ProcessIO(Engine& engine);
 
 private:
     bool m_editorMode = false;
-    Gui m_gui;
-    Window m_window;
+    Mesh m_cube;
+    Mesh m_plane;
+    Mesh m_sphere;
+    Texture m_texture;
+    UIInterface m_interface;
     FPCameraControl m_controller;
+    std::shared_ptr<Camera> m_camera;
 };

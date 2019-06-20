@@ -28,12 +28,12 @@ std::pair<GLchar*, GLint> read(const char* filepath) {
     return std::make_pair(data, length);
 }
 
-std::pair<GLuint, const std::string> LoadShader(std::filesystem::path&& filepath, GLenum shaderType) {
+GLuint LoadShader(std::filesystem::path&& filepath, GLenum shaderType, std::string& error) {
     const auto [data, length] = read(filepath.c_str());
 
     if (data == nullptr) {
-        auto msg = fmt::format("Сouldn't read the shader from the file: '{}'", filepath.c_str());
-        return std::make_pair(0, msg);
+        error = fmt::format("Сouldn't read the shader from the file: '{}'", filepath.c_str());
+        return 0;
     }
 
     GLuint shader = glCreateShader(shaderType);
@@ -47,16 +47,53 @@ std::pair<GLuint, const std::string> LoadShader(std::filesystem::path&& filepath
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-        auto msg = fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog);
-        return std::make_pair(0, msg);
+        error = fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog);
+        return 0;
     }
 
-    return std::make_pair(shader, std::string());
+    return shader;
 }
 
-Shader::Shader(uint handle)
+Shader::Shader(const privateArg&, uint handle)
     : m_handle(handle) {
 
+}
+
+Shader::~Shader() {
+    Destroy();
+}
+
+std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName, std::string& error) {
+    const auto root = std::filesystem::current_path() / "data" / "shaders";
+
+    auto vertexShader = LoadShader(root / (vertexShaderName + ".glsl"), GL_VERTEX_SHADER, error);
+    if (vertexShader == 0) {
+        return nullptr;
+    }
+    auto fragmentShader = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER, error);
+    if (fragmentShader == 0) {
+        glDeleteShader(vertexShader);
+        return nullptr;
+    }
+
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    GLint success;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
+        error = fmt::format("Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
+            vertexShaderName, fragmentShaderName, infoLog);
+        return nullptr;
+    }
+
+    return std::make_shared<Shader>(Shader::privateArg{}, shaderProgram);
 }
 
 void Shader::Bind() const {
@@ -65,13 +102,6 @@ void Shader::Bind() const {
 
 void Shader::Unbind() const {
     glUseProgram(0);
-}
-
-void Shader::Delete() {
-    if (m_handle != 0) {
-        glDeleteProgram(m_handle);
-        m_handle = 0;
-    }
 }
 
 void Shader::SetBool(const char* name, bool value) const {
@@ -122,35 +152,9 @@ void Shader::SetMat4(const char* name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(m_handle, name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-std::pair<Shader, const std::string> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName) {
-    const auto root = std::filesystem::current_path() / "data" / "shaders";
-
-    const auto [vertexShader, vErr] = LoadShader(root / (vertexShaderName + ".glsl"), GL_VERTEX_SHADER);
-    if (!vErr.empty()) {
-        return std::make_pair(Shader(), vErr);
+void Shader::Destroy() {
+    if (m_handle != 0) {
+        glDeleteProgram(m_handle);
+        m_handle = 0;
     }
-    const auto [fragmentShader, fErr] = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER);
-    if (!fErr.empty()) {
-        glDeleteShader(vertexShader);
-        return std::make_pair(Shader(), fErr);
-    }
-
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    GLint success;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        GLchar infoLog[1024];
-        glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
-        auto msg = fmt::format("Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
-            vertexShaderName, fragmentShaderName, infoLog);
-        return std::make_pair(Shader(), msg);
-    }
-
-    return std::make_pair(Shader(shaderProgram), std::string());
 }

@@ -44,7 +44,7 @@ public:
     ~DataBuffer() = default;
 
 public:
-    void Delete();
+    void Destroy();
 
 protected:
     uint m_handle;
@@ -85,13 +85,15 @@ class Geometry {
 public:
     Geometry() = delete;
     Geometry(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
-    ~Geometry() = default;
+    ~Geometry();
 
 public:
     void Bind() const;
     void Unbind() const;
     void Draw() const;
-    void Delete();
+
+private:
+    void Destroy();
 
 private:
     uint m_handle;

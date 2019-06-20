@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "mesh/geometry.h"
 
 
@@ -24,12 +26,12 @@ struct GeometryGenerator {
             /       /
           17------18
     */
-    static Geometry CreateSolidCube();
+    static std::shared_ptr<Geometry> CreateSolidCube();
     /*!
         Creates a sphere with a center at the beginning of coordinates and a diameter equal to 1
         cntVertexCircle - Number of vertices in the circle
     */
-    static Geometry CreateSolidSphere(uint16_t cntVertexCircle);
+    static std::shared_ptr<Geometry> CreateSolidSphere(uint16_t cntVertexCircle);
     /*!
         Creates a square plane at the beginning of coordinates with an edge side equal to 1
         The plane is located in the X0Z plane, the normatives are directed along the OY
@@ -37,5 +39,5 @@ struct GeometryGenerator {
         cntXSides - Number of vertices on 0X axis (cntXSides >= 2)
         cntZSides - Number of vertices on 0Z axis (cntZSides >= 2)
     */
-    static Geometry CreateSolidPlane(uint32_t cntXSides = 2, uint32_t cntZSides = 2, float scaleTextureX = 1.0f, float scaleTextureZ = 1.0f);
+    static std::shared_ptr<Geometry> CreateSolidPlane(uint32_t cntXSides = 2, uint32_t cntZSides = 2, float scaleTextureX = 1.0f, float scaleTextureZ = 1.0f);
 };

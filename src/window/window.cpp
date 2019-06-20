@@ -360,18 +360,18 @@ bool Window::StartFrame() {
         return false;
     }
 
-    return true;
-}
-
-void Window::EndFrame() {
-    glfwSwapBuffers(m_window);
-
     double cursorPosX, cursorPosY;
     glfwGetCursorPos(m_window, &cursorPosX, &cursorPosY);
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(m_window, &fbWidth, &fbHeight);
     m_io.Update(static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight), cursorPosX, cursorPosY);
     glfwPollEvents();
+
+    return true;
+}
+
+void Window::EndFrame() {
+    glfwSwapBuffers(m_window);
 }
 
 void Window::SetCursor(CursorType value) {

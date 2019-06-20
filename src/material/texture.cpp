@@ -35,7 +35,7 @@ bool Texture::Load(const std::string& path, std::string& error) {
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    Delete();
+    Destroy();
     m_handle = handle;
 
     return true;
@@ -51,7 +51,7 @@ void Texture::Unbind(uint unit) const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::Delete() {
+void Texture::Destroy() {
     if (m_handle != 0) {
         glDeleteTextures(1, &m_handle);
         m_handle = 0;

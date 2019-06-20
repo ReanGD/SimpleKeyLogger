@@ -16,12 +16,25 @@ int main() {
     std::shared_ptr<void> _(nullptr, [](...){ glfwTerminate(); });
 
     try {
+        Engine engine;
         Editor editor;
-        auto err = editor.Run();
-        if (!err.empty()) {
-            std::cerr << "Error: " << err << std::endl;
+
+        std::string error;
+        if(!engine.Init(false, 0.8f, error)) {
+            std::cerr << "Error init engine: " << error << std::endl;
             return EXIT_FAILURE;
         }
+
+        if(!editor.Init(engine, error)) {
+            std::cerr << "Error init editor: " << error << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        engine.Run([&editor](Engine& engine){
+            editor.Render(engine);
+        });
+
+        editor.Destroy();
     } catch(const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
         return EXIT_FAILURE;

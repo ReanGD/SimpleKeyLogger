@@ -1,19 +1,21 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <glm/mat4x4.hpp>
 
 
 class Shader {
-private:
-    Shader() = default;
-    Shader(uint handle);
+    struct privateArg{};
+
 public:
-    ~Shader() = default;
+    Shader() = delete;
+    Shader(const privateArg&, uint handle);
+    ~Shader();
+    static std::shared_ptr<Shader> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName, std::string& error);
 
     void Bind() const;
     void Unbind() const;
-    void Delete();
 
     void SetBool(const char* name, bool value) const;
     void SetInt(const char* name, int value) const;
@@ -28,7 +30,9 @@ public:
     void SetMat3(const char* name, const glm::mat3& mat) const;
     void SetMat4(const char* name, const glm::mat4& mat) const;
 
-    static std::pair<Shader, const std::string> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName);
+private:
+    void Destroy();
+
 private:
     uint m_handle = 0;
 };
