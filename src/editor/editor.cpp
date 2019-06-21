@@ -15,6 +15,11 @@ bool Editor::Init(Engine& engine, std::string& error) {
         return false;
     }
 
+    auto shaderTexLight = Shader::Create("vertex", "fragment_tex_light", error);
+    if (!shaderTexLight) {
+        return false;
+    }
+
     auto shaderClrLight = Shader::Create("vertex", "fragment_clr_light", error);
     if (!shaderClrLight) {
         return false;
@@ -23,15 +28,27 @@ bool Editor::Init(Engine& engine, std::string& error) {
     if(!m_texture.Load("brice.jpg", error)) {
         return false;
     }
+    if(!m_groundTex.Load("ground.jpg", error)) {
+        return false;
+    }
 
     Material materialTex(shaderTex);
     materialTex.SetBaseTexture(0, m_texture);
-    Material materialClrLight(shaderClrLight);
-    materialClrLight.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
+    Material materialGround(shaderTex);
+    materialGround.SetBaseTexture(0, m_groundTex);
 
     m_cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
-    m_plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f), materialTex);
-    m_sphere.Add(GeometryGenerator::CreateSolidSphere(30), materialClrLight);
+    m_plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
+
+    Material materialSphere(shaderTexLight);
+    materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
+    materialSphere.SetBaseTexture(0, m_groundTex);
+    auto sphereGeom = GeometryGenerator::CreateSolidSphere(100);
+    for(auto& meshesRow: m_meshes) {
+        for(auto& mesh: meshesRow) {
+            mesh.Add(sphereGeom, materialSphere);
+        }
+    }
 
     m_camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     m_camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -45,21 +62,30 @@ void Editor::Render(Engine& engine) {
     ProcessIO(engine);
 
     auto matWorld = glm::mat4(1.0f);
-    matWorld = glm::translate(matWorld, glm::vec3(0, 0.51f, 0));
+    matWorld = glm::translate(matWorld, glm::vec3(3.0, 0.51f, 0));
     m_cube.Draw(m_camera, matWorld);
 
-    matWorld = glm::scale(glm::mat4(1.0), glm::vec3(20.0f));
+    matWorld = glm::scale(glm::mat4(1.0), glm::vec3(40.0f));
     m_plane.Draw(m_camera, matWorld);
 
-    matWorld = glm::translate(glm::mat4(1.0), glm::vec3(0, 0.51f, 3.0f));
-    matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-    m_sphere.Draw(m_camera, matWorld);
+    float posX = -static_cast<float>(m_meshes.size()) * 1.5f / 2.0f;
+    for(const auto& meshesRow: m_meshes) {
+        float posZ = -static_cast<float>(m_meshes[0].size()) * 2.5f / 2.0f;
+        for(const auto& mesh: meshesRow) {
+            matWorld = glm::translate(glm::mat4(1.0), glm::vec3(posX, 0.51f, posZ));
+            posZ += 2.5f;
+            matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
+            mesh.Draw(m_camera, matWorld);
+        }
+        posX += 1.5f;
+    }
 
     m_interface.Draw(engine.GetGui());
 }
 
 void Editor::Destroy() {
     m_texture.Destroy();
+    m_groundTex.Destroy();
 }
 
 void Editor::ProcessIO(Engine& engine) {

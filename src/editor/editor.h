@@ -26,10 +26,11 @@ private:
 
 private:
     bool m_editorMode = false;
+    std::array<std::array<Mesh, 100>, 100> m_meshes;
     Mesh m_cube;
     Mesh m_plane;
-    Mesh m_sphere;
     Texture m_texture;
+    Texture m_groundTex;
     UIInterface m_interface;
     FPCameraControl m_controller;
     std::shared_ptr<Camera> m_camera;
