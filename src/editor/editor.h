@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mesh/mesh.h"
+#include "engine/mesh/mesh.h"
 #include "engine/engine.h"
 #include "editor/ui_interface.h"
-#include "camera/fp_camera_control.h"
+#include "engine/camera/fp_camera_control.h"
 
 
 class Editor {

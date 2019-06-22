@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 
 #include <glm/gtc/matrix_transform.hpp>
-#include "mesh/geometry_generator.h"
+#include "engine/mesh/geometry_generator.h"
 
 bool Editor::Init(Engine& engine, std::string& error) {
     auto& gui = engine.GetGui();

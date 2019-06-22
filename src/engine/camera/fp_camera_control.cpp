@@ -1,4 +1,4 @@
-#include "camera/fp_camera_control.h"
+#include "engine/camera/fp_camera_control.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

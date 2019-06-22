@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "mesh/geometry.h"
+#include "engine/mesh/geometry.h"
 
 
 struct GeometryGenerator {

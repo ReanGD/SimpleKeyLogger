@@ -2,8 +2,8 @@
 
 #include <memory>
 #include <vector>
-#include "camera/camera.h"
-#include "window/window.h"
+#include "engine/camera/camera.h"
+#include "engine/window/window.h"
 
 
 // First person camera control

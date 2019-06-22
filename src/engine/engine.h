@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "gui/gui.h"
+#include "engine/gui/gui.h"
 
 
 class Engine {

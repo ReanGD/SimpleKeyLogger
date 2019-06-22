@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "mesh/geometry.h"
-#include "material/material.h"
+#include "engine/mesh/geometry.h"
+#include "engine/material/material.h"
 
 
 class Mesh {

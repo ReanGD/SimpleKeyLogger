@@ -1,4 +1,4 @@
-#include "mesh/geometry_generator.h"
+#include "engine/mesh/geometry_generator.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

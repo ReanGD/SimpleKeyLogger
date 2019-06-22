@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window/window_input.h"
+#include "engine/window/window_input.h"
 
 
 enum CursorType : uint8_t {

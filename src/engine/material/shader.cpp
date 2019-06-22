@@ -1,4 +1,4 @@
-#include "material/shader.h"
+#include "engine/material/shader.h"
 
 #define GLEW_STATIC
 #include <GL/glew.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/gui.h"
+#include "engine/gui/gui.h"
 
 
 class UIInterface {

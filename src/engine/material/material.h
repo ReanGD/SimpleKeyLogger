@@ -2,9 +2,9 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "material/shader.h"
-#include "material/texture.h"
-#include "camera/camera.h"
+#include "engine/material/shader.h"
+#include "engine/material/texture.h"
+#include "engine/camera/camera.h"
 
 
 class Material {

@@ -1,4 +1,4 @@
-#include "mesh/mesh.h"
+#include "engine/mesh/mesh.h"
 
 void Mesh::Add(const std::shared_ptr<Geometry>& geometry, const Material& material) noexcept {
     m_objects.push_back(std::make_pair(geometry, material));
