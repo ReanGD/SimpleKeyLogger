@@ -14,6 +14,11 @@ public:
     ~Shader();
     static std::shared_ptr<Shader> Create(const std::string& vertexShaderName, const std::string& fragmentShaderName, std::string& error);
 
+    // TODO: remove it
+    uint GetHandle() const noexcept {
+        return m_handle;
+    }
+
     void Bind() const;
     void Unbind() const;
 

@@ -31,6 +31,9 @@ private:
     Mesh m_plane;
     Texture m_texture;
     Texture m_groundTex;
+    uint m_uboHandle;
+    int m_offset[2];
+    int m_ubSize;
     UIInterface m_interface;
     FPCameraControl m_controller;
     std::shared_ptr<Camera> m_camera;

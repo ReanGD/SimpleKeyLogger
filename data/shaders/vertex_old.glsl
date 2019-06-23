@@ -7,12 +7,8 @@ layout (location = 3) in vec2 vTexCoord;
 smooth out vec3 pNormal;
 smooth out vec2 pTexCoord;
 
-layout (std140) uniform ubCamera
-{
-	mat4 uProjMatrix;
-	mat4 uViewMatrix;
-};
-
+uniform mat4 uProjMatrix;
+uniform mat4 uViewMatrix;
 uniform mat4 uModelMatrix;
 uniform mat3 uNormalMatrix;
 
