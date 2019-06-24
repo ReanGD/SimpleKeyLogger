@@ -34,8 +34,9 @@ bool Editor::Init(Engine& engine, std::string& error) {
     }
     std::cout << "index = " << ubCameraIndex << std::endl;
 
-    glGetActiveUniformBlockiv(shaderTexLight->GetHandle(), ubCameraIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &m_ubSize);
-    std::cout << "size = " << m_ubSize << std::endl;
+    int ubSize;
+    glGetActiveUniformBlockiv(shaderTexLight->GetHandle(), ubCameraIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &ubSize);
+    std::cout << "size = " << ubSize << std::endl;
 
     const GLchar *names[2] = { "uProjMatrix", "uViewMatrix" };
     GLuint indices[2];
@@ -45,21 +46,14 @@ bool Editor::Init(Engine& engine, std::string& error) {
         std::cout << names[i] << ": index = " << indices[i] << ", offset = " << m_offset[i] << std::endl;
     }
 
-    GLubyte* blockBuffer= static_cast<GLubyte *>(malloc(static_cast<size_t>(m_ubSize)));
-    glm::mat4 uProjMatrix = m_camera->GetProjMatrix();
-    glm::mat4 uViewMatrix = m_camera->GetViewMatrix();
-    std::copy(reinterpret_cast<const GLubyte*>(&uProjMatrix), reinterpret_cast<const GLubyte*>(&uProjMatrix) + sizeof(uProjMatrix), blockBuffer + m_offset[0]);
-    std::copy(reinterpret_cast<const GLubyte*>(&uViewMatrix), reinterpret_cast<const GLubyte*>(&uViewMatrix) + sizeof(uViewMatrix), blockBuffer + m_offset[1]);
-
-    glGenBuffers(1, &m_uboHandle);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_uboHandle);
-    glBufferData(GL_UNIFORM_BUFFER, m_ubSize, blockBuffer, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    free(blockBuffer);
+    m_ubCamera = std::make_shared<UniformBuffer>(static_cast<size_t>(ubSize));
+    m_ubCamera->setUniform(static_cast<size_t>(m_offset[0]), m_camera->GetProjMatrix());
+    m_ubCamera->setUniform(static_cast<size_t>(m_offset[1]), m_camera->GetViewMatrix());
+    m_ubCamera->Sync();
 
     GLuint index = 0;
     glUniformBlockBinding(shaderTexLight->GetHandle(), ubCameraIndex, index);
-    glBindBufferBase(GL_UNIFORM_BUFFER, index, m_uboHandle);
+    m_ubCamera->Bind(index);
 
     auto shaderClrLight = Shader::Create("vertex_old", "fragment_clr_light", error);
     if (!shaderClrLight) {
@@ -97,20 +91,12 @@ bool Editor::Init(Engine& engine, std::string& error) {
 void Editor::Render(Engine& engine) {
     ProcessIO(engine);
 
-    GLubyte* blockBuffer= static_cast<GLubyte *>(malloc(static_cast<size_t>(m_ubSize)));
-    glm::mat4 uProjMatrix = m_camera->GetProjMatrix();
-    glm::mat4 uViewMatrix = m_camera->GetViewMatrix();
-    std::copy(reinterpret_cast<const GLubyte*>(&uProjMatrix), reinterpret_cast<const GLubyte*>(&uProjMatrix) + sizeof(uProjMatrix), blockBuffer + m_offset[0]);
-    std::copy(reinterpret_cast<const GLubyte*>(&uViewMatrix), reinterpret_cast<const GLubyte*>(&uViewMatrix) + sizeof(uViewMatrix), blockBuffer + m_offset[1]);
-
-    glGenBuffers(1, &m_uboHandle);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_uboHandle);
-    glBufferData(GL_UNIFORM_BUFFER, m_ubSize, blockBuffer, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    free(blockBuffer);
+    m_ubCamera->setUniform(static_cast<size_t>(m_offset[0]), m_camera->GetProjMatrix());
+    m_ubCamera->setUniform(static_cast<size_t>(m_offset[1]), m_camera->GetViewMatrix());
+    m_ubCamera->Sync();
 
     GLuint index = 0;
-    glBindBufferBase(GL_UNIFORM_BUFFER, index, m_uboHandle);
+    m_ubCamera->Bind(index);
 
     auto matWorld = glm::mat4(1.0f);
     matWorld = glm::translate(matWorld, glm::vec3(3.0, 0.51f, 0));
