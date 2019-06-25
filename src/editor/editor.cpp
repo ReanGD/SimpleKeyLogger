@@ -5,6 +5,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
+#include <fmt/format.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include "engine/mesh/geometry_generator.h"
 
@@ -28,31 +29,19 @@ bool Editor::Init(Engine& engine, std::string& error) {
         return false;
     }
 
-    GLuint ubCameraIndex = glGetUniformBlockIndex(shaderTexLight->GetHandle(), "ubCamera");
-    if (ubCameraIndex == GL_INVALID_INDEX) {
-        std::cout << "not flound" << std::endl;
-    }
-    std::cout << "index = " << ubCameraIndex << std::endl;
-
-    int ubSize;
-    glGetActiveUniformBlockiv(shaderTexLight->GetHandle(), ubCameraIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &ubSize);
-    std::cout << "size = " << ubSize << std::endl;
-
-    const GLchar *names[2] = { "uProjMatrix", "uViewMatrix" };
-    GLuint indices[2];
-    glGetUniformIndices(shaderTexLight->GetHandle(), 2, names, indices);
-    glGetActiveUniformsiv(shaderTexLight->GetHandle(), 2, indices, GL_UNIFORM_OFFSET, m_offset);
-    for (int i=0; i!=2; ++i) {
-        std::cout << names[i] << ": index = " << indices[i] << ", offset = " << m_offset[i] << std::endl;
+    m_declCamera = shaderTexLight->GetUBDecl("ubCamera");
+    if (!m_declCamera) {
+        error = fmt::format("Сouldn't found uniform block '{}' in shader", "ubCamera");
+        return false;
     }
 
-    m_ubCamera = std::make_shared<UniformBuffer>(static_cast<size_t>(ubSize));
-    m_ubCamera->setUniform(static_cast<size_t>(m_offset[0]), m_camera->GetProjMatrix());
-    m_ubCamera->setUniform(static_cast<size_t>(m_offset[1]), m_camera->GetViewMatrix());
+    m_ubCamera = std::make_shared<UniformBuffer>(m_declCamera->GetSize());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), m_camera->GetProjMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), m_camera->GetViewMatrix());
     m_ubCamera->Sync();
 
     GLuint index = 0;
-    glUniformBlockBinding(shaderTexLight->GetHandle(), ubCameraIndex, index);
+    glUniformBlockBinding(shaderTexLight->GetHandle(), m_declCamera->GetIndex(), index);
     m_ubCamera->Bind(index);
 
     auto shaderClrLight = Shader::Create("vertex_old", "fragment_clr_light", error);
@@ -91,8 +80,8 @@ bool Editor::Init(Engine& engine, std::string& error) {
 void Editor::Render(Engine& engine) {
     ProcessIO(engine);
 
-    m_ubCamera->setUniform(static_cast<size_t>(m_offset[0]), m_camera->GetProjMatrix());
-    m_ubCamera->setUniform(static_cast<size_t>(m_offset[1]), m_camera->GetViewMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), m_camera->GetProjMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), m_camera->GetViewMatrix());
     m_ubCamera->Sync();
 
     GLuint index = 0;

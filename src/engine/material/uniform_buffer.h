@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <glm/mat4x4.hpp>
 
 
@@ -43,4 +44,32 @@ private:
     uint m_handle = 0;
     size_t m_size = 0;
     uint8_t* m_buffer = nullptr;
+};
+
+class UniformBufferDecl {
+public:
+    UniformBufferDecl() = delete;
+    UniformBufferDecl(const UniformBufferDecl&) = delete;
+    UniformBufferDecl(UniformBufferDecl&&) = delete;
+    UniformBufferDecl& operator=(const UniformBufferDecl&) = delete;
+    UniformBufferDecl& operator=(UniformBufferDecl&&) = delete;
+
+    UniformBufferDecl(uint index, size_t size, std::unordered_map<std::string, size_t>&& offsets);
+    ~UniformBufferDecl() = default;
+
+    size_t GetSize() const noexcept {
+        return m_size;
+    }
+
+    uint GetIndex() const noexcept {
+        return m_index;
+    }
+
+    size_t GetOffset(const std::string& name) const noexcept;
+
+    static const size_t InvalidOffset;
+private:
+    uint m_index = 0;
+    size_t m_size = 0;
+    std::unordered_map<std::string, size_t> m_offsets;
 };

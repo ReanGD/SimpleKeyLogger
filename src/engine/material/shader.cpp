@@ -104,6 +104,38 @@ void Shader::Unbind() const {
     glUseProgram(0);
 }
 
+std::shared_ptr<UniformBufferDecl> Shader::GetUBDecl(const char* name) {
+    GLuint ubIndex = glGetUniformBlockIndex(m_handle, name);
+    if (ubIndex == GL_INVALID_INDEX) {
+        return nullptr;
+    }
+
+    int ubSize, ubVarCountI;
+    glGetActiveUniformBlockiv(m_handle, ubIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &ubSize);
+    glGetActiveUniformBlockiv(m_handle, ubIndex, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &ubVarCountI);
+
+    auto ubVarCount = static_cast<size_t>(ubVarCountI);
+    uint *indices = new uint[ubVarCount];
+    int *offsets = new int[ubVarCount];
+    std::shared_ptr<void> _(nullptr, [&indices, &offsets](...){
+        delete[] indices;
+        delete[] offsets;
+    });
+
+    glGetActiveUniformBlockiv(m_handle, ubIndex, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, reinterpret_cast<int*>(indices));
+    glGetActiveUniformsiv(m_handle, ubVarCountI, indices, GL_UNIFORM_OFFSET, offsets);
+
+    char nameBuf[256];
+    std::unordered_map<std::string, size_t> offsetMap;
+    for (size_t i=0; i!=ubVarCount; ++i) {
+        int nameLen = 0;
+        glGetActiveUniformName(m_handle, indices[i], sizeof(nameBuf), &nameLen, nameBuf);
+        offsetMap[std::string(nameBuf, nameBuf + nameLen)] = static_cast<size_t>(offsets[i]);
+    }
+
+    return std::make_shared<UniformBufferDecl>(ubIndex, static_cast<size_t>(ubSize), std::move(offsetMap));
+}
+
 void Shader::SetBool(const char* name, bool value) const {
     glUniform1i(glGetUniformLocation(m_handle, name), static_cast<int>(value));
 }

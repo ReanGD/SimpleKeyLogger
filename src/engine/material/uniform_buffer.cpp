@@ -37,3 +37,21 @@ void UniformBuffer::Sync() {
 void UniformBuffer::Bind(uint index) const {
     glBindBufferBase(GL_UNIFORM_BUFFER, index, m_handle);
 }
+
+const size_t UniformBufferDecl::InvalidOffset = std::numeric_limits<size_t>::max();
+
+UniformBufferDecl::UniformBufferDecl(uint index, size_t size, std::unordered_map<std::string, size_t>&& offsets)
+    : m_index(index)
+    , m_size(size)
+    , m_offsets(std::move(offsets)) {
+
+}
+
+size_t UniformBufferDecl::GetOffset(const std::string& name) const noexcept {
+    const auto it = m_offsets.find(name);
+    if (it != m_offsets.end()) {
+        return it->second;
+    }
+
+    return UniformBufferDecl::InvalidOffset;
+}

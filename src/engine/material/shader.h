@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <glm/mat4x4.hpp>
+#include "engine/material/uniform_buffer.h"
 
 
 class Shader {
@@ -21,6 +22,8 @@ public:
 
     void Bind() const;
     void Unbind() const;
+
+    std::shared_ptr<UniformBufferDecl> GetUBDecl(const char* name);
 
     void SetBool(const char* name, bool value) const;
     void SetInt(const char* name, int value) const;
