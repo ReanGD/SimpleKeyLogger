@@ -52,9 +52,11 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clan
     set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${IMGUI_ERRORS_EXCLUDE_FLAGS})
 endif()
 
+add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/libucl")
+
 add_executable(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE "src" "${CONAN_SRC_DIRS_IMGUI}/bindings")
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS} ucl)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
