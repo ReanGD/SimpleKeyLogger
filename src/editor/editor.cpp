@@ -116,13 +116,7 @@ void Editor::Destroy() {
 
 void Editor::ProcessIO(Engine& engine) {
     auto& window = engine.GetWindow();
-    auto& gui = engine.GetGui();
     WindowInput& wio = window.GetIO();
-
-    uint32_t width, height;
-    if (wio.GetFramebufferSize(width, height)) {
-        m_controller.SetScreenSize(width, height);
-    }
 
     if (wio.IsKeyReleasedFirstTime(Key::Escape)) {
         window.Close();
@@ -135,26 +129,9 @@ void Editor::ProcessIO(Engine& engine) {
     if (wio.IsKeyReleasedFirstTime(Key::F2)) {
         m_editorMode = !m_editorMode;
         window.SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
-        gui.EnableInput(m_editorMode);
+        engine.GetGui().EnableInput(m_editorMode);
+        m_controller.EnableInput(!m_editorMode);
     }
 
-    if (!m_editorMode) {
-        if (wio.IsKeyStickyDown(Key::W)) {
-            m_controller.MoveForward();
-        }
-        if (wio.IsKeyStickyDown(Key::S)) {
-            m_controller.MoveBackward();
-        }
-        if (wio.IsKeyStickyDown(Key::A)) {
-            m_controller.MoveLeft();
-        }
-        if (wio.IsKeyStickyDown(Key::D)) {
-            m_controller.MoveRight();
-        }
-        float offsetX, offsetY;
-        wio.GetCursorOffet(offsetX, offsetY);
-        m_controller.Rotate(offsetX, offsetY);
-    }
-
-    m_controller.Update(engine.GetDeltaTime());
+    m_controller.Update(wio, engine.GetDeltaTime());
 }

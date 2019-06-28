@@ -3,6 +3,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
+void FPCameraControl::EnableInput(bool value) noexcept {
+    m_enableInput = value;
+}
+
+void FPCameraControl::SetHotkey(Action action, Key key) noexcept {
+    if (action < Action::Last) {
+        m_hostkey[static_cast<size_t>(action)] = key;
+    }
+}
+
 void FPCameraControl::SetMovementSpeed(float value) noexcept {
     m_movementSpeed	= value;
 }
@@ -16,35 +26,7 @@ void FPCameraControl::AttachCamera(std::shared_ptr<Camera> camera) {
     m_cameras.push_back(camera);
 }
 
-void FPCameraControl::MoveForward() noexcept {
-    m_posOffset.x += 1.0f;
-}
-
-void FPCameraControl::MoveBackward() noexcept {
-    m_posOffset.x -= 1.0f;
-}
-
-void FPCameraControl::MoveLeft() noexcept {
-    m_posOffset.y -= 1.0f;
-}
-
-void FPCameraControl::MoveRight() noexcept {
-    m_posOffset.y += 1.0f;
-}
-
-void FPCameraControl::Rotate(float dtYaw, float dtPitch) noexcept {
-    m_yawOffset += dtYaw;
-    m_pitchOffset += dtPitch;
-}
-
-void FPCameraControl::SetScreenSize(uint32_t width, uint32_t height) {
-    m_aspectRatio = float(width) / float(height);
-    for(const auto& camera: m_cameras) {
-        camera->SetAspectRatio(m_aspectRatio);
-    }
-}
-
-void FPCameraControl::Update(float deltaTime) {
+void FPCameraControl::Update(WindowInput& wio, float deltaTime) {
     constexpr const float factor = 0.3f;
     constexpr const float pitchMax = glm::half_pi<float>() - 0.2f;
     constexpr const float pitchMin = -(glm::half_pi<float>() - 0.2f);
@@ -55,15 +37,33 @@ void FPCameraControl::Update(float deltaTime) {
     m_yawOffsetPrevious *= factor;
     m_pitchOffsetPrevious *= factor;
 
-    if ((-0.1f > m_posOffset.x) || (m_posOffset.x > 0.1f) ||
-        (-0.1f > m_posOffset.y) || (m_posOffset.y > 0.1f) ||
-        (-0.1f > m_posOffset.z) || (m_posOffset.z > 0.1f)) {
-        m_posOffsetPrevious += (glm::normalize(m_posOffset) * (m_movementSpeed * dt));
-        m_posOffset = glm::vec3(0);
+    if (m_enableInput) {
+        bool isMove = false;
+        glm::vec3 posOffset(0);
+        if (wio.IsKeyStickyDown(m_hostkey[static_cast<size_t>(Action::Forward)])) {
+            posOffset.x += 1.0f;
+            isMove = true;
+        } else if (wio.IsKeyStickyDown(m_hostkey[static_cast<size_t>(Action::Backward)])) {
+            posOffset.x -= 1.0f;
+            isMove = true;
+        }
+        if (wio.IsKeyStickyDown(m_hostkey[static_cast<size_t>(Action::Right)])) {
+            posOffset.y += 1.0f;
+            isMove = true;
+        } else if (wio.IsKeyStickyDown(m_hostkey[static_cast<size_t>(Action::Left)])) {
+            posOffset.y -= 1.0f;
+            isMove = true;
+        }
+        if (isMove) {
+            m_posOffsetPrevious += (glm::normalize(posOffset) * (m_movementSpeed * dt));
+        }
+
+        float dtYaw, dtPitch;
+        wio.GetCursorOffet(dtYaw, dtPitch);
+        m_yawOffsetPrevious += (dtYaw * m_mouseSensitivity * dt);
+        m_pitchOffsetPrevious += (dtPitch * m_mouseSensitivity * dt);
     }
 
-    m_yawOffsetPrevious += (m_yawOffset * m_mouseSensitivity * dt);
-    m_yawOffset	= 0;
     m_yaw += m_yawOffsetPrevious;
     if (m_yaw >= glm::two_pi<float>()) {
         m_yaw -= glm::two_pi<float>();
@@ -71,8 +71,6 @@ void FPCameraControl::Update(float deltaTime) {
         m_yaw += glm::two_pi<float>();
     }
 
-    m_pitchOffsetPrevious += (m_pitchOffset * m_mouseSensitivity * dt);
-    m_pitchOffset = 0;
     m_pitch = glm::min(glm::max(m_pitch + m_pitchOffsetPrevious, pitchMin), pitchMax);
 
     const auto matOne = glm::mat4(1.0);
@@ -88,5 +86,13 @@ void FPCameraControl::Update(float deltaTime) {
             camera->GetDirection() * m_posOffsetPrevious.x +
             camera->GetLeftVector() * m_posOffsetPrevious.y;
         camera->SetViewParams(position, direction);
+    }
+
+    uint32_t width, height;
+    if (wio.GetFramebufferSize(width, height)) {
+        m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        for(const auto& camera: m_cameras) {
+            camera->SetAspectRatio(m_aspectRatio);
+        }
     }
 }
