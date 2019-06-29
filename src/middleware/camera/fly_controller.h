@@ -6,8 +6,8 @@
 #include "engine/window/window.h"
 
 
-// First person camera control
-class FPCameraControl {
+// First-person flight camera controler
+class FlyCameraController {
 public:
     enum class Action : uint8_t {
         Forward = 0,
@@ -16,8 +16,8 @@ public:
         Left = 3,
         Last = 4,
     };
-    FPCameraControl() = default;
-    ~FPCameraControl() = default;
+    FlyCameraController() = default;
+    ~FlyCameraController() = default;
 
 public:
     void EnableInput(bool value) noexcept;
@@ -46,7 +46,7 @@ private:
     // Offset in the previous frame
     float m_pitchOffsetPrevious = 0;
 
-    Key m_hostkey[static_cast<size_t>(FPCameraControl::Action::Last)] = {
+    Key m_hostkey[static_cast<size_t>(FlyCameraController::Action::Last)] = {
         /*Forward*/Key::W, /*Backward*/Key::S, /*Right*/Key::D, /*Left*/Key::A};
     std::vector<std::shared_ptr<Camera>> m_cameras;
 };

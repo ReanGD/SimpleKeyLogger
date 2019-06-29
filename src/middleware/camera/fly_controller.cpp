@@ -1,32 +1,32 @@
-#include "engine/camera/fp_camera_control.h"
+#include "middleware/camera/fly_controller.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 
-void FPCameraControl::EnableInput(bool value) noexcept {
+void FlyCameraController::EnableInput(bool value) noexcept {
     m_enableInput = value;
 }
 
-void FPCameraControl::SetHotkey(Action action, Key key) noexcept {
+void FlyCameraController::SetHotkey(Action action, Key key) noexcept {
     if (action < Action::Last) {
         m_hostkey[static_cast<size_t>(action)] = key;
     }
 }
 
-void FPCameraControl::SetMovementSpeed(float value) noexcept {
+void FlyCameraController::SetMovementSpeed(float value) noexcept {
     m_movementSpeed	= value;
 }
 
-void FPCameraControl::SetMouseSensitivity(float value) noexcept {
+void FlyCameraController::SetMouseSensitivity(float value) noexcept {
     m_mouseSensitivity = value;
 }
 
-void FPCameraControl::AttachCamera(std::shared_ptr<Camera> camera) {
+void FlyCameraController::AttachCamera(std::shared_ptr<Camera> camera) {
     camera->SetAspectRatio(m_aspectRatio);
     m_cameras.push_back(camera);
 }
 
-void FPCameraControl::Update(WindowInput& wio, float deltaTime) {
+void FlyCameraController::Update(WindowInput& wio, float deltaTime) {
     constexpr const float factor = 0.3f;
     constexpr const float pitchMax = glm::half_pi<float>() - 0.2f;
     constexpr const float pitchMin = -(glm::half_pi<float>() - 0.2f);

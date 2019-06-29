@@ -4,7 +4,7 @@
 #include "engine/mesh/mesh.h"
 #include "editor/ui_interface.h"
 #include "engine/material/uniform_buffer.h"
-#include "engine/camera/fp_camera_control.h"
+#include "middleware/camera/fly_controller.h"
 
 
 class Editor {
@@ -27,7 +27,7 @@ private:
 
 private:
     bool m_editorMode = false;
-    std::array<std::array<Mesh, 100>, 100> m_meshes;
+    std::array<std::array<Mesh, 50>, 50> m_meshes;
     Mesh m_cube;
     Mesh m_plane;
     Texture m_texture;
@@ -35,6 +35,6 @@ private:
     std::shared_ptr<UniformBuffer> m_ubCamera;
     std::shared_ptr<UniformBufferDecl> m_declCamera;
     UIInterface m_interface;
-    FPCameraControl m_controller;
+    FlyCameraController m_controller;
     std::shared_ptr<Camera> m_camera;
 };
