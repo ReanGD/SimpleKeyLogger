@@ -313,12 +313,8 @@ bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     m_cursors[CursorType::ResizeH] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
     m_cursors[CursorType::ResizeV] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
 
-    glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    m_currentCursor = CursorType::Disabled;
-
-    // if (glfwRawMouseMotionSupported()) {
-    //     glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    // }
+    m_currentCursor = CursorType::Hidden;
+    SetCursor(CursorType::Disabled);
 
     GLFWCallbacks::Init(this, m_window);
 
@@ -400,6 +396,13 @@ void Window::SetCursor(CursorType value) {
         m_currentCursor = value;
         break;
     }
+
+    if (m_currentCursor == CursorType::Disabled && glfwRawMouseMotionSupported()) {
+        glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    } else {
+        glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
+    }
+
 }
 
 void Window::SetCursorPosition(float posX, float posY) {
