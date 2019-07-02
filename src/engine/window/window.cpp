@@ -313,10 +313,11 @@ bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     m_cursors[CursorType::ResizeH] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
     m_cursors[CursorType::ResizeV] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
 
-    m_currentCursor = CursorType::Hidden;
     SetCursor(CursorType::Disabled);
 
     GLFWCallbacks::Init(this, m_window);
+    UpdateIO();
+    m_io.OnFramebufferSizeEvent(0, 0);
 
     return true;
 }
@@ -356,13 +357,7 @@ bool Window::StartFrame() {
         return false;
     }
 
-    double cursorPosX, cursorPosY;
-    glfwGetCursorPos(m_window, &cursorPosX, &cursorPosY);
-    int fbWidth, fbHeight;
-    glfwGetFramebufferSize(m_window, &fbWidth, &fbHeight);
-    m_io.Update(static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight), cursorPosX, cursorPosY);
-    glfwPollEvents();
-
+    UpdateIO();
     return true;
 }
 
@@ -402,7 +397,6 @@ void Window::SetCursor(CursorType value) {
     } else {
         glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
     }
-
 }
 
 void Window::SetCursorPosition(float posX, float posY) {
@@ -436,6 +430,19 @@ void Window::SetClipboardText(void*, const char* text) {
     GLFWCallbacks::SetClipboardText(text);
 }
 
-WindowInput& Window::GetIO() {
+WindowInput& Window::GetIO() noexcept {
     return m_io;
+}
+
+void Window::UpdateIO() {
+    m_io.Update();
+    glfwPollEvents();
+
+    double posX, posY;
+    glfwGetCursorPos(m_window, &posX, &posY);
+    m_io.OnCursorEvent(posX, posY);
+
+    int width, height;
+    glfwGetFramebufferSize(m_window, &width, &height);
+    m_io.OnFramebufferSizeEvent(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }

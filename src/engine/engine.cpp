@@ -21,6 +21,9 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     return true;
 }
@@ -32,9 +35,8 @@ void Engine::Run(const std::function<void (Engine&)>& callback) {
     auto& wio = m_window.GetIO();
 
     while (m_window.StartFrame()) {
-        if (wio.GetFramebufferSize(width, height)) {
-            glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
-        }
+        wio.GetFramebufferSize(width, height);
+        glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

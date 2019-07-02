@@ -50,12 +50,16 @@ public:
     static const char* GetClipboardText(void*);
     static void SetClipboardText(void*, const char* text);
 
-    WindowInput& GetIO();
+    WindowInput& GetIO() noexcept;
+
+private:
+    void UpdateIO();
+
 private:
     WindowInput m_io;
     bool m_fullscreen = false;
     float m_windowMultiplier = 0.7f;
-    CursorType m_currentCursor = CursorType::Disabled;
+    CursorType m_currentCursor = CursorType::Arrow;
     GLFWcursor* m_cursors[static_cast<size_t>(CursorType::LastStandartCursor) + 1] = { nullptr };
     GLFWmonitor* m_monitor = nullptr;
     const GLFWvidmode* m_mode = nullptr;

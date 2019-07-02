@@ -160,6 +160,8 @@ enum KeyAction : uint8_t {
 };
 
 class WindowInput {
+    friend class Window;
+    friend struct GLFWCallbacks;
 public:
     WindowInput() = default;
     ~WindowInput() = default;
@@ -188,14 +190,16 @@ public:
 
     std::u16string GetInput() const noexcept;
 
-    void Update(uint32_t fbWidth, uint32_t fbHeight, double cursorPosX, double cursorPosY) noexcept;
+protected:
+    void Update() noexcept;
+    void OnFramebufferSizeEvent(uint32_t width, uint32_t height) noexcept;
+    void OnCursorEvent(double posX, double posY) noexcept;
     void OnScrollEvent(double offsetX, double offsetY) noexcept;
     void OnKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept;
     void OnMouseKeyEvent(Key code, KeyAction action, uint8_t mods) noexcept;
     void OnCharEvent(char16_t ch);
 
 private:
-    bool m_firstUpdate = true;
     bool m_fbChanged = false;
     uint32_t m_fbWidth = 0;
     uint32_t m_fbHeight = 0;

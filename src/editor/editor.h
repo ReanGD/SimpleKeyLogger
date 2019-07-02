@@ -23,11 +23,12 @@ public:
     void Destroy();
 
 private:
+    void SetEditorMode(Engine& engine, bool value);
     void ProcessIO(Engine& engine);
 
 private:
     bool m_editorMode = false;
-    std::array<std::array<Mesh, 50>, 50> m_meshes;
+    std::array<std::array<Mesh, 5>, 5> m_meshes;
     Mesh m_cube;
     Mesh m_plane;
     Texture m_texture;

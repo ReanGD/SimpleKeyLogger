@@ -1,7 +1,5 @@
 #include "editor/editor.h"
 
-#include <iostream>
-
 #define GLEW_STATIC
 #include <GL/glew.h>
 
@@ -11,8 +9,7 @@
 
 
 bool Editor::Init(Engine& engine, std::string& error) {
-    auto& gui = engine.GetGui();
-    gui.EnableInput(m_editorMode);
+    SetEditorMode(engine, m_editorMode);
 
     m_camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
     m_camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -114,6 +111,13 @@ void Editor::Destroy() {
     m_groundTex.Destroy();
 }
 
+void Editor::SetEditorMode(Engine& engine, bool value) {
+    m_editorMode = value;
+    engine.GetWindow().SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
+    engine.GetGui().EnableInput(m_editorMode);
+    m_controller.EnableInput(!m_editorMode);
+}
+
 void Editor::ProcessIO(Engine& engine) {
     auto& window = engine.GetWindow();
     WindowInput& wio = window.GetIO();
@@ -127,10 +131,7 @@ void Editor::ProcessIO(Engine& engine) {
     }
 
     if (wio.IsKeyReleasedFirstTime(Key::F2)) {
-        m_editorMode = !m_editorMode;
-        window.SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
-        engine.GetGui().EnableInput(m_editorMode);
-        m_controller.EnableInput(!m_editorMode);
+        SetEditorMode(engine, !m_editorMode);
     }
 
     m_controller.Update(wio, engine.GetDeltaTime());

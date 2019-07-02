@@ -87,23 +87,9 @@ std::u16string WindowInput::GetInput() const noexcept {
     return m_userInput;
 }
 
-void WindowInput::Update(uint32_t fbWidth, uint32_t fbHeight, double cursorPosX, double cursorPosY) noexcept {
-    m_fbChanged = ((m_fbWidth != fbWidth) || (m_fbHeight != fbHeight));
-    if (m_fbChanged) {
-        m_fbWidth = fbWidth;
-        m_fbHeight = fbHeight;
-    }
-    m_cursorLastPosX = m_cursorPosX;
-    m_cursorLastPosY = m_cursorPosY;
-    m_cursorPosX = cursorPosX;
-    m_cursorPosY = cursorPosY;
+void WindowInput::Update() noexcept {
     m_scrollOffsetX = 0;
     m_scrollOffsetY = 0;
-    if (m_firstUpdate) {
-        m_firstUpdate = false;
-        m_cursorLastPosX = m_cursorPosX;
-        m_cursorLastPosY = m_cursorPosY;
-    }
 
     m_userInput.clear();
     for(size_t i=0; i!=(static_cast<size_t>(Key::Last) + 1); ++i) {
@@ -114,6 +100,19 @@ void WindowInput::Update(uint32_t fbWidth, uint32_t fbHeight, double cursorPosX,
             m_isKeyDown[i] = 0;
         }
     }
+}
+
+void WindowInput::OnFramebufferSizeEvent(uint32_t width, uint32_t height) noexcept {
+    m_fbChanged = ((m_fbWidth != width) || (m_fbHeight != height));
+    m_fbWidth = width;
+    m_fbHeight = height;
+}
+
+void WindowInput::OnCursorEvent(double posX, double posY) noexcept {
+    m_cursorLastPosX = m_cursorPosX;
+    m_cursorLastPosY = m_cursorPosY;
+    m_cursorPosX = posX;
+    m_cursorPosY = posY;
 }
 
 void WindowInput::OnScrollEvent(double offsetX, double offsetY) noexcept {
