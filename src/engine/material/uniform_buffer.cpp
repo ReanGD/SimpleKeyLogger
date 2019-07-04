@@ -30,7 +30,7 @@ UniformBuffer::~UniformBuffer() {
 
 void UniformBuffer::Sync() {
     glBindBuffer(GL_UNIFORM_BUFFER, m_handle);
-    glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(m_size), m_buffer, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(m_size), m_buffer, GL_STREAM_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 

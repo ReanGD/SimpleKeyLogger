@@ -18,8 +18,10 @@ void FlyCameraController::SetMementSmoothFactor(float value) noexcept {
     m_movementSmoothFactor = value;
 }
 
-void FlyCameraController::SetMovementNormalSpeed(float value) noexcept {
-    m_movementNormalSpeed = value;
+void FlyCameraController::SetMovementSpeed(float low, float normal, float high) noexcept {
+    m_movementLowSpeed = low;
+    m_movementNormalSpeed = normal;
+    m_movementHighSpeed = high;
 }
 
 void FlyCameraController::SetMouseSmooth(float value) noexcept {
@@ -67,7 +69,14 @@ void FlyCameraController::Update(WindowInput& wio, float deltaTime) {
             isMove = true;
         }
         if (isMove) {
-            auto currentSpeed = glm::normalize(moveDirection) * m_movementNormalSpeed;
+            auto currentSpeed = glm::normalize(moveDirection);
+            if (wio.IsKeyStickyDown(m_hostkey[static_cast<size_t>(Action::HighSpeed)])) {
+                currentSpeed *= m_movementHighSpeed;
+            } else if (wio.IsKeyStickyDown(m_hostkey[static_cast<size_t>(Action::LowSpeed)])) {
+                currentSpeed *= m_movementLowSpeed;
+            } else {
+                currentSpeed *= m_movementNormalSpeed;
+            }
             m_movementSpeed = glm::lerp(currentSpeed, m_movementSpeed, glm::min(m_movementSmoothFactor * smoothFPSCorrection, 0.9f));
             positionOffset = (m_movementSpeed * deltaTime);
         }
