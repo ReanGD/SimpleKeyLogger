@@ -1,25 +1,58 @@
 #include "editor/ui_interface.h"
 
 #include <imgui.h>
+#include <filesystem>
+#include <fmt/format.h>
 
 
-void UIInterface::Draw(const Gui& gui) {
+bool UIInterface::Init(const Gui&, std::string& error) {
+    ImGuiIO& io = ImGui::GetIO();
+    m_fontDefault = io.Fonts->AddFontDefault();
+    if (m_fontDefault == nullptr) {
+        error = "Failed to load a default font";
+        return false;
+    }
+
+    const auto monoFontPath = std::filesystem::current_path() / "data" / "fonts" / "NotoSans" / "NotoSans-Regular.ttf";
+    m_fontMono = io.Fonts->AddFontFromFileTTF(monoFontPath.c_str(), 26, nullptr, io.Fonts->GetGlyphRangesCyrillic());
+    if (m_fontMono == nullptr) {
+        error = fmt::format("Failed to load a font from file '{}'", monoFontPath.c_str());
+        return false;
+
+    }
+    return true;
+}
+
+void UIInterface::DrawInfoBar() {
+    bool* pOpen = nullptr;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(300, 50));
+    if (ImGui::Begin("infobar", pOpen, windowFlags)){
+        ImGui::PushFont(m_fontMono);
+        ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "FPS = 0");
+        ImGui::PopFont();
+        ImGui::End();
+    }
+}
+
+void UIInterface::DrawExample() {
     ImVec4 clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    static bool m_showDemoWindow = false;
+    static bool m_showAnotherWindow = false;
 
-    gui.NewFrame();
-    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
     if (m_showDemoWindow) {
         ImGui::ShowDemoWindow(&m_showDemoWindow);
     }
 
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
     {
         static float f = 0.0f;
         static int counter = 0;
 
-        ImGui::Begin("Win1");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Win1");
 
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+        ImGui::Text("This is some useful text.");
         ImGui::Checkbox("Demo Window", &m_showDemoWindow);      // Edit bools storing our window open/close state
         ImGui::Checkbox("Another Window", &m_showAnotherWindow);
 
@@ -35,13 +68,20 @@ void UIInterface::Draw(const Gui& gui) {
         ImGui::End();
     }
 
-    // 3. Show another simple window.
     if (m_showAnotherWindow) {
-        ImGui::Begin("Another Window", &m_showAnotherWindow);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Begin("Another Window", &m_showAnotherWindow);
         ImGui::Text("Hello from another window!");
         if (ImGui::Button("Close Me"))
             m_showAnotherWindow = false;
         ImGui::End();
     }
+}
+
+void UIInterface::Draw(const Gui& gui) {
+    gui.NewFrame();
+    DrawInfoBar();
+    // DrawExample();
+    // ImGui::ShowStyleEditor();
+
     gui.EndFrame();
 }

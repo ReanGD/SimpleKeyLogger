@@ -3,6 +3,7 @@
 #include "engine/gui/gui.h"
 
 
+struct ImFont;
 class UIInterface {
 public:
     UIInterface(const UIInterface&) = delete;
@@ -13,9 +14,12 @@ public:
     UIInterface() = default;
     ~UIInterface() = default;
 
+    bool Init(const Gui& gui, std::string& error);
     void Draw(const Gui& gui);
-
 private:
-    bool m_showDemoWindow = false;
-    bool m_showAnotherWindow = false;
+    void DrawInfoBar();
+    void DrawExample();
+private:
+    ImFont* m_fontDefault = nullptr;
+    ImFont* m_fontMono = nullptr;
 };

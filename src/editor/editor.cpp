@@ -9,6 +9,9 @@
 
 
 bool Editor::Init(Engine& engine, std::string& error) {
+    if (!m_interface.Init(engine.GetGui(), error)) {
+        return false;
+    }
     SetEditorMode(engine, m_editorMode);
 
     m_camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
