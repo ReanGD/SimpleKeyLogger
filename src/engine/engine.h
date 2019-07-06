@@ -29,8 +29,15 @@ public:
     float GetDeltaTime() const noexcept {
         return m_deltaTime;
     }
+
+    float GetFps() const noexcept {
+        return static_cast<float>(m_timeDeltas.size()) / m_timeDeltasTotal;
+    }
 private:
     Gui m_gui;
     Window m_window;
     float m_deltaTime = 1.0f / 60.0f;
+    uint16_t m_timeDeltasPos = 0;
+    std::array<float, 120> m_timeDeltas = { /*1.0f / 60.0f*/ };
+    float m_timeDeltasTotal = static_cast<float>(m_timeDeltas.size()) / 60.0f;
 };

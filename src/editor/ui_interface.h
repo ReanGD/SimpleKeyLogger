@@ -15,9 +15,9 @@ public:
     ~UIInterface() = default;
 
     bool Init(const Gui& gui, std::string& error);
-    void Draw(const Gui& gui);
+    void Draw(const Gui& gui, float fps);
 private:
-    void DrawInfoBar();
+    void DrawInfoBar(float fps);
     void DrawExample();
 private:
     ImFont* m_fontDefault = nullptr;

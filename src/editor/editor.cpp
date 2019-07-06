@@ -106,7 +106,7 @@ void Editor::Render(Engine& engine) {
         posX += 1.5f;
     }
 
-    m_interface.Draw(engine.GetGui());
+    m_interface.Draw(engine.GetGui(), engine.GetFps());
 }
 
 void Editor::Destroy() {

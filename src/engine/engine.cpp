@@ -6,6 +6,7 @@
 
 
 bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
+    m_timeDeltas.fill(1.0f / 60.0f);
     if (!m_window.Init(isFullscreen, windowMultiplier, error)) {
         return false;
     }
@@ -43,6 +44,10 @@ void Engine::Run(const std::function<void (Engine&)>& callback) {
         auto now = std::chrono::steady_clock::now();
         m_deltaTime = std::chrono::duration<float>(now - timeLast).count();
         timeLast = now;
+
+        m_timeDeltasTotal += (m_deltaTime - m_timeDeltas[m_timeDeltasPos]);
+        m_timeDeltas[m_timeDeltasPos] = m_deltaTime;
+        m_timeDeltasPos = (m_timeDeltasPos+1) % m_timeDeltas.size();
 
         m_gui.Update(m_window, m_deltaTime);
         callback(*this);
