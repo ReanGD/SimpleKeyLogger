@@ -1,7 +1,5 @@
 #include "engine/material/material.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
 
 Material::Material(const std::shared_ptr<Shader>& shader)
     : m_shader(shader) {
@@ -27,7 +25,7 @@ Material& Material::SetBaseTexture(uint unit, const Texture& texture) noexcept {
     return *this;
 }
 
-void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matWorld) const {
+void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const {
     m_shader->Bind();
     m_baseTexture.Bind(m_baseTextureUnit);
     m_shader->SetInt("uBaseTexture", int(m_baseTextureUnit));
@@ -37,9 +35,8 @@ void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matW
     m_shader->SetMat4("uViewMatrix", camera->GetViewMatrix());
     m_shader->SetVec3("uToEyeDirection", camera->GetToEyeDirection());
 
-    m_shader->SetMat4("uModelMatrix", matWorld);
-    glm::mat3 matNorm = glm::inverseTranspose(glm::mat3(matWorld));
-    m_shader->SetMat3("uNormalMatrix", matNorm);
+    m_shader->SetMat4("uModelMatrix", matModel);
+    m_shader->SetMat3("uNormalMatrix", matNormal);
 }
 
 void Material::Unbind() const {

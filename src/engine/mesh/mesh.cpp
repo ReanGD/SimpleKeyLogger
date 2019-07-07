@@ -1,12 +1,21 @@
 #include "engine/mesh/mesh.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
+
 void Mesh::Add(const std::shared_ptr<Geometry>& geometry, const Material& material) noexcept {
     m_objects.push_back(std::make_pair(geometry, material));
 }
 
-void Mesh::Draw(const std::shared_ptr<Camera>& camera, const glm::mat4& matWorld) const {
+void Mesh::SetModelMatrix(const glm::mat4& matrix) noexcept {
+    m_matModel = matrix;
+    m_matNormal = glm::inverseTranspose(glm::mat3(m_matModel));
+}
+
+void Mesh::Draw(const std::shared_ptr<Camera>& camera) const {
     for(const auto& pair: m_objects) {
-        pair.second.Bind(camera, matWorld);
+        pair.second.Bind(camera, m_matModel, m_matNormal);
         pair.first->Bind();
         pair.first->Draw();
         pair.first->Unbind();

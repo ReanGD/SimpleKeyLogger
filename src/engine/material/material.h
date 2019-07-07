@@ -18,7 +18,7 @@ public:
     Material& SetBaseColor(const glm::vec3& color) noexcept;
     Material& SetBaseTexture(uint unit, const Texture& texture) noexcept;
 
-    void Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matWorld) const;
+    void Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const;
     void Unbind() const;
 
 private:

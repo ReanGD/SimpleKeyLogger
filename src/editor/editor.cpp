@@ -61,17 +61,29 @@ bool Editor::Init(Engine& engine, std::string& error) {
     Material materialGround(shaderTex);
     materialGround.SetBaseTexture(0, m_groundTex);
 
+    auto matModel = glm::translate(glm::mat4(1.0f), glm::vec3(3.0, 0.51f, 0));
     m_cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
+    m_cube.SetModelMatrix(matModel);
+
+    matModel = glm::scale(glm::mat4(1.0), glm::vec3(40.0f));
     m_plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
+    m_plane.SetModelMatrix(matModel);
 
     Material materialSphere(shaderTexLight);
     materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
     materialSphere.SetBaseTexture(0, m_groundTex);
     auto sphereGeom = GeometryGenerator::CreateSolidSphere(100);
+    float posX = -static_cast<float>(m_meshes.size()) * 1.5f / 2.0f;
     for(auto& meshesRow: m_meshes) {
+        float posZ = -static_cast<float>(m_meshes[0].size()) * 2.5f / 2.0f;
         for(auto& mesh: meshesRow) {
+            matModel = glm::translate(glm::mat4(1.0), glm::vec3(posX, 0.51f, posZ));
+            posZ += 2.5f;
+            matModel = glm::scale(matModel, glm::vec3(1.0f, 1.0f, 2.0f));
             mesh.Add(sphereGeom, materialSphere);
+            mesh.SetModelMatrix(matModel);
         }
+        posX += 1.5f;
     }
 
     return true;
@@ -87,23 +99,13 @@ void Editor::Render(Engine& engine) {
     GLuint index = 0;
     m_ubCamera->Bind(index);
 
-    auto matWorld = glm::mat4(1.0f);
-    matWorld = glm::translate(matWorld, glm::vec3(3.0, 0.51f, 0));
-    m_cube.Draw(m_camera, matWorld);
+    m_cube.Draw(m_camera);
+    m_plane.Draw(m_camera);
 
-    matWorld = glm::scale(glm::mat4(1.0), glm::vec3(40.0f));
-    m_plane.Draw(m_camera, matWorld);
-
-    float posX = -static_cast<float>(m_meshes.size()) * 1.5f / 2.0f;
     for(const auto& meshesRow: m_meshes) {
-        float posZ = -static_cast<float>(m_meshes[0].size()) * 2.5f / 2.0f;
         for(const auto& mesh: meshesRow) {
-            matWorld = glm::translate(glm::mat4(1.0), glm::vec3(posX, 0.51f, posZ));
-            posZ += 2.5f;
-            matWorld = glm::scale(matWorld, glm::vec3(1.0f, 1.0f, 2.0f));
-            mesh.Draw(m_camera, matWorld);
+            mesh.Draw(m_camera);
         }
-        posX += 1.5f;
     }
 
     m_interface.Draw(engine.GetGui(), engine.GetFps());
