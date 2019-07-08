@@ -14,10 +14,11 @@ bool Editor::Init(Engine& engine, std::string& error) {
     }
     SetEditorMode(engine, m_editorMode);
 
-    m_camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
-    m_camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
+    auto& scene = engine.GetScene();
 
-    m_controller.AttachCamera(m_camera);
+    auto camera = scene.GetCamera();
+    camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
+    m_controller.AttachCamera(camera);
 
     auto shaderTex = Shader::Create("vertex_old", "fragment_tex", error);
     if (!shaderTex) {
@@ -36,8 +37,8 @@ bool Editor::Init(Engine& engine, std::string& error) {
     }
 
     m_ubCamera = std::make_shared<UniformBuffer>(m_declCamera->GetSize());
-    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), m_camera->GetProjMatrix());
-    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), m_camera->GetViewMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), camera->GetProjMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), camera->GetViewMatrix());
     m_ubCamera->Sync();
 
     GLuint index = 0;
@@ -61,29 +62,36 @@ bool Editor::Init(Engine& engine, std::string& error) {
     Material materialGround(shaderTex);
     materialGround.SetBaseTexture(0, m_groundTex);
 
+    Mesh cube;
+    cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
     auto matModel = glm::translate(glm::mat4(1.0f), glm::vec3(3.0, 0.51f, 0));
-    m_cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
-    m_cube.SetModelMatrix(matModel);
+    cube.SetModelMatrix(matModel);
+    scene.Add(cube);
 
+    Mesh plane;
+    plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
     matModel = glm::scale(glm::mat4(1.0), glm::vec3(40.0f));
-    m_plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
-    m_plane.SetModelMatrix(matModel);
+    plane.SetModelMatrix(matModel);
+    scene.Add(plane);
 
+    const auto meshCntX = 10;
+    const auto meshCntZ = 10;
     Material materialSphere(shaderTexLight);
     materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
     materialSphere.SetBaseTexture(0, m_groundTex);
     auto sphereGeom = GeometryGenerator::CreateSolidSphere(100);
-    float posX = -static_cast<float>(m_meshes.size()) * 1.5f / 2.0f;
-    for(auto& meshesRow: m_meshes) {
-        float posZ = -static_cast<float>(m_meshes[0].size()) * 2.5f / 2.0f;
-        for(auto& mesh: meshesRow) {
-            matModel = glm::translate(glm::mat4(1.0), glm::vec3(posX, 0.51f, posZ));
-            posZ += 2.5f;
-            matModel = glm::scale(matModel, glm::vec3(1.0f, 1.0f, 2.0f));
+    for(auto i=0; i!=meshCntX; ++i) {
+        float posX = 1.5f * static_cast<float>(i) - static_cast<float>(meshCntX) * 1.5f / 2.0f;
+        for(auto j=0; j!=meshCntZ; ++j) {
+            Mesh mesh;
             mesh.Add(sphereGeom, materialSphere);
+
+            float posZ = 2.5f * static_cast<float>(j) - static_cast<float>(meshCntZ) * 2.5f / 2.0f;
+            matModel = glm::translate(glm::mat4(1.0), glm::vec3(posX, 0.51f, posZ));
+            matModel = glm::scale(matModel, glm::vec3(1.0f, 1.0f, 2.0f));
             mesh.SetModelMatrix(matModel);
+            scene.Add(mesh);
         }
-        posX += 1.5f;
     }
 
     return true;
@@ -92,21 +100,17 @@ bool Editor::Init(Engine& engine, std::string& error) {
 void Editor::Render(Engine& engine) {
     ProcessIO(engine);
 
-    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), m_camera->GetProjMatrix());
-    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), m_camera->GetViewMatrix());
+    auto& scene = engine.GetScene();
+    auto camera = scene.GetCamera();
+
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), camera->GetProjMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), camera->GetViewMatrix());
     m_ubCamera->Sync();
 
     GLuint index = 0;
     m_ubCamera->Bind(index);
 
-    m_cube.Draw(m_camera);
-    m_plane.Draw(m_camera);
-
-    for(const auto& meshesRow: m_meshes) {
-        for(const auto& mesh: meshesRow) {
-            mesh.Draw(m_camera);
-        }
-    }
+    scene.Draw();
 
     m_interface.Draw(engine.GetGui(), engine.GetFps());
 }

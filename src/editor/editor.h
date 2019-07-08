@@ -28,14 +28,10 @@ private:
 
 private:
     bool m_editorMode = false;
-    std::array<std::array<Mesh, 10>, 10> m_meshes;
-    Mesh m_cube;
-    Mesh m_plane;
     Texture m_texture;
     Texture m_groundTex;
     std::shared_ptr<UniformBuffer> m_ubCamera;
     std::shared_ptr<UniformBufferDecl> m_declCamera;
     UIInterface m_interface;
     FlyCameraController m_controller;
-    std::shared_ptr<Camera> m_camera;
 };

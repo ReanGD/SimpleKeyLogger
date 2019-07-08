@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "engine/gui/gui.h"
+#include "engine/scene/scene.h"
 
 
 class Engine {
@@ -26,6 +27,10 @@ public:
         return m_window;
     }
 
+    Scene& GetScene() noexcept {
+        return m_scene;
+    }
+
     float GetDeltaTime() const noexcept {
         return m_deltaTime;
     }
@@ -36,6 +41,7 @@ public:
 private:
     Gui m_gui;
     Window m_window;
+    Scene m_scene;
     float m_deltaTime = 1.0f / 60.0f;
     uint16_t m_timeDeltasPos = 0;
     std::array<float, 120> m_timeDeltas = { /*1.0f / 60.0f*/ };
