@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "engine/common/noncopyable.h"
+
 
 enum class Key : uint8_t {
         F1             = 0,            // GLFW_KEY_F1
@@ -159,16 +161,12 @@ enum KeyAction : uint8_t {
     Last    = Repeat,
 };
 
-class WindowInput {
+class WindowInput : Noncopyable {
     friend class Window;
     friend struct GLFWCallbacks;
 public:
     WindowInput() = default;
     ~WindowInput() = default;
-    WindowInput(const WindowInput&) = delete;
-    WindowInput(WindowInput&&) = delete;
-    WindowInput& operator=(const WindowInput&) = delete;
-    WindowInput& operator=(WindowInput&&) = delete;
 
 public:
     bool GetFramebufferSize(uint32_t& width, uint32_t& height) const noexcept;

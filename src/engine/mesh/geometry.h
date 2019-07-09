@@ -3,6 +3,7 @@
 #include <string>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include "engine/common/noncopyable.h"
 
 
 class VertexDecl {
@@ -81,7 +82,7 @@ private:
     uint m_count;
 };
 
-class Geometry {
+class Geometry : Noncopyable {
 public:
     Geometry() = delete;
     Geometry(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);

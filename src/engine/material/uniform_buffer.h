@@ -3,16 +3,12 @@
 #include <string>
 #include <unordered_map>
 #include <glm/mat4x4.hpp>
+#include "engine/common/noncopyable.h"
 
 
-class UniformBuffer {
+class UniformBuffer : Noncopyable {
 public:
     UniformBuffer() = delete;
-    UniformBuffer(const UniformBuffer&) = delete;
-    UniformBuffer(UniformBuffer&&) = delete;
-    UniformBuffer& operator=(const UniformBuffer&) = delete;
-    UniformBuffer& operator=(UniformBuffer&&) = delete;
-
     UniformBuffer(size_t size);
     ~UniformBuffer();
 

@@ -3,9 +3,10 @@
 #include <memory>
 
 #include "engine/mesh/geometry.h"
+#include "engine/common/noncopyable.h"
 
 
-struct GeometryGenerator {
+struct GeometryGenerator : Noncopyable {
     /*!
        Creates a solid cube with a center at the beginning of the coordinates and a long edge equal to 1
 

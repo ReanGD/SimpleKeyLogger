@@ -7,7 +7,7 @@
 
 
 // First-person flight camera controler
-class FlyCameraController {
+class FlyCameraController : Noncopyable {
 public:
     enum class Action : uint8_t {
         Forward = 0,
@@ -28,7 +28,7 @@ public:
     void SetMovementSpeed(float low, float normal, float high) noexcept;
     void SetMouseSmooth(float value) noexcept;
     void SetMouseSensitivity(float value) noexcept;
-    void AttachCamera(std::shared_ptr<Camera> camera);
+    void AttachCamera(const std::shared_ptr<Camera>& camera);
 
     void Update(WindowInput& wio, float deltaTime);
 private:

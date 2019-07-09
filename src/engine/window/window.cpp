@@ -172,7 +172,7 @@ Key TranslateMouseKeyCode(int key) {
     }
 }
 
-struct GLFWCallbacks {
+struct GLFWCallbacks : Noncopyable {
     static Window* m_window;
 
     static const char* GetClipboardText() {

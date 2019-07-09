@@ -32,7 +32,7 @@ void FlyCameraController::SetMouseSensitivity(float value) noexcept {
     m_mouseSensitivity = value;
 }
 
-void FlyCameraController::AttachCamera(std::shared_ptr<Camera> camera) {
+void FlyCameraController::AttachCamera(const std::shared_ptr<Camera>& camera) {
     camera->SetAspectRatio(m_aspectRatio);
     camera->SetViewParams(camera->GetPosition(), m_direction);
     m_cameras.push_back(camera);

@@ -1,13 +1,12 @@
 #pragma once
 
 #include "engine/engine.h"
-#include "engine/mesh/mesh.h"
 #include "editor/ui_interface.h"
 #include "engine/material/uniform_buffer.h"
 #include "middleware/camera/fly_controller.h"
 
 
-class Editor {
+class Editor : Noncopyable {
 public:
     Editor(const Editor&) = delete;
     Editor(Editor&&) = delete;

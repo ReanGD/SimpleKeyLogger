@@ -6,7 +6,7 @@
 #include "engine/material/uniform_buffer.h"
 
 
-class Shader {
+class Shader : Noncopyable {
     struct privateArg{};
 
 public:

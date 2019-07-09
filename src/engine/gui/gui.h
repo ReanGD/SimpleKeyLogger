@@ -4,13 +4,8 @@
 
 
 struct ImGuiContext;
-class Gui {
+class Gui : Noncopyable {
 public:
-    Gui(const Gui&) = delete;
-    Gui(Gui&&) = delete;
-    Gui& operator=(const Gui&) = delete;
-    Gui& operator=(Gui&&) = delete;
-
     Gui() = default;
     ~Gui();
 

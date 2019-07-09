@@ -2,9 +2,10 @@
 
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/constants.hpp>
+#include "engine/common/noncopyable.h"
 
 
-class Camera {
+class Camera : Noncopyable {
 public:
 	Camera() = delete;
 	Camera(float fovy, float nearPlane, float farPlane);

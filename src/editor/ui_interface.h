@@ -4,7 +4,7 @@
 
 
 struct ImFont;
-class UIInterface {
+class UIInterface : Noncopyable {
 public:
     UIInterface(const UIInterface&) = delete;
     UIInterface(UIInterface&&) = delete;
