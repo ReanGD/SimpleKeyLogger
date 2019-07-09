@@ -1,9 +1,7 @@
 #include "engine/mesh/geometry.h"
 
 #include <stdexcept>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include "engine/common/glapi.h"
 
 
 const VertexDecl VertexPNTC::vDecl = {

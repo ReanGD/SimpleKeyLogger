@@ -2,9 +2,7 @@
 
 #include <cstring>
 #include <algorithm>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include "engine/common/glapi.h"
 
 
 UniformBuffer::UniformBuffer(size_t size)

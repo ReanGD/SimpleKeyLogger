@@ -1,10 +1,8 @@
 #include "editor/editor.h"
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-
 #include <fmt/format.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include "engine/common/glapi.h"
 #include "engine/mesh/geometry_generator.h"
 
 

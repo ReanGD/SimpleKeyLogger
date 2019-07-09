@@ -1,8 +1,7 @@
 #include "engine/engine.h"
 
 #include <chrono>
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include "engine/common/glapi.h"
 
 
 bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error) {

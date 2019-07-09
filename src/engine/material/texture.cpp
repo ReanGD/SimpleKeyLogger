@@ -1,13 +1,11 @@
 #include "engine/material/texture.h"
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <filesystem>
 #include <fmt/format.h>
+#include "engine/common/glapi.h"
 
 
 bool Texture::Load(const std::string& path, std::string& error) {

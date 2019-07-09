@@ -1,14 +1,12 @@
 #include "engine/material/shader.h"
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <filesystem>
 #include <fmt/format.h>
 #include <glm/gtc/type_ptr.hpp>
+#include "engine/common/glapi.h"
 
 
 std::pair<GLchar*, GLint> read(const char* filepath) {
