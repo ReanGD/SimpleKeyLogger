@@ -38,6 +38,9 @@ public:
     float GetFps() const noexcept {
         return static_cast<float>(m_timeDeltas.size()) / m_timeDeltasTotal;
     }
+    uint32_t GetTpf() const noexcept {
+        return m_scene.GetCountTriangles();
+    }
 private:
     Gui m_gui;
     Window m_window;

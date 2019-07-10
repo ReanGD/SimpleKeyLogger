@@ -8,8 +8,9 @@ void Scene::Add(const Mesh& mesh) {
     m_meshes.push_back(mesh);
 }
 
-void Scene::Draw() const {
+void Scene::Draw() {
+    m_countTriangles = 0;
     for(const auto& mesh: m_meshes) {
-        mesh.Draw(m_camera);
+        m_countTriangles += mesh.Draw(m_camera);
     }
 }

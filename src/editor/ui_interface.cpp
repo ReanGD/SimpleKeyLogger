@@ -23,7 +23,7 @@ bool UIInterface::Init(const Gui&, std::string& error) {
     return true;
 }
 
-void UIInterface::DrawInfoBar(float fps) {
+void UIInterface::DrawInfoBar(float fps, uint32_t tpf) {
     bool* pOpen = nullptr;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
@@ -31,7 +31,8 @@ void UIInterface::DrawInfoBar(float fps) {
     ImGui::SetNextWindowSize(ImVec2(300, 50));
     if (ImGui::Begin("infobar", pOpen, windowFlags)){
         ImGui::PushFont(m_fontMono);
-        ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "FPS = %.2f", fps);
+        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M", fps, static_cast<double>(tpf) / 1000.0 / 1000.0);
+        ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "%s", text.c_str());
         ImGui::PopFont();
         ImGui::End();
     }
@@ -77,9 +78,9 @@ void UIInterface::DrawExample() {
     }
 }
 
-void UIInterface::Draw(const Gui& gui, float fps) {
+void UIInterface::Draw(const Gui& gui, float fps, uint32_t tpf) {
     gui.NewFrame();
-    DrawInfoBar(fps);
+    DrawInfoBar(fps, tpf);
     // DrawExample();
     // ImGui::ShowStyleEditor();
 

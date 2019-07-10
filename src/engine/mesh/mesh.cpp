@@ -13,12 +13,15 @@ void Mesh::SetModelMatrix(const glm::mat4& matrix) noexcept {
     m_matNormal = glm::inverseTranspose(glm::mat3(m_matModel));
 }
 
-void Mesh::Draw(const std::shared_ptr<Camera>& camera) const {
+uint32_t Mesh::Draw(const std::shared_ptr<Camera>& camera) const {
+    uint32_t count = 0;
     for(const auto& pair: m_objects) {
         pair.second.Bind(camera, m_matModel, m_matNormal);
         pair.first->Bind();
-        pair.first->Draw();
+        count += pair.first->Draw();
         pair.first->Unbind();
         pair.second.Unbind();
     }
+
+    return count;
 }

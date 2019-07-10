@@ -14,7 +14,7 @@ public:
     void Add(const std::shared_ptr<Geometry>& geometry, const Material& material) noexcept;
     void SetModelMatrix(const glm::mat4& matrix) noexcept;
 
-    void Draw(const std::shared_ptr<Camera>& camera) const;
+    uint32_t Draw(const std::shared_ptr<Camera>& camera) const;
 
 private:
     glm::mat4 m_matModel = glm::mat4(1.0f);

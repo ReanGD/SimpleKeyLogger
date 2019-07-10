@@ -118,8 +118,9 @@ void Geometry::Unbind() const {
     glBindVertexArray(0);
 }
 
-void Geometry::Draw() const {
+uint32_t Geometry::Draw() const {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexBuffer.Count()), static_cast<GLenum>(m_indexBuffer.Type()), 0);
+    return m_indexBuffer.Count() / 3;
 }
 
 void Geometry::Destroy() {

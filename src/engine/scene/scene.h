@@ -9,12 +9,16 @@ public:
     ~Scene() = default;
 
     void Add(const Mesh& mesh);
-    void Draw() const;
+    void Draw();
 
+    uint32_t GetCountTriangles() const noexcept {
+        return m_countTriangles;
+    }
     std::shared_ptr<Camera> GetCamera() const noexcept {
         return m_camera;
     }
 private:
+    uint32_t m_countTriangles = 0;
     std::shared_ptr<Camera> m_camera;
     std::vector<Mesh> m_meshes;
 };

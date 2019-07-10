@@ -72,8 +72,8 @@ bool Editor::Init(Engine& engine, std::string& error) {
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
 
-    const auto meshCntX = 10;
-    const auto meshCntZ = 10;
+    const auto meshCntX = 30;
+    const auto meshCntZ = 30;
     Material materialSphere(shaderTexLight);
     materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
     materialSphere.SetBaseTexture(0, m_groundTex);
@@ -110,7 +110,7 @@ void Editor::Render(Engine& engine) {
 
     scene.Draw();
 
-    m_interface.Draw(engine.GetGui(), engine.GetFps());
+    m_interface.Draw(engine.GetGui(), engine.GetFps(), engine.GetTpf());
 }
 
 void Editor::Destroy() {
