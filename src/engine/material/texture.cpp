@@ -9,7 +9,7 @@
 
 
 bool Texture::Load(const std::string& path, std::string& error) {
-    const auto fullPath = std::filesystem::current_path() / "data" / "textures" / path;
+    const auto fullPath = std::filesystem::current_path() / "assets" / "textures" / path;
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(fullPath.c_str(), &width, &height, &channels, STBI_rgb);
