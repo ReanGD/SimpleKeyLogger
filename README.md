@@ -12,7 +12,7 @@ sudo pip install conan
 ```console
 mkdir -p build
 cd build
-cmake -DCMAKE_BUILD_TYPE=RELWITHDEBINFO ../
+cmake -DCMAKE_BUILD_TYPE=RELWITHDEBINFO -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ../
 cmake --build .
 cd ..
 ```
