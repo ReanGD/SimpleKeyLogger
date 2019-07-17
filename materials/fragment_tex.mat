@@ -1,3 +1,8 @@
+material {
+    name : "fragment_tex",
+}
+
+fragment = <<SHADER
 #version 330 core
 
 smooth in vec3 pNormal;
@@ -10,3 +15,4 @@ uniform sampler2D uBaseTexture;
 void main() {
     color = texture(uBaseTexture, pTexCoord);
 }
+SHADER

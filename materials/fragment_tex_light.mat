@@ -1,3 +1,8 @@
+material {
+    name : "fragment_tex_light",
+}
+
+fragment = <<SHADER
 #version 330 core
 
 smooth in vec3 pNormal;
@@ -5,7 +10,7 @@ smooth in vec2 pTexCoord;
 
 out vec4 color;
 
-uniform vec3 uBaseColor;
+uniform sampler2D uBaseTexture;
 uniform vec3 uToEyeDirection;
 
 const vec3 uToLightDirection = vec3(0, 1, 0);
@@ -39,8 +44,9 @@ vec3 PhongLighting(vec3 N, vec3 L, vec3 V, vec3 facture) {
 
 void main() {
     vec3 normal = normalize(pNormal);
-    vec3 facture = uBaseColor;
+    vec3 facture = texture(uBaseTexture, pTexCoord).rgb;
 
     vec3 clr = PhongLighting(normal, uToLightDirection, uToEyeDirection, facture);
     color = vec4(clr, 1.0);
 }
+SHADER

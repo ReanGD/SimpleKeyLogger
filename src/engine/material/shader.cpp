@@ -1,51 +1,75 @@
 #include "engine/material/shader.h"
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
+#include <ucl++.h>
+#include <fstream>
 #include <filesystem>
 #include <fmt/format.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "engine/common/glapi.h"
 
 
-std::pair<GLchar*, GLint> read(const char* filepath) {
-    int fd = open(filepath, O_RDONLY);
-    if (fd < 0) {
-        return std::make_pair(nullptr, 0);
+static bool ReadFile(const char* filepath, std::string& data, std::string& error) {
+    std::ifstream ifs(filepath, std::ifstream::in);
+    if(!ifs) {
+        error = fmt::format("couldn't open file '{}', error: {}", filepath, strerror(errno));
+        return false;
     }
 
-    struct stat sb;
-    fstat(fd, &sb);
-    auto length = static_cast<std::size_t>(sb.st_size);
+    ifs.seekg(0, std::ios::end);
+    data.reserve(static_cast<size_t>(ifs.tellg()));
+    ifs.seekg(0, std::ios::beg);
 
-    GLchar* data = new GLchar[length];
-    read(fd, data, length);
-    close(fd);
+    data.assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 
-    return std::make_pair(data, length);
+    return true;
 }
 
-GLuint LoadShader(std::filesystem::path&& filepath, GLenum shaderType, std::string& error) {
-    const auto [data, length] = read(filepath.c_str());
+bool ParseMaterial(const std::string& data, std::string& shaderSrc, std::string& error) {
+    auto cfg = ucl::Ucl::parse(data, error, UCL_DUPLICATE_ERROR);
+    if (!cfg) {
+        return false;
+    }
 
-    if (data == nullptr) {
-        error = fmt::format("Сouldn't read the shader from the file: '{}'", filepath.c_str());
+    for (const auto &it :cfg) {
+        if ((it.key() == "vertex") || (it.key() == "fragment")) {
+            shaderSrc = it.string_value();
+            if (shaderSrc.empty()) {
+                error = fmt::format("empty shader section");
+                return false;
+            }
+            return true;
+        }
+    }
+
+    error = fmt::format("not found shader section");
+    return false;
+}
+
+static GLuint LoadShader(std::filesystem::path&& filepath, GLenum shaderType, std::string& error) {
+    std::string data;
+    if (!ReadFile(filepath.c_str(), data, error)) {
+        error = fmt::format("couldn't read material: '{}'", error);
+        return 0;
+    }
+
+    std::string shaderSrc;
+    if (!ParseMaterial(data, shaderSrc, error)) {
+        error = fmt::format("couldn't parse material from file '{}': '{}'", filepath.c_str(), error);
         return 0;
     }
 
     GLuint shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &data, &length);
+    const GLchar* glData = static_cast<const GLchar *>(shaderSrc.c_str());
+    auto length = static_cast<GLint>(shaderSrc.length());
+    glShaderSource(shader, 1, &glData, &length);
     glCompileShader(shader);
-
-    delete[] data;
 
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-        error = fmt::format("Couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog);
+        error = fmt::format("couldn't compile the shader from the file '{}', error: '{}'", filepath.c_str(), infoLog);
         return 0;
     }
 
@@ -62,13 +86,13 @@ Shader::~Shader() {
 }
 
 std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName, std::string& error) {
-    const auto root = std::filesystem::current_path() / "data" / "shaders";
+    const auto root = std::filesystem::current_path() / "materials";
 
-    auto vertexShader = LoadShader(root / (vertexShaderName + ".glsl"), GL_VERTEX_SHADER, error);
+    auto vertexShader = LoadShader(root / (vertexShaderName + ".mat"), GL_VERTEX_SHADER, error);
     if (vertexShader == 0) {
         return nullptr;
     }
-    auto fragmentShader = LoadShader(root / (fragmentShaderName + ".glsl"), GL_FRAGMENT_SHADER, error);
+    auto fragmentShader = LoadShader(root / (fragmentShaderName + ".mat"), GL_FRAGMENT_SHADER, error);
     if (fragmentShader == 0) {
         glDeleteShader(vertexShader);
         return nullptr;
@@ -86,7 +110,7 @@ std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, cons
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
-        error = fmt::format("Couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
+        error = fmt::format("couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
             vertexShaderName, fragmentShaderName, infoLog);
         return nullptr;
     }
