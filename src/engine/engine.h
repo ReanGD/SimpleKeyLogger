@@ -31,6 +31,12 @@ public:
         return m_scene;
     }
 
+    void SetFillPoligone(bool value) noexcept;
+
+    bool IsFillPoligone() const noexcept {
+        return m_fillPoligone;
+    }
+
     float GetDeltaTime() const noexcept {
         return m_deltaTime;
     }
@@ -38,6 +44,7 @@ public:
     float GetFps() const noexcept {
         return static_cast<float>(m_timeDeltas.size()) / m_timeDeltasTotal;
     }
+
     uint32_t GetTpf() const noexcept {
         return m_scene.GetCountTriangles();
     }
@@ -45,6 +52,7 @@ private:
     Gui m_gui;
     Window m_window;
     Scene m_scene;
+    bool m_fillPoligone = true;
     float m_deltaTime = 1.0f / 60.0f;
     uint16_t m_timeDeltasPos = 0;
     std::array<float, 120> m_timeDeltas = { /*1.0f / 60.0f*/ };

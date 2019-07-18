@@ -72,8 +72,8 @@ bool Editor::Init(Engine& engine, std::string& error) {
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
 
-    const auto meshCntX = 30;
-    const auto meshCntZ = 30;
+    const auto meshCntX = 10;
+    const auto meshCntZ = 10;
     Material materialSphere(shaderTexLight);
     materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
     materialSphere.SetBaseTexture(0, m_groundTex);
@@ -139,6 +139,10 @@ void Editor::ProcessIO(Engine& engine) {
 
     if (wio.IsKeyReleasedFirstTime(Key::F2)) {
         SetEditorMode(engine, !m_editorMode);
+    }
+
+    if (wio.IsKeyReleasedFirstTime(Key::L)) {
+        engine.SetFillPoligone(!engine.IsFillPoligone());
     }
 
     m_controller.Update(wio, engine.GetDeltaTime());

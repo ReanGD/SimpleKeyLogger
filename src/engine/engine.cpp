@@ -24,6 +24,7 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+    SetFillPoligone(m_fillPoligone);
 
     return true;
 }
@@ -53,4 +54,9 @@ void Engine::Run(const std::function<void (Engine&)>& callback) {
 
         m_window.EndFrame();
     }
+}
+
+void Engine::SetFillPoligone(bool value) noexcept {
+    m_fillPoligone = value;
+    glPolygonMode(GL_FRONT_AND_BACK, m_fillPoligone ? GL_FILL : GL_LINE);
 }
