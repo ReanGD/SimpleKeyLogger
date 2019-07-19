@@ -23,6 +23,11 @@ bool Editor::Init(Engine& engine, std::string& error) {
         return false;
     }
 
+    auto shaderLandscape = Shader::Create("vertex_landscape", "fragment_tex", error);
+    if (!shaderTex) {
+        return false;
+    }
+
     auto shaderTexLight = Shader::Create("vertex", "fragment_tex_light", error);
     if (!shaderTexLight) {
         return false;
@@ -54,11 +59,16 @@ bool Editor::Init(Engine& engine, std::string& error) {
     if(!m_groundTex.Load("ground.jpg", error)) {
         return false;
     }
+    if(!m_heightmapTex.Load("heightmap.jpg", error)) {
+        return false;
+    }
 
     Material materialTex(shaderTex);
     materialTex.SetBaseTexture(0, m_texture);
     Material materialGround(shaderTex);
     materialGround.SetBaseTexture(0, m_groundTex);
+    Material materialLandscape(shaderLandscape);
+    materialLandscape.SetBaseTexture(0, m_heightmapTex);
 
     Mesh cube;
     cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
@@ -67,13 +77,13 @@ bool Editor::Init(Engine& engine, std::string& error) {
     scene.Add(cube);
 
     Mesh plane;
-    plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
-    matModel = glm::scale(glm::mat4(1.0), glm::vec3(40.0f));
+    plane.Add(GeometryGenerator::CreateSolidPlane(250, 250, 1.0f, 1.0f), materialLandscape);
+    matModel = glm::scale(glm::mat4(1.0), glm::vec3(400.0f, 1.0f, 400.0f));
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
 
-    const auto meshCntX = 10;
-    const auto meshCntZ = 10;
+    const auto meshCntX = 1;
+    const auto meshCntZ = 1;
     Material materialSphere(shaderTexLight);
     materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
     materialSphere.SetBaseTexture(0, m_groundTex);
@@ -116,6 +126,7 @@ void Editor::Render(Engine& engine) {
 void Editor::Destroy() {
     m_texture.Destroy();
     m_groundTex.Destroy();
+    m_heightmapTex.Destroy();
 }
 
 void Editor::SetEditorMode(Engine& engine, bool value) {

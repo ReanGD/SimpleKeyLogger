@@ -29,6 +29,7 @@ private:
     bool m_editorMode = false;
     Texture m_texture;
     Texture m_groundTex;
+    Texture m_heightmapTex;
     std::shared_ptr<UniformBuffer> m_ubCamera;
     std::shared_ptr<UniformBufferDecl> m_declCamera;
     UIInterface m_interface;
