@@ -1,5 +1,5 @@
 material {
-    name : "vertex_old",
+    name : "vertex_landscape",
 }
 
 vertex = <<SHADER
@@ -21,7 +21,7 @@ uniform sampler2D uBaseTexture;
 
 void main() {
     vec4 pos = vec4(vPosition, 1.0f);
-    float height = textureLod(uBaseTexture, vTexCoord, 1).r * 256;
+    float height = textureLod(uBaseTexture, vTexCoord, 0).r * 2;
     pos.y = height;
 	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * pos;
     pNormal		= uNormalMatrix * vNormal;

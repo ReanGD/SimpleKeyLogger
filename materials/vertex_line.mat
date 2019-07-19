@@ -1,0 +1,16 @@
+material {
+    name : "vertex_line",
+}
+
+vertex = <<SHADER
+#version 330 core
+layout (location = 0) in vec3 vPosition;
+
+uniform mat4 uProjMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uModelMatrix;
+
+void main() {
+	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(vPosition, 1.0f);
+}
+SHADER

@@ -4,6 +4,10 @@
 #include "engine/common/glapi.h"
 
 
+const VertexDecl VertexP::vDecl = {
+    {0, glm::vec3::length()}, // layout (location = 0) in vec3 vPosition;
+};
+
 const VertexDecl VertexPNTC::vDecl = {
     {0, glm::vec3::length()}, // layout (location = 0) in vec3 vPosition;
     {1, glm::vec3::length()}, // layout (location = 1) in vec3 vNormal;
@@ -40,7 +44,8 @@ void VertexDecl::Bind() const {
     }
 }
 
-DataBuffer::DataBuffer(uint target, const void* data, size_t size) {
+DataBuffer::DataBuffer(uint target, const void* data, size_t size)
+    : m_size(size) {
     glGenBuffers(1, &m_handle);
     glBindBuffer(static_cast<GLenum>(target), m_handle);
     glBufferData(static_cast<GLenum>(target), static_cast<GLsizeiptr>(size), static_cast<const GLvoid *>(data), GL_STATIC_DRAW);
@@ -131,4 +136,45 @@ void Geometry::Destroy() {
 
     m_vertexBuffer.Destroy();
     m_indexBuffer.Destroy();
+}
+
+Lines::Lines(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer)
+    : m_vertexCount(static_cast<uint32_t>(vertexBuffer.Size()/vDecl.Size()))
+    , m_vDecl(vDecl)
+    , m_vertexBuffer(vertexBuffer) {
+
+    glGenVertexArrays(1, &m_handle);
+
+    Bind();
+    m_vertexBuffer.Bind();
+    m_vDecl.Bind();
+    Unbind();
+
+    m_vertexBuffer.Unbind();
+}
+
+Lines::~Lines() {
+    Destroy();
+}
+
+void Lines::Bind() const {
+    glBindVertexArray(m_handle);
+}
+
+void Lines::Unbind() const {
+    glBindVertexArray(0);
+}
+
+uint32_t Lines::Draw() const {
+    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(m_vertexCount));
+    return m_vertexCount - 1;
+}
+
+void Lines::Destroy() {
+    if (m_handle != 0) {
+        glDeleteVertexArrays(1, &m_handle);
+        m_handle = 0;
+    }
+
+    m_vertexBuffer.Destroy();
 }

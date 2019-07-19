@@ -18,6 +18,10 @@ public:
     ~VertexDecl() = default;
 
 public:
+    size_t Size() const noexcept {
+        return m_vertexSize;
+    }
+
     void Bind() const;
 
 private:
@@ -26,6 +30,12 @@ private:
     Layout m_layouts[16];
 };
 
+
+struct VertexP {
+	glm::vec3 Position;
+
+    static const VertexDecl vDecl;
+};
 
 struct VertexPNTC {
 	glm::vec3 Position;
@@ -45,9 +55,14 @@ public:
     ~DataBuffer() = default;
 
 public:
+    size_t Size() const noexcept {
+        return m_size;
+    }
+
     void Destroy();
 
 protected:
+    size_t m_size;
     uint m_handle;
 };
 
@@ -101,4 +116,25 @@ private:
     VertexDecl m_vDecl;
     VertexBuffer m_vertexBuffer;
     IndexBuffer m_indexBuffer;
+};
+
+class Lines : Noncopyable {
+public:
+    Lines() = delete;
+    Lines(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer);
+    ~Lines();
+
+public:
+    void Bind() const;
+    void Unbind() const;
+    uint32_t Draw() const;
+
+private:
+    void Destroy();
+
+private:
+    uint m_handle;
+    uint32_t m_vertexCount;
+    VertexDecl m_vDecl;
+    VertexBuffer m_vertexBuffer;
 };

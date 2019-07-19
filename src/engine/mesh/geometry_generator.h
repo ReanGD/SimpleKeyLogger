@@ -8,6 +8,10 @@
 
 struct GeometryGenerator : Noncopyable {
     /*!
+        Creates a line [from -> to]
+    */
+    static std::shared_ptr<Lines> CreateLine(const glm::vec3& from, const glm::vec3& to);
+    /*!
        Creates a solid cube with a center at the beginning of the coordinates and a long edge equal to 1
 
                    21-------22

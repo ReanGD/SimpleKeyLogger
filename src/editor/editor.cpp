@@ -53,13 +53,19 @@ bool Editor::Init(Engine& engine, std::string& error) {
         return false;
     }
 
+    auto shaderLine = Shader::Create("vertex_line", "fragment_clr", error);
+    if (!shaderLine) {
+        return false;
+    }
+
+
     if(!m_texture.Load("brice.jpg", error)) {
         return false;
     }
     if(!m_groundTex.Load("ground.jpg", error)) {
         return false;
     }
-    if(!m_heightmapTex.Load("heightmap.jpg", error)) {
+    if(!m_heightmapTex.Load("heightmap2.jpg", error)) {
         return false;
     }
 
@@ -69,6 +75,8 @@ bool Editor::Init(Engine& engine, std::string& error) {
     materialGround.SetBaseTexture(0, m_groundTex);
     Material materialLandscape(shaderLandscape);
     materialLandscape.SetBaseTexture(0, m_heightmapTex);
+    m_materialLine = std::make_shared<Material>(shaderLine);
+    m_materialLine->SetBaseColor(glm::vec3(0.9f, 0.9f, 0.1f));
 
     Mesh cube;
     cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
@@ -77,10 +85,12 @@ bool Editor::Init(Engine& engine, std::string& error) {
     scene.Add(cube);
 
     Mesh plane;
-    plane.Add(GeometryGenerator::CreateSolidPlane(250, 250, 1.0f, 1.0f), materialLandscape);
+    plane.Add(GeometryGenerator::CreateSolidPlane(10, 10, 1.0f, 1.0f), materialLandscape);
     matModel = glm::scale(glm::mat4(1.0), glm::vec3(400.0f, 1.0f, 400.0f));
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
+
+    m_line = GeometryGenerator::CreateLine(glm::vec3(0), glm::vec3(10.0f));
 
     const auto meshCntX = 1;
     const auto meshCntZ = 1;
@@ -120,6 +130,13 @@ void Editor::Render(Engine& engine) {
 
     scene.Draw();
 
+    glm::mat4 matModel(1.0f);
+    m_materialLine->Bind(camera, matModel, matModel);
+    m_line->Bind();
+    m_line->Draw();
+    m_line->Unbind();
+    m_materialLine->Unbind();
+
     m_interface.Draw(engine.GetGui(), engine.GetFps(), engine.GetTpf());
 }
 
@@ -127,6 +144,9 @@ void Editor::Destroy() {
     m_texture.Destroy();
     m_groundTex.Destroy();
     m_heightmapTex.Destroy();
+
+    m_materialLine.reset();
+    m_line.reset();
 }
 
 void Editor::SetEditorMode(Engine& engine, bool value) {

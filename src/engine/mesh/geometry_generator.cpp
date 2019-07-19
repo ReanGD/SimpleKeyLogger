@@ -3,6 +3,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
+std::shared_ptr<Lines> GeometryGenerator::CreateLine(const glm::vec3& from, const glm::vec3& to) {
+    VertexP vb[2];
+    vb[ 0].Position	= from;
+    vb[ 1].Position	= to;
+
+    VertexBuffer vertexBuffer(vb, sizeof(vb));
+
+    return std::make_shared<Lines>(VertexP::vDecl, vertexBuffer);
+}
+
 std::shared_ptr<Geometry> GeometryGenerator::CreateSolidCube() {
     VertexPNTC vb[24];
     vb[ 0].Position	= glm::vec3(-0.5f,-0.5f,-0.5f);

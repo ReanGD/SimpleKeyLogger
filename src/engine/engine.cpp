@@ -24,6 +24,7 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+    glLineWidth(2.0f);
     SetFillPoligone(m_fillPoligone);
 
     return true;
