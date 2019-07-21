@@ -130,6 +130,24 @@ void Editor::Render(Engine& engine) {
 
     scene.Draw();
 
+    static uint64_t cnt = 0;
+    static bool opt = false;
+    cnt++;
+    if ((cnt % 600) == 0) {
+        opt = !opt;
+        auto& vertexBuffer = m_line->GetVertexBuffer();
+        VertexP* vb = static_cast<VertexP*>(vertexBuffer.Lock());
+        vb[0].Position	= glm::vec3(0);
+        if (opt) {
+            vb[1].Position	= glm::vec3(20);
+        } else {
+            vb[1].Position	= glm::vec3(10);
+        }
+        if (!vertexBuffer.Unlock()) {
+            throw std::runtime_error("Can't unlock vertex buffer in GeometryGenerator::CreateLine");
+        }
+    }
+
     glm::mat4 matModel(1.0f);
     m_materialLine->Bind(camera, matModel, matModel);
     m_line->Bind();

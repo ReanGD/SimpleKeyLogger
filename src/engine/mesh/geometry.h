@@ -49,6 +49,7 @@ struct VertexPNTC {
 class DataBuffer {
 protected:
     DataBuffer() = delete;
+    DataBuffer(uint target, size_t size);
     DataBuffer(uint target, const void* data, size_t size);
 
 public:
@@ -58,8 +59,11 @@ public:
     size_t Size() const noexcept {
         return m_size;
     }
-
     void Destroy();
+
+protected:
+    void* Lock(uint target) const noexcept;
+    bool Unlock(uint target) const noexcept;
 
 protected:
     size_t m_size;
@@ -68,11 +72,15 @@ protected:
 
 class VertexBuffer : public DataBuffer {
 public:
+    VertexBuffer(size_t size);
     VertexBuffer(const void* data, size_t size);
 
 public:
     void Bind() const;
     void Unbind() const;
+
+    void* Lock() const noexcept;
+    bool Unlock() const noexcept;
 };
 
 class IndexBuffer : public DataBuffer {
@@ -91,6 +99,9 @@ public:
 
     void Bind() const;
     void Unbind() const;
+
+    void* Lock() const noexcept;
+    bool Unlock() const noexcept;
 
 private:
     uint m_type;
@@ -125,6 +136,10 @@ public:
     ~Lines();
 
 public:
+    VertexBuffer& GetVertexBuffer() noexcept {
+        return m_vertexBuffer;
+    }
+
     void Bind() const;
     void Unbind() const;
     uint32_t Draw() const;

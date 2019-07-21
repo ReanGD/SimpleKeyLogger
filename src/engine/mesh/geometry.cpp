@@ -44,6 +44,14 @@ void VertexDecl::Bind() const {
     }
 }
 
+DataBuffer::DataBuffer(uint target, size_t size)
+    : m_size(size) {
+    glGenBuffers(1, &m_handle);
+    glBindBuffer(static_cast<GLenum>(target), m_handle);
+    glBufferData(static_cast<GLenum>(target), static_cast<GLsizeiptr>(size), nullptr, GL_STREAM_DRAW);
+    glBindBuffer(static_cast<GLenum>(target), 0);
+}
+
 DataBuffer::DataBuffer(uint target, const void* data, size_t size)
     : m_size(size) {
     glGenBuffers(1, &m_handle);
@@ -52,11 +60,28 @@ DataBuffer::DataBuffer(uint target, const void* data, size_t size)
     glBindBuffer(static_cast<GLenum>(target), 0);
 }
 
+void* DataBuffer::Lock(uint target) const noexcept {
+    glBindBuffer(static_cast<GLenum>(target), m_handle);
+    return glMapBuffer(static_cast<GLenum>(target), GL_WRITE_ONLY);
+}
+
+bool DataBuffer::Unlock(uint target) const noexcept {
+    bool result = glUnmapBuffer(static_cast<GLenum>(target)) == GL_TRUE;
+    glBindBuffer(static_cast<GLenum>(target), 0);
+
+    return result;
+}
+
 void DataBuffer::Destroy() {
     if (m_handle != 0) {
         glDeleteBuffers(1, &m_handle);
         m_handle = 0;
     }
+}
+
+VertexBuffer::VertexBuffer(size_t size)
+    : DataBuffer(GL_ARRAY_BUFFER, size) {
+
 }
 
 VertexBuffer::VertexBuffer(const void* data, size_t size)
@@ -70,6 +95,14 @@ void VertexBuffer::Bind() const {
 
 void VertexBuffer::Unbind() const {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void* VertexBuffer::Lock() const noexcept {
+    return DataBuffer::Lock(GL_ARRAY_BUFFER);
+}
+
+bool VertexBuffer::Unlock() const noexcept {
+    return DataBuffer::Unlock(GL_ARRAY_BUFFER);
 }
 
 IndexBuffer::IndexBuffer(const uint16_t* data, size_t size)
@@ -92,6 +125,14 @@ void IndexBuffer::Bind() const {
 
 void IndexBuffer::Unbind() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void* IndexBuffer::Lock() const noexcept {
+    return DataBuffer::Lock(GL_ELEMENT_ARRAY_BUFFER);
+}
+
+bool IndexBuffer::Unlock() const noexcept {
+    return DataBuffer::Unlock(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 Geometry::Geometry(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)

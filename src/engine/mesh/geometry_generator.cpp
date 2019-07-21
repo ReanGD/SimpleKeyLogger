@@ -4,11 +4,13 @@
 
 
 std::shared_ptr<Lines> GeometryGenerator::CreateLine(const glm::vec3& from, const glm::vec3& to) {
-    VertexP vb[2];
-    vb[ 0].Position	= from;
-    vb[ 1].Position	= to;
-
-    VertexBuffer vertexBuffer(vb, sizeof(vb));
+    VertexBuffer vertexBuffer(sizeof(VertexP) * 2);
+    VertexP* vb = static_cast<VertexP*>(vertexBuffer.Lock());
+    vb[0].Position	= from;
+    vb[1].Position	= to;
+    if (!vertexBuffer.Unlock()) {
+        throw std::runtime_error("Can't unlock vertex buffer in GeometryGenerator::CreateLine");
+    }
 
     return std::make_shared<Lines>(VertexP::vDecl, vertexBuffer);
 }
