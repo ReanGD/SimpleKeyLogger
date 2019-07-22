@@ -173,6 +173,7 @@ public:
 
     void GetCursorPosition(float& posX, float& posY) const noexcept;
     void GetCursorOffet(float& offsetX, float& offsetY) const noexcept;
+    void GetHomogeneousClipCursorPosition(float& posX, float& posY) const noexcept;
 
     float GetScrollOffsetY() const noexcept;
     void GetScrollOffset(float& offsetX, float& offsetY) const noexcept;

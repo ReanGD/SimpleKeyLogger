@@ -19,14 +19,14 @@ public:
 
 public:
     size_t Size() const noexcept {
-        return m_vertexSize;
+        return m_vertexCount * sizeof(float);
     }
 
     void Bind() const;
 
 private:
-    uint8_t m_layoutsCnt = 0;
-    uint8_t m_vertexSize = 0;
+    uint8_t m_layoutsCount = 0;
+    uint8_t m_vertexCount = 0;
     Layout m_layouts[16];
 };
 

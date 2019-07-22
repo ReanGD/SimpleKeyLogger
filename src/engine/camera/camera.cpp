@@ -21,6 +21,14 @@ void Camera::SetViewParams(const glm::vec3& position, const glm::vec3& direction
 	calcViewMatrix(direction);
 }
 
+glm::vec3 Camera::HomogeneousPositionToRay(const glm::vec2& pos) const noexcept {
+	glm::vec4 rayEye = glm::inverse(m_matProj) * glm::vec4(pos.x, pos.y, -1.0f, 1.0f);
+	rayEye.z = -1.0f;
+	rayEye.w = 0.0f;
+
+	return glm::normalize(glm::vec3(glm::inverse(m_matView) * rayEye));
+}
+
 void Camera::calcViewMatrix(const glm::vec3& dir) {
 	// see glm::lookAtRH
 	constexpr const glm::vec3 up(0.0, 1.0, 0.0);

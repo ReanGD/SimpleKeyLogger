@@ -22,9 +22,9 @@ VertexDecl::VertexDecl(const std::initializer_list<Layout>& layouts) {
     }
 
     for (const auto& layout: layouts) {
-        m_layouts[m_layoutsCnt] = layout;
-        m_layoutsCnt++;
-        m_vertexSize+=layout.elementCnt;
+        m_layouts[m_layoutsCount] = layout;
+        m_layoutsCount++;
+        m_vertexCount+=layout.elementCnt;
     }
 }
 
@@ -33,8 +33,8 @@ void VertexDecl::Bind() const {
     const GLboolean normalized = GL_FALSE;
 
  	char* pointer = nullptr;
-    auto stride = static_cast<GLsizei>(m_vertexSize * sizeof(GLfloat));
-    for(uint i=0; i!=m_layoutsCnt; i++) {
+    auto stride = static_cast<GLsizei>(Size());
+    for(uint i=0; i!=m_layoutsCount; i++) {
         auto index = static_cast<GLuint>(m_layouts[i].index);
         uint elementCnt = m_layouts[i].elementCnt;
 

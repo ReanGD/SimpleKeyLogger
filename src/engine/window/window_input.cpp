@@ -23,6 +23,11 @@ void WindowInput::GetCursorOffet(float& offsetX, float& offsetY) const noexcept 
     offsetY = static_cast<float>(m_cursorLastPosY - m_cursorPosY);
 }
 
+void WindowInput::GetHomogeneousClipCursorPosition(float& posX, float& posY) const noexcept {
+    posX = static_cast<float>((2.0 * m_cursorPosX) / static_cast<double>(m_fbWidth) - 1.0);
+    posY = static_cast<float>(1.0 - (2.0 * m_cursorPosY) / static_cast<double>(m_fbHeight));
+}
+
 float WindowInput::GetScrollOffsetY() const noexcept {
     return static_cast<float>(m_scrollOffsetY);
 }

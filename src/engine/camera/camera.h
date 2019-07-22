@@ -41,6 +41,7 @@ public:
 		return m_matView;
 	}
 
+	glm::vec3 HomogeneousPositionToRay(const glm::vec2& pos) const noexcept;
 private:
 	void calcViewMatrix(const glm::vec3& direction);
 

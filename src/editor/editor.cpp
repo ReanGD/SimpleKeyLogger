@@ -130,24 +130,6 @@ void Editor::Render(Engine& engine) {
 
     scene.Draw();
 
-    static uint64_t cnt = 0;
-    static bool opt = false;
-    cnt++;
-    if ((cnt % 600) == 0) {
-        opt = !opt;
-        auto& vertexBuffer = m_line->GetVertexBuffer();
-        VertexP* vb = static_cast<VertexP*>(vertexBuffer.Lock());
-        vb[0].Position	= glm::vec3(0);
-        if (opt) {
-            vb[1].Position	= glm::vec3(20);
-        } else {
-            vb[1].Position	= glm::vec3(10);
-        }
-        if (!vertexBuffer.Unlock()) {
-            throw std::runtime_error("Can't unlock vertex buffer in GeometryGenerator::CreateLine");
-        }
-    }
-
     glm::mat4 matModel(1.0f);
     m_materialLine->Bind(camera, matModel, matModel);
     m_line->Bind();
@@ -192,6 +174,24 @@ void Editor::ProcessIO(Engine& engine) {
 
     if (wio.IsKeyReleasedFirstTime(Key::L)) {
         engine.SetFillPoligone(!engine.IsFillPoligone());
+    }
+
+    if (m_editorMode) {
+        if (wio.IsKeyReleasedFirstTime(Key::MouseLeft)) {
+            glm::vec2 coord;
+            wio.GetHomogeneousClipCursorPosition(coord.x, coord.y);
+            auto camera = engine.GetScene().GetCamera();
+            glm::vec3 pos = camera->GetPosition();
+            glm::vec3 rayWorld = camera->HomogeneousPositionToRay(coord);
+
+            auto& vertexBuffer = m_line->GetVertexBuffer();
+            VertexP* vb = static_cast<VertexP*>(vertexBuffer.Lock());
+            vb[0].Position	= pos;
+            vb[1].Position	= pos + rayWorld * 10.0f;
+            if (!vertexBuffer.Unlock()) {
+                throw std::runtime_error("Can't unlock vertex buffer in GeometryGenerator::CreateLine");
+            }
+        }
     }
 
     m_controller.Update(wio, engine.GetDeltaTime());
