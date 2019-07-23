@@ -12,7 +12,27 @@ bool Texture::Load(const std::string& path, std::string& error) {
     const auto fullPath = std::filesystem::current_path() / "assets" / "textures" / path;
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(fullPath.c_str(), &width, &height, &channels, STBI_rgb);
+
+    FILE *f = stbi__fopen(fullPath.c_str(), "rb");
+    if (f == nullptr) {
+        error = fmt::format("Failed to open a texture file '{}'", fullPath.c_str());
+        return false;
+    }
+
+    stbi__context s;
+    stbi__start_file(&s, f);
+    long pos = ftell(f);
+    bool is16bit = (stbi__is_16_main(&s) == 1);
+    fseek(f,pos,SEEK_SET);
+
+    void *data = nullptr;
+    if (is16bit) {
+        data = stbi__load_and_postprocess_16bit(&s, &width, &height, &channels, STBI_default);
+    } else {
+        data = stbi__load_and_postprocess_8bit(&s, &width, &height, &channels, STBI_default);
+    }
+    fclose(f);
+
     if (data == nullptr) {
         error = fmt::format("Failed to create a texture from file '{}', error: '{}'", fullPath.c_str(), stbi_failure_reason());
         return false;
@@ -28,7 +48,17 @@ bool Texture::Load(const std::string& path, std::string& error) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    GLint outFormat = GL_RGB;
+    switch(channels) {
+        case 1: outFormat = GL_RED;  break;
+        case 2: outFormat = GL_RG;   break;
+        case 3: outFormat = GL_RGB;  break;
+        case 4: outFormat = GL_RGBA; break;
+    }
+    GLenum inFormat = outFormat;
+    GLenum inType = (is16bit) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
+    GLint border = 0; // This value must be 0
+    glTexImage2D(GL_TEXTURE_2D, 0, outFormat, width, height, border, inFormat, inType, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);

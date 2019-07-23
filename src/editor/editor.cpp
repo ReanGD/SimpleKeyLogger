@@ -65,7 +65,7 @@ bool Editor::Init(Engine& engine, std::string& error) {
     if(!m_groundTex.Load("ground.jpg", error)) {
         return false;
     }
-    if(!m_heightmapTex.Load("heightmap2.jpg", error)) {
+    if(!m_heightmapTex.Load("landscape/1/landscape Height Map (ASTER 30m).png", error)) {
         return false;
     }
 
@@ -85,8 +85,8 @@ bool Editor::Init(Engine& engine, std::string& error) {
     scene.Add(cube);
 
     Mesh plane;
-    plane.Add(GeometryGenerator::CreateSolidPlane(10, 10, 1.0f, 1.0f), materialLandscape);
-    matModel = glm::scale(glm::mat4(1.0), glm::vec3(400.0f, 1.0f, 400.0f));
+    plane.Add(GeometryGenerator::CreateSolidPlane(200, 200, 1.0f, 1.0f), materialLandscape);
+    matModel = glm::scale(glm::mat4(1.0), glm::vec3(200.0f, 1.0f, 200.0f));
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
 
