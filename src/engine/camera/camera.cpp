@@ -22,6 +22,7 @@ void Camera::SetViewParams(const glm::vec3& position, const glm::vec3& direction
 }
 
 glm::vec3 Camera::HomogeneousPositionToRay(const glm::vec2& pos) const noexcept {
+	// see: http://antongerdelan.net/opengl/raycasting.html
 	glm::vec4 rayEye = glm::inverse(m_matProj) * glm::vec4(pos.x, pos.y, -1.0f, 1.0f);
 	rayEye.z = -1.0f;
 	rayEye.w = 0.0f;

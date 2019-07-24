@@ -279,24 +279,63 @@ Window::~Window() {
 bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
     m_fullscreen = isFullscreen;
     m_windowMultiplier = windowMultiplier;
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    glfwWindowHint(GLFW_AUTO_ICONIFY, GL_TRUE);
 
     m_monitor = glfwGetPrimaryMonitor();
     if (m_monitor == nullptr) {
         error = "Failed to get primary monitor";
         return false;
     }
-
     m_mode = glfwGetVideoMode(m_monitor);
     if (m_mode == nullptr) {
         error = "Failed to get monitor mode";
         return false;
     }
 
+    // calculated
+    glfwWindowHint(GLFW_RED_BITS, m_mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, m_mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, m_mode->blueBits);
+    glfwWindowHint(GLFW_ALPHA_BITS, m_mode->redBits);
+    glfwWindowHint(GLFW_STENCIL_BITS, m_mode->redBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, m_mode->refreshRate);
+
+    // settings
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+    glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_TRUE);
+    glfwWindowHint(GLFW_CENTER_CURSOR, GLFW_TRUE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_FALSE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // default
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+    glfwWindowHint(GLFW_FLOATING, GLFW_FALSE);
+    glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_FALSE);
+    glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_FALSE);
+    glfwWindowHint(GLFW_ACCUM_RED_BITS, 0);
+    glfwWindowHint(GLFW_ACCUM_GREEN_BITS, 0);
+    glfwWindowHint(GLFW_ACCUM_BLUE_BITS, 0);
+    glfwWindowHint(GLFW_ACCUM_ALPHA_BITS, 0);
+    glfwWindowHint(GLFW_AUX_BUFFERS, 0);
+    glfwWindowHint(GLFW_STEREO, GLFW_FALSE);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+    glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_ANY_RELEASE_BEHAVIOR);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+    glfwWindowHintString(GLFW_COCOA_FRAME_NAME, "");
+    glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GLFW_FALSE);
+    glfwWindowHintString(GLFW_X11_CLASS_NAME, "");
+    glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "");
 
     m_window = createWindow(m_monitor, m_mode, m_fullscreen, m_windowMultiplier, error);
     if (m_window == nullptr) {
