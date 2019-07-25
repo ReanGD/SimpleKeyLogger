@@ -1,0 +1,31 @@
+material {
+    name : "geometry_normals",
+}
+
+geometry = <<SHADER
+#version 330 core
+
+layout (triangles) in;
+layout (line_strip, max_vertices = 6) out;
+
+in VS_OUT {
+    smooth vec3 normal;
+} vsOut[];
+
+uniform mat4 uProjMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uModelMatrix;
+uniform mat3 uNormalMatrix;
+
+void main() {
+    for (int i = 0; i != vsOut.length(); i++) {
+        gl_Position = uProjMatrix * uViewMatrix * gl_in[i].gl_Position;
+        EmitVertex();
+
+        gl_Position = uProjMatrix * uViewMatrix * (gl_in[i].gl_Position + vec4(normalize(vsOut[i].normal).xyz * 0.1f, 0));
+        EmitVertex();
+
+        EndPrimitive();
+    }
+}
+SHADER

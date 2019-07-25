@@ -10,6 +10,7 @@ public:
 
     void Add(const Mesh& mesh);
     void Draw();
+    void DrawWithMaterial(const Material& material);
 
     uint32_t GetCountTriangles() const noexcept {
         return m_countTriangles;

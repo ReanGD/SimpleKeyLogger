@@ -14,3 +14,10 @@ void Scene::Draw() {
         m_countTriangles += mesh.Draw(m_camera);
     }
 }
+
+void Scene::DrawWithMaterial(const Material& material) {
+    m_countTriangles = 0;
+    for(const auto& mesh: m_meshes) {
+        m_countTriangles += mesh.DrawWithMaterial(m_camera, material);
+    }
+}

@@ -58,6 +58,10 @@ bool Editor::Init(Engine& engine, std::string& error) {
         return false;
     }
 
+    auto shaderNormals = Shader::Create("vertex_normals", "geometry_normals", "fragment_normals", error);
+    if (!shaderNormals) {
+        return false;
+    }
 
     if(!m_texture.Load("brice.jpg", error)) {
         return false;
@@ -71,12 +75,17 @@ bool Editor::Init(Engine& engine, std::string& error) {
 
     Material materialTex(shaderTex);
     materialTex.SetBaseTexture(0, m_texture);
+
     Material materialGround(shaderTex);
     materialGround.SetBaseTexture(0, m_groundTex);
+
     Material materialLandscape(shaderLandscape);
     materialLandscape.SetBaseTexture(0, m_heightmapTex);
     m_materialLine = std::make_shared<Material>(shaderLine);
     m_materialLine->SetBaseColor(glm::vec3(0.9f, 0.9f, 0.1f));
+
+    m_materialNormals = std::make_shared<Material>(shaderNormals);
+    m_materialNormals->SetBaseColor(glm::vec3(0.9f, 0.9f, 0.4f));
 
     Mesh cube;
     cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
@@ -129,6 +138,9 @@ void Editor::Render(Engine& engine) {
     m_ubCamera->Bind(index);
 
     scene.Draw();
+    if (m_showNormals) {
+        scene.DrawWithMaterial(*m_materialNormals);
+    }
 
     glm::mat4 matModel(1.0f);
     m_materialLine->Bind(camera, matModel, matModel);
@@ -146,6 +158,7 @@ void Editor::Destroy() {
     m_heightmapTex.Destroy();
 
     m_materialLine.reset();
+    m_materialNormals.reset();
     m_line.reset();
 }
 
@@ -174,6 +187,10 @@ void Editor::ProcessIO(Engine& engine) {
 
     if (wio.IsKeyReleasedFirstTime(Key::L)) {
         engine.SetFillPoligone(!engine.IsFillPoligone());
+    }
+
+    if (wio.IsKeyReleasedFirstTime(Key::N)) {
+        m_showNormals = !m_showNormals;
     }
 
     if (m_editorMode) {

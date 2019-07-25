@@ -1,0 +1,19 @@
+material {
+    name : "fragment_normals",
+}
+
+fragment = <<SHADER
+#version 330 core
+
+in VS_OUT {
+    smooth vec3 normal;
+} vsOut;
+
+out vec4 color;
+
+uniform vec3 uBaseColor;
+
+void main() {
+    color = vec4(uBaseColor, 1.0);
+}
+SHADER

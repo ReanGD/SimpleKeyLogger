@@ -31,7 +31,7 @@ bool ParseMaterial(const std::string& data, std::string& shaderSrc, std::string&
     }
 
     for (const auto &it :cfg) {
-        if ((it.key() == "vertex") || (it.key() == "fragment")) {
+        if ((it.key() == "geometry") || (it.key() == "vertex") || (it.key() == "fragment")) {
             shaderSrc = it.string_value();
             if (shaderSrc.empty()) {
                 error = fmt::format("empty shader section");
@@ -102,6 +102,52 @@ std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, cons
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    GLint success;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        GLchar infoLog[1024];
+        glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
+        error = fmt::format("couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
+            vertexShaderName, fragmentShaderName, infoLog);
+        return nullptr;
+    }
+
+    return std::make_shared<Shader>(Shader::privateArg{}, shaderProgram);
+}
+
+std::shared_ptr<Shader> Shader::Create(
+    const std::string& vertexShaderName,
+    const std::string& geometryShaderName,
+    const std::string& fragmentShaderName,
+    std::string& error) {
+
+    const auto root = std::filesystem::current_path() / "materials";
+
+    auto vertexShader = LoadShader(root / (vertexShaderName + ".mat"), GL_VERTEX_SHADER, error);
+    if (vertexShader == 0) {
+        return nullptr;
+    }
+    auto geometryShader = LoadShader(root / (geometryShaderName + ".mat"), GL_GEOMETRY_SHADER, error);
+    if (geometryShader == 0) {
+        glDeleteShader(vertexShader);
+        return nullptr;
+    }
+    auto fragmentShader = LoadShader(root / (fragmentShaderName + ".mat"), GL_FRAGMENT_SHADER, error);
+    if (fragmentShader == 0) {
+        glDeleteShader(geometryShader);
+        glDeleteShader(vertexShader);
+        return nullptr;
+    }
+
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, geometryShader);
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glDeleteShader(geometryShader);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 

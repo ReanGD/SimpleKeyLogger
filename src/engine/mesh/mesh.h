@@ -15,6 +15,7 @@ public:
     void SetModelMatrix(const glm::mat4& matrix) noexcept;
 
     uint32_t Draw(const std::shared_ptr<Camera>& camera) const;
+    uint32_t DrawWithMaterial(const std::shared_ptr<Camera>& camera, const Material& material) const;
 
 private:
     glm::mat4 m_matModel = glm::mat4(1.0f);
