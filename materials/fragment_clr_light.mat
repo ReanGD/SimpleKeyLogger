@@ -5,8 +5,10 @@ material {
 fragment = <<SHADER
 #version 330 core
 
-smooth in vec3 pNormal;
-smooth in vec2 pTexCoord;
+in VS_OUT {
+    smooth vec3 normal;
+    smooth vec2 texCoord;
+} vsOut;
 
 out vec4 color;
 
@@ -43,7 +45,7 @@ vec3 PhongLighting(vec3 N, vec3 L, vec3 V, vec3 facture) {
 }
 
 void main() {
-    vec3 normal = normalize(pNormal);
+    vec3 normal = normalize(vsOut.normal);
     vec3 facture = uBaseColor;
 
     vec3 clr = PhongLighting(normal, uToLightDirection, uToEyeDirection, facture);

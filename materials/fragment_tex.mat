@@ -5,14 +5,16 @@ material {
 fragment = <<SHADER
 #version 330 core
 
-smooth in vec3 pNormal;
-smooth in vec2 pTexCoord;
+in VS_OUT {
+    smooth vec3 normal;
+    smooth vec2 texCoord;
+} vsOut;
 
 out vec4 color;
 
 uniform sampler2D uBaseTexture;
 
 void main() {
-    color = texture(uBaseTexture, pTexCoord);
+    color = texture(uBaseTexture, vsOut.texCoord);
 }
 SHADER

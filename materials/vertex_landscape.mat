@@ -4,13 +4,16 @@ material {
 
 vertex = <<SHADER
 #version 330 core
+
 layout (location = 0) in vec3 vPosition;
 layout (location = 1) in vec3 vNormal;
 layout (location = 2) in vec3 vTangent;
 layout (location = 3) in vec2 vTexCoord;
 
-smooth out vec3 pNormal;
-smooth out vec2 pTexCoord;
+out VS_OUT {
+    smooth vec3 normal;
+    smooth vec2 texCoord;
+} vsOut;
 
 uniform mat4 uProjMatrix;
 uniform mat4 uViewMatrix;
@@ -24,7 +27,7 @@ void main() {
     float height = textureLod(uBaseTexture, vTexCoord, 0).r * 2.0f;
     pos.y = height;
 	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * pos;
-    pNormal		= uNormalMatrix * vNormal;
-	pTexCoord   = vTexCoord;
+    vsOut.normal = uNormalMatrix * vNormal;
+	vsOut.texCoord = vTexCoord;
 }
 SHADER
