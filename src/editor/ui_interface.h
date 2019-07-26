@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/gui/gui.h"
+#include "engine/engine.h"
 
 
 struct ImFont;
@@ -15,9 +15,10 @@ public:
     ~UIInterface() = default;
 
     bool Init(const Gui& gui, std::string& error);
-    void Draw(const Gui& gui, float fps, uint32_t tpf);
+    void Draw(Engine& engine, bool editorMode);
 private:
-    void DrawInfoBar(float fps, uint32_t tpf);
+    void DrawInfoBar(Engine& engine);
+    void DrawRightPanel(Engine& engine);
     void DrawExample();
 private:
     ImFont* m_fontDefault = nullptr;

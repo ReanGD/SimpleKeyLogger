@@ -23,7 +23,21 @@ bool UIInterface::Init(const Gui&, std::string& error) {
     return true;
 }
 
-void UIInterface::DrawInfoBar(float fps, uint32_t tpf) {
+void UIInterface::Draw(Engine& engine, bool editorMode) {
+    auto& gui = engine.GetGui();
+    gui.NewFrame();
+    DrawInfoBar(engine);
+    if (editorMode) {
+        DrawRightPanel(engine);
+        // DrawExample();
+        // ImGui::ShowStyleEditor();
+    }
+
+    gui.EndFrame();
+}
+
+
+void UIInterface::DrawInfoBar(Engine& engine) {
     bool* pOpen = nullptr;
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
@@ -31,9 +45,41 @@ void UIInterface::DrawInfoBar(float fps, uint32_t tpf) {
     ImGui::SetNextWindowSize(ImVec2(300, 50));
     if (ImGui::Begin("infobar", pOpen, windowFlags)){
         ImGui::PushFont(m_fontMono);
-        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M", fps, static_cast<double>(tpf) / 1000.0 / 1000.0);
+        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M", engine.GetFps(), static_cast<double>(engine.GetTpf()) / 1000.0 / 1000.0);
         ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "%s", text.c_str());
         ImGui::PopFont();
+        ImGui::End();
+    }
+}
+
+void UIInterface::DrawRightPanel(Engine& engine) {
+    auto camera = engine.GetScene().GetCamera();
+    auto& wio = engine.GetWindow().GetIO();
+    uint32_t fbWidth, fbHeight;
+    wio.GetFramebufferSize(fbWidth, fbHeight);
+
+    bool* pOpen = nullptr;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
+
+    uint32_t width = 300;
+    uint32_t height = fbHeight;
+    ImGui::SetNextWindowPos(ImVec2(fbWidth - width, 0));
+    ImGui::SetNextWindowSize(ImVec2(width, height));
+    if (ImGui::Begin("right_panel", pOpen, windowFlags)){
+
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+            float nearPlane = camera->GetNearPlane();
+            if (ImGui::DragFloat("near plane", &nearPlane, 0.1f, 0.1f, 10.0f, "%.1f")) {
+                camera->SetNearPlane(nearPlane);
+            }
+
+            float farPlane = camera->GetFarPlane();
+            if (ImGui::DragFloat("far plane", &farPlane, 1.0f, 10.0f, 5000.0f, "%.0f")) {
+                camera->SetFarPlane(farPlane);
+            }
+        }
+
         ImGui::End();
     }
 }
@@ -76,13 +122,4 @@ void UIInterface::DrawExample() {
             m_showAnotherWindow = false;
         ImGui::End();
     }
-}
-
-void UIInterface::Draw(const Gui& gui, float fps, uint32_t tpf) {
-    gui.NewFrame();
-    DrawInfoBar(fps, tpf);
-    // DrawExample();
-    // ImGui::ShowStyleEditor();
-
-    gui.EndFrame();
 }

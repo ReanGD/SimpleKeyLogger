@@ -14,7 +14,17 @@ public:
 public:
 	// screenWidth / screenHeight
 	void SetAspectRatio(float value);
+	void SetNearPlane(float value);
+	void SetFarPlane(float value);
 	void SetViewParams(const glm::vec3& position, const glm::vec3& direction);
+
+	float GetNearPlane() const noexcept {
+		return m_nearPlane;
+	}
+
+	float GetFarPlane() const noexcept {
+		return m_farPlane;
+	}
 
 	glm::vec3 GetPosition() const noexcept {
 		return m_position;

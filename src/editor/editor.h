@@ -1,6 +1,5 @@
 #pragma once
 
-#include "engine/engine.h"
 #include "editor/ui_interface.h"
 #include "engine/material/uniform_buffer.h"
 #include "middleware/camera/fly_controller.h"

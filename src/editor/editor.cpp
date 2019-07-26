@@ -149,7 +149,7 @@ void Editor::Render(Engine& engine) {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Draw(engine.GetGui(), engine.GetFps(), engine.GetTpf());
+    m_interface.Draw(engine, m_editorMode);
 }
 
 void Editor::Destroy() {

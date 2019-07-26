@@ -16,6 +16,16 @@ void Camera::SetAspectRatio(float value) {
 	m_matProj = glm::perspective(m_fovy, m_aspectRatio, m_nearPlane, m_farPlane);
 }
 
+void Camera::SetNearPlane(float value) {
+	m_nearPlane = value;
+	m_matProj = glm::perspective(m_fovy, m_aspectRatio, m_nearPlane, m_farPlane);
+}
+
+void Camera::SetFarPlane(float value) {
+	m_farPlane = value;
+	m_matProj = glm::perspective(m_fovy, m_aspectRatio, m_nearPlane, m_farPlane);
+}
+
 void Camera::SetViewParams(const glm::vec3& position, const glm::vec3& direction) {
 	m_position = position;
 	calcViewMatrix(direction);
