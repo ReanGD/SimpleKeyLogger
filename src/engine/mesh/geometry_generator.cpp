@@ -143,15 +143,9 @@ std::shared_ptr<Geometry> GeometryGenerator::CreateSolidSphere(uint16_t cntVerte
     return std::make_shared<Geometry>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
-std::shared_ptr<Geometry> GeometryGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
-    const uint32_t cntSidesMax = 0xFFFF/3-1;
-    const uint32_t cntSidesMin = 2;
-    cntXSides = glm::max(glm::min(cntXSides, cntSidesMax), cntSidesMin);
-    cntZSides = glm::max(glm::min(cntZSides, cntSidesMax), cntSidesMin);
-    cntZSides = glm::min(cntZSides,(0xFFFF/(cntXSides+1)-1));
-
+template<class T>
+std::shared_ptr<Geometry> CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
     // CAABB box;
-
     uint32_t ind = 0;
     uint32_t vertexCnt = (cntXSides+1)*(cntZSides+1);
     auto* vb = new VertexPNTC[vertexCnt];
@@ -171,11 +165,11 @@ std::shared_ptr<Geometry> GeometryGenerator::CreateSolidPlane(uint32_t cntXSides
 
     ind = 0;
     uint32_t indexCnt = cntXSides*cntZSides*6;
-    uint16_t* ib = new uint16_t[indexCnt];
-    for(uint16_t i=0; i!=cntXSides; ++i) {
-        for(uint16_t j=0; j!=cntZSides; ++j) {
-            uint16_t z1 = i * static_cast<uint16_t>(cntXSides + 1) + j;
-            uint16_t z2 = z1 + static_cast<uint16_t>(cntZSides + 1);
+    T* ib = new T[indexCnt];
+    for(T i=0; i!=cntXSides; ++i) {
+        for(T j=0; j!=cntZSides; ++j) {
+            T z1 = i * static_cast<T>(cntXSides + 1) + j;
+            T z2 = z1 + static_cast<T>(cntZSides + 1);
             ib[ind++] = z1;
             ib[ind++] = z1+1;
             ib[ind++] = z2;
@@ -189,8 +183,19 @@ std::shared_ptr<Geometry> GeometryGenerator::CreateSolidPlane(uint32_t cntXSides
     VertexBuffer vertexBuffer(vb, vertexCnt * sizeof(VertexPNTC));
     delete []vb;
 
-    IndexBuffer indexBuffer(ib, indexCnt * sizeof(*ib));
+    IndexBuffer indexBuffer(ib, indexCnt * sizeof(T));
     delete []ib;
 
     return std::make_shared<Geometry>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+}
+
+std::shared_ptr<Geometry> GeometryGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
+    cntXSides = glm::max(cntXSides, uint32_t(2));
+    cntZSides = glm::max(cntZSides, uint32_t(2));
+
+    if (cntXSides*cntZSides*6 <= std::numeric_limits<uint16_t>::max()) {
+        return ::CreateSolidPlane<uint16_t>(cntXSides, cntZSides, scaleTextureX, scaleTextureZ);
+    } else {
+        return ::CreateSolidPlane<uint32_t>(cntXSides, cntZSides, scaleTextureX, scaleTextureZ);
+    }
 }
