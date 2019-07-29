@@ -4,8 +4,22 @@
 #include <filesystem>
 #include <fmt/format.h>
 
+static const ImGuiWindowFlags staticWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
-bool UIInterface::Init(const Gui&, std::string& error) {
+static bool BeginWindow(const char* name, rect& rect, ImGuiWindowFlags flags = staticWindowFlags) {
+    bool* pOpen = nullptr;
+    ImGui::SetNextWindowPos(ImVec2(rect.posX, rect.posY));
+    ImGui::SetNextWindowSize(ImVec2(rect.sizeX, rect.sizeY));
+    return ImGui::Begin(name, pOpen, flags);
+}
+
+UIInterface::UIInterface(Engine& engine)
+    : m_engine(engine) {
+
+}
+
+bool UIInterface::Init(std::string& error) {
     ImGuiIO& io = ImGui::GetIO();
     m_fontDefault = io.Fonts->AddFontDefault();
     if (m_fontDefault == nullptr) {
@@ -23,52 +37,61 @@ bool UIInterface::Init(const Gui&, std::string& error) {
     return true;
 }
 
-void UIInterface::Draw(Engine& engine, bool editorMode) {
-    auto& gui = engine.GetGui();
+void UIInterface::Render(bool editorMode) {
+    auto& gui = m_engine.GetGui();
+    auto& wio = m_engine.GetWindow().GetIO();
+    uint32_t width, height;
+    wio.GetFramebufferSize(width, height);
+
     gui.NewFrame();
-    DrawInfoBar(engine);
+    rect rect;
+
     if (editorMode) {
-        DrawRightPanel(engine);
+        uint32_t widthRightPanel = 300;
+        rect.sizeX = widthRightPanel;
+        rect.sizeY = height;
+        rect.posX = width - rect.sizeX;
+        rect.posY = 0;
+        DrawRightPanel(rect);
+
+        rect.sizeX = width - widthRightPanel;
+        rect.sizeY = height;
+        rect.posX = 0;
+        rect.posY = 0;
+        DrawViewer(rect);
         // DrawExample();
         // ImGui::ShowStyleEditor();
+    } else {
+        rect.posX = 0;
+        rect.posY = 0;
+        rect.sizeX = 300;
+        rect.sizeY = 50;
+        DrawInfoBar(rect);
     }
 
     gui.EndFrame();
 }
 
+void UIInterface::Destroy() {
 
-void UIInterface::DrawInfoBar(Engine& engine) {
-    bool* pOpen = nullptr;
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(300, 50));
-    if (ImGui::Begin("infobar", pOpen, windowFlags)){
+}
+
+void UIInterface::DrawInfoBar(rect& rect) {
+    if (BeginWindow("infobar", rect)) {
         ImGui::PushFont(m_fontMono);
-        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M", engine.GetFps(), static_cast<double>(engine.GetTpf()) / 1000.0 / 1000.0);
+        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M", m_engine.GetFps(), static_cast<double>(m_engine.GetTpf()) / 1000.0 / 1000.0);
         ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "%s", text.c_str());
         ImGui::PopFont();
+
         ImGui::End();
     }
 }
 
-void UIInterface::DrawRightPanel(Engine& engine) {
-    auto camera = engine.GetScene().GetCamera();
-    auto& wio = engine.GetWindow().GetIO();
-    uint32_t fbWidth, fbHeight;
-    wio.GetFramebufferSize(fbWidth, fbHeight);
-
-    bool* pOpen = nullptr;
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
-
-    uint32_t width = 300;
-    uint32_t height = fbHeight;
-    ImGui::SetNextWindowPos(ImVec2(fbWidth - width, 0));
-    ImGui::SetNextWindowSize(ImVec2(width, height));
-    if (ImGui::Begin("right_panel", pOpen, windowFlags)){
+void UIInterface::DrawRightPanel(rect& rect) {
+    if (BeginWindow("right_panel", rect)) {
 
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+            auto camera = m_engine.GetScene().GetCamera();
             float nearPlane = camera->GetNearPlane();
             if (ImGui::DragFloat("near plane", &nearPlane, 0.1f, 0.1f, 10.0f, "%.1f")) {
                 camera->SetNearPlane(nearPlane);
@@ -79,6 +102,13 @@ void UIInterface::DrawRightPanel(Engine& engine) {
                 camera->SetFarPlane(farPlane);
             }
         }
+
+        ImGui::End();
+    }
+}
+
+void UIInterface::DrawViewer(rect& rect) {
+    if (BeginWindow("viewer", rect)) {
 
         ImGui::End();
     }

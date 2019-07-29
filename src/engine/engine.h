@@ -6,18 +6,13 @@
 #include "engine/scene/scene.h"
 
 
-class Engine {
+class Engine : Noncopyable {
 public:
-    Engine(const Engine&) = delete;
-    Engine(Engine&&) = delete;
-    Engine& operator=(const Engine&) = delete;
-    Engine& operator=(Engine&&) = delete;
-
     Engine() = default;
     ~Engine() = default;
 
     bool Init(bool isFullscreen, float windowMultiplier, std::string& error);
-    void Run(const std::function<void (Engine&)>& callback);
+    void Run(const std::function<void ()>& callback);
 
     Gui& GetGui() noexcept {
         return m_gui;

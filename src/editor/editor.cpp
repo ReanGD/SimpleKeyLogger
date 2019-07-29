@@ -6,13 +6,19 @@
 #include "engine/mesh/geometry_generator.h"
 
 
-bool Editor::Init(Engine& engine, std::string& error) {
-    if (!m_interface.Init(engine.GetGui(), error)) {
+Editor::Editor(Engine& engine)
+    : m_engine(engine)
+    , m_interface(engine) {
+
+}
+
+bool Editor::Init(std::string& error) {
+    if (!m_interface.Init(error)) {
         return false;
     }
-    SetEditorMode(engine, m_editorMode);
+    SetEditorMode(m_editorMode);
 
-    auto& scene = engine.GetScene();
+    auto& scene = m_engine.GetScene();
 
     auto camera = scene.GetCamera();
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -124,10 +130,10 @@ bool Editor::Init(Engine& engine, std::string& error) {
     return true;
 }
 
-void Editor::Render(Engine& engine) {
-    ProcessIO(engine);
+void Editor::Render() {
+    ProcessIO();
 
-    auto& scene = engine.GetScene();
+    auto& scene = m_engine.GetScene();
     auto camera = scene.GetCamera();
 
     m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), camera->GetProjMatrix());
@@ -149,10 +155,12 @@ void Editor::Render(Engine& engine) {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Draw(engine, m_editorMode);
+    m_interface.Render(m_editorMode);
 }
 
 void Editor::Destroy() {
+    m_interface.Destroy();
+
     m_texture.Destroy();
     m_groundTex.Destroy();
     m_heightmapTex.Destroy();
@@ -162,15 +170,15 @@ void Editor::Destroy() {
     m_line.reset();
 }
 
-void Editor::SetEditorMode(Engine& engine, bool value) {
+void Editor::SetEditorMode(bool value) {
     m_editorMode = value;
-    engine.GetWindow().SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
-    engine.GetGui().EnableInput(m_editorMode);
+    m_engine.GetWindow().SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
+    m_engine.GetGui().EnableInput(m_editorMode);
     m_controller.EnableInput(!m_editorMode);
 }
 
-void Editor::ProcessIO(Engine& engine) {
-    auto& window = engine.GetWindow();
+void Editor::ProcessIO() {
+    auto& window = m_engine.GetWindow();
     WindowInput& wio = window.GetIO();
 
     if (wio.IsKeyReleasedFirstTime(Key::Escape)) {
@@ -182,11 +190,11 @@ void Editor::ProcessIO(Engine& engine) {
     }
 
     if (wio.IsKeyReleasedFirstTime(Key::F2)) {
-        SetEditorMode(engine, !m_editorMode);
+        SetEditorMode(!m_editorMode);
     }
 
     if (wio.IsKeyReleasedFirstTime(Key::L)) {
-        engine.SetFillPoligone(!engine.IsFillPoligone());
+        m_engine.SetFillPoligone(!m_engine.IsFillPoligone());
     }
 
     if (wio.IsKeyReleasedFirstTime(Key::N)) {
@@ -197,7 +205,7 @@ void Editor::ProcessIO(Engine& engine) {
         if (wio.IsKeyReleasedFirstTime(Key::MouseLeft)) {
             glm::vec2 coord;
             wio.GetHomogeneousClipCursorPosition(coord.x, coord.y);
-            auto camera = engine.GetScene().GetCamera();
+            auto camera = m_engine.GetScene().GetCamera();
             glm::vec3 pos = camera->GetPosition();
             glm::vec3 rayWorld = camera->HomogeneousPositionToRay(coord);
 
@@ -211,5 +219,5 @@ void Editor::ProcessIO(Engine& engine) {
         }
     }
 
-    m_controller.Update(wio, engine.GetDeltaTime());
+    m_controller.Update(wio, m_engine.GetDeltaTime());
 }

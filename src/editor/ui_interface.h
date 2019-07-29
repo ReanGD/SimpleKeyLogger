@@ -2,25 +2,31 @@
 
 #include "engine/engine.h"
 
+struct rect {
+    uint32_t posX = 0;
+    uint32_t posY = 0;
+    uint32_t sizeX = 0;
+    uint32_t sizeY = 0;
+};
 
 struct ImFont;
 class UIInterface : Noncopyable {
 public:
-    UIInterface(const UIInterface&) = delete;
-    UIInterface(UIInterface&&) = delete;
-    UIInterface& operator=(const UIInterface&) = delete;
-    UIInterface& operator=(UIInterface&&) = delete;
-
-    UIInterface() = default;
+    UIInterface() = delete;
+    UIInterface(Engine& engine);
     ~UIInterface() = default;
 
-    bool Init(const Gui& gui, std::string& error);
-    void Draw(Engine& engine, bool editorMode);
+    bool Init(std::string& error);
+    void Render(bool editorMode);
+    void Destroy();
+
 private:
-    void DrawInfoBar(Engine& engine);
-    void DrawRightPanel(Engine& engine);
+    void DrawInfoBar(rect& rect);
+    void DrawRightPanel(rect& rect);
+    void DrawViewer(rect& rect);
     void DrawExample();
 private:
+    Engine& m_engine;
     ImFont* m_fontDefault = nullptr;
     ImFont* m_fontMono = nullptr;
 };

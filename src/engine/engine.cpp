@@ -30,7 +30,7 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     return true;
 }
 
-void Engine::Run(const std::function<void (Engine&)>& callback) {
+void Engine::Run(const std::function<void ()>& callback) {
     auto timeLast = std::chrono::steady_clock::now();
 
     uint32_t width, height;
@@ -51,7 +51,7 @@ void Engine::Run(const std::function<void (Engine&)>& callback) {
         m_timeDeltasPos = (m_timeDeltasPos+1) % m_timeDeltas.size();
 
         m_gui.Update(m_window, m_deltaTime);
-        callback(*this);
+        callback();
 
         m_window.EndFrame();
     }

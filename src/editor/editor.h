@@ -7,24 +7,21 @@
 
 class Editor : Noncopyable {
 public:
-    Editor(const Editor&) = delete;
-    Editor(Editor&&) = delete;
-    Editor& operator=(const Editor&) = delete;
-    Editor& operator=(Editor&&) = delete;
-
-    Editor() = default;
+    Editor() = delete;
+    Editor(Engine& engine);
     ~Editor() = default;
 
 
-    bool Init(Engine& engine, std::string& error);
-    void Render(Engine& engine);
+    bool Init(std::string& error);
+    void Render();
     void Destroy();
 
 private:
-    void SetEditorMode(Engine& engine, bool value);
-    void ProcessIO(Engine& engine);
+    void SetEditorMode(bool value);
+    void ProcessIO();
 
 private:
+    Engine& m_engine;
     bool m_editorMode = false;
     bool m_showNormals = false;
     Texture m_texture;

@@ -17,7 +17,7 @@ int main() {
 
     try {
         Engine engine;
-        Editor editor;
+        Editor editor(engine);
 
         std::string error;
         if(!engine.Init(false, 0.8f, error)) {
@@ -25,13 +25,13 @@ int main() {
             return EXIT_FAILURE;
         }
 
-        if(!editor.Init(engine, error)) {
+        if(!editor.Init(error)) {
             std::cerr << "Error init editor: " << error << std::endl;
             return EXIT_FAILURE;
         }
 
-        engine.Run([&editor](Engine& engine){
-            editor.Render(engine);
+        engine.Run([&editor](){
+            editor.Render();
         });
 
         editor.Destroy();
