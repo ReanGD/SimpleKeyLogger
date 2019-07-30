@@ -7,6 +7,33 @@
 #include <fmt/format.h>
 #include "engine/common/glapi.h"
 
+bool Texture::Create(uint32_t width, uint32_t height, std::string& /*error*/) {
+    GLuint handle;
+    glGenTextures(1, &handle);
+    glBindTexture(GL_TEXTURE_2D, handle);
+
+    // TODO: fix
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    GLint level = 0;
+    GLint outFormat = GL_RGB;
+    GLint inFormat = GL_RGB;
+    GLenum inType = GL_UNSIGNED_BYTE;
+    void *data = nullptr;
+    GLint border = 0; // This value must be 0
+
+    glTexImage2D(GL_TEXTURE_2D, level, outFormat, static_cast<GLsizei>(width), static_cast<GLsizei>(height), border, inFormat, inType, data);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    Destroy();
+    m_handle = handle;
+
+    return true;
+}
 
 bool Texture::Load(const std::string& path, std::string& error) {
     const auto fullPath = std::filesystem::current_path() / "assets" / "textures" / path;

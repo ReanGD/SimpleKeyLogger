@@ -8,6 +8,7 @@ public:
     Texture() = default;
     ~Texture() = default;
 
+    bool Create(uint32_t width, uint32_t height, std::string& error);
     bool Load(const std::string& path, std::string& error);
 
     void Bind(uint unit) const;
