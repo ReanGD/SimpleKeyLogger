@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include "engine/common/glapi.h"
 
-bool Texture::Create(uint32_t width, uint32_t height, std::string& /*error*/) {
+void Texture::Create(uint32_t width, uint32_t height) noexcept {
     GLuint handle;
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
@@ -31,8 +31,6 @@ bool Texture::Create(uint32_t width, uint32_t height, std::string& /*error*/) {
 
     Destroy();
     m_handle = handle;
-
-    return true;
 }
 
 bool Texture::Load(const std::string& path, std::string& error) {
@@ -96,14 +94,19 @@ bool Texture::Load(const std::string& path, std::string& error) {
     return true;
 }
 
-void Texture::Bind(uint unit) const {
+void Texture::Bind(uint unit) const noexcept {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 
-void Texture::Unbind(uint unit) const {
+void Texture::Unbind(uint unit) const noexcept {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::AttachToFramebuffer() const noexcept {
+    GLint mipmapLvl = 0;
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_handle, mipmapLvl);
 }
 
 void Texture::Destroy() {

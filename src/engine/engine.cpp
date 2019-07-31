@@ -40,7 +40,7 @@ void Engine::Run(const std::function<void ()>& callback) {
         wio.GetFramebufferSize(width, height);
         glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         auto now = std::chrono::steady_clock::now();
         m_deltaTime = std::chrono::duration<float>(now - timeLast).count();
