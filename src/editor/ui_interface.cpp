@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fmt/format.h>
 
+
 static const ImGuiWindowFlags staticWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
@@ -37,7 +38,7 @@ bool UIInterface::Init(std::string& error) {
     return true;
 }
 
-void UIInterface::Render(bool editorMode) {
+void UIInterface::Render(bool editorMode, uint image) {
     auto& gui = m_engine.GetGui();
     auto& wio = m_engine.GetWindow().GetIO();
     uint32_t width, height;
@@ -58,7 +59,7 @@ void UIInterface::Render(bool editorMode) {
         rect.sizeY = height;
         rect.posX = 0;
         rect.posY = 0;
-        DrawViewer(rect);
+        DrawViewer(rect, image);
         // DrawExample();
         // ImGui::ShowStyleEditor();
     } else {
@@ -107,8 +108,10 @@ void UIInterface::DrawRightPanel(rect& rect) {
     }
 }
 
-void UIInterface::DrawViewer(rect& rect) {
+void UIInterface::DrawViewer(rect& rect, uint image) {
     if (BeginWindow("viewer", rect)) {
+
+        ImGui::Image(reinterpret_cast<ImTextureID>(image), ImVec2(512,512), ImVec2(0,1), ImVec2(1,0));
 
         ImGui::End();
     }

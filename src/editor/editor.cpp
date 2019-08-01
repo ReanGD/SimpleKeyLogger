@@ -127,6 +127,11 @@ bool Editor::Init(std::string& error) {
         }
     }
 
+    m_fbo = std::make_shared<Framebuffer>();
+    if (!m_fbo->Create(2000, 2000, error)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -144,6 +149,12 @@ void Editor::Render() {
     m_ubCamera->Bind(index);
 
     scene.Draw();
+    m_fbo->Bind();
+    glViewport(0, 0, 2000, 2000);
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    scene.Draw();
+    m_fbo->Unbind();
     if (m_showNormals) {
         scene.DrawWithMaterial(*m_materialNormals);
     }
@@ -155,7 +166,7 @@ void Editor::Render() {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Render(m_editorMode);
+    m_interface.Render(m_editorMode, m_fbo->GetColorBufferHandle());
 }
 
 void Editor::Destroy() {
@@ -168,6 +179,7 @@ void Editor::Destroy() {
     m_materialLine.reset();
     m_materialNormals.reset();
     m_line.reset();
+    m_fbo.reset();
 }
 
 void Editor::SetEditorMode(bool value) {

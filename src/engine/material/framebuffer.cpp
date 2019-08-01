@@ -41,6 +41,7 @@ void Framebuffer::Unbind() const {
 
 void Framebuffer::Destroy() {
     if (m_handle != 0) {
+        m_colorBuffer.Destroy();
         glDeleteFramebuffers(1, &m_handle);
         m_handle = 0;
     }

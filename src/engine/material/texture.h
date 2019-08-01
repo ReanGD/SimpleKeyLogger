@@ -11,6 +11,10 @@ public:
     void Create(uint32_t width, uint32_t height) noexcept;
     bool Load(const std::string& path, std::string& error);
 
+    uint GetHandle() const noexcept {
+        return m_handle;
+    }
+
     void Bind(uint unit) const noexcept;
     void Unbind(uint unit) const noexcept;
     void AttachToFramebuffer() const noexcept;

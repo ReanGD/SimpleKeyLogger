@@ -17,13 +17,13 @@ public:
     ~UIInterface() = default;
 
     bool Init(std::string& error);
-    void Render(bool editorMode);
+    void Render(bool editorMode, uint image);
     void Destroy();
 
 private:
     void DrawInfoBar(rect& rect);
     void DrawRightPanel(rect& rect);
-    void DrawViewer(rect& rect);
+    void DrawViewer(rect& rect, uint image);
     void DrawExample();
 private:
     Engine& m_engine;
