@@ -29,4 +29,5 @@ private:
     Engine& m_engine;
     ImFont* m_fontDefault = nullptr;
     ImFont* m_fontMono = nullptr;
+    Texture m_heightmapTex;
 };

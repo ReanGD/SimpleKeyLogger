@@ -7,7 +7,15 @@
 #include <fmt/format.h>
 #include "engine/common/glapi.h"
 
-void Texture::Create(uint32_t width, uint32_t height) noexcept {
+GLint PixelFormatToGL(PixelFormat value) {
+    switch (value) {
+    case PixelFormat::RGB: return GL_RGB;
+    case PixelFormat::RGBA: return GL_RGBA;
+    default: return GL_RGB;
+    }
+}
+
+void Texture::Create(uint32_t width, uint32_t height, PixelFormat format, void* data) noexcept {
     GLuint handle;
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
@@ -19,10 +27,9 @@ void Texture::Create(uint32_t width, uint32_t height) noexcept {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     GLint level = 0;
-    GLint outFormat = GL_RGB;
-    GLint inFormat = GL_RGB;
+    GLint outFormat = PixelFormatToGL(format);
+    GLint inFormat = PixelFormatToGL(format);
     GLenum inType = GL_UNSIGNED_BYTE;
-    void *data = nullptr;
     GLint border = 0; // This value must be 0
 
     glTexImage2D(GL_TEXTURE_2D, level, outFormat, static_cast<GLsizei>(width), static_cast<GLsizei>(height), border, inFormat, inType, data);
