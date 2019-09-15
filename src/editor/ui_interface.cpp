@@ -5,7 +5,12 @@
 #include <fmt/format.h>
 #include <noise/noise.h>
 #include <noise/noiseutils.h>
+#include <imgui_node_editor.h>
 
+
+namespace ed = ax::NodeEditor;
+
+static ed::EditorContext* g_Context = nullptr;
 
 static const ImGuiWindowFlags staticWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
@@ -84,6 +89,8 @@ bool UIInterface::Init(std::string& error) {
     m_heightmapTex.Create(512, 512, PixelFormat::RGBA, texData);
     delete []texData;
 
+    g_Context = ed::CreateEditor();
+
     return true;
 }
 
@@ -123,7 +130,7 @@ void UIInterface::Render(bool editorMode, uint image) {
 }
 
 void UIInterface::Destroy() {
-
+    ed::DestroyEditor(g_Context);
 }
 
 void UIInterface::DrawInfoBar(rect& rect) {
@@ -160,7 +167,26 @@ void UIInterface::DrawRightPanel(rect& rect) {
 void UIInterface::DrawViewer(rect& rect, uint /*image*/) {
     if (BeginWindow("viewer", rect)) {
 
-        ImGui::Image(reinterpret_cast<ImTextureID>(m_heightmapTex.GetHandle()), ImVec2(1024,1024), ImVec2(0,1), ImVec2(1,0));
+        // ImGui::Image(reinterpret_cast<ImTextureID>(m_heightmapTex.GetHandle()), ImVec2(1024,1024), ImVec2(0,1), ImVec2(1,0));
+        ed::SetCurrentEditor(g_Context);
+
+        ed::Begin("My Editor");
+
+        unsigned long uniqueId = 1;
+
+        // Start drawing nodes.
+        ed::BeginNode(uniqueId++);
+            ImGui::Text("Node A");
+            ed::BeginPin(uniqueId++, ed::PinKind::Input);
+                ImGui::Text("-> In");
+            ed::EndPin();
+            ImGui::SameLine();
+            ed::BeginPin(uniqueId++, ed::PinKind::Output);
+                ImGui::Text("Out ->");
+            ed::EndPin();
+        ed::EndNode();
+
+        ed::End();
 
         ImGui::End();
     }

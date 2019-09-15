@@ -54,10 +54,11 @@ endif()
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/libucl")
 add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/libnoise")
+add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/imgui_node_editor")
 
 add_executable(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE "src" "${CONAN_SRC_DIRS_IMGUI}/bindings")
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS} ucl noise)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS} ucl noise imgui_node_editor)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
