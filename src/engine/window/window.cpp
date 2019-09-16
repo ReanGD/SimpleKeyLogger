@@ -1,8 +1,15 @@
 #include "engine/window/window.h"
 
 #include <GLFW/glfw3.h>
+#include <fmt/format.h>
+#include <spdlog/spdlog.h>
 
-void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwindow* window) {
+
+static void GLFWErrorCallback(int error, const char* description) {
+    spdlog::error("GLFW error {}: {}", error, description);
+}
+
+static void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwindow* window) {
 	int monitorX, monitorY;
 	glfwGetMonitorPos(monitor, &monitorX, &monitorY);
 
@@ -14,7 +21,7 @@ void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwindow* win
 	glfwSetWindowPos(window, xpos, ypos);
 }
 
-GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, bool isFullscreen, float windowMultiplier, std::string& error) {
+static GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, bool isFullscreen, float windowMultiplier, std::string& error) {
     int width = mode->width;
     int height = mode->height;
     auto windowMonitor = monitor;
@@ -37,7 +44,7 @@ GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, bool isF
     return window;
 }
 
-Key TranslateKeyCode(int key) {
+static Key TranslateKeyCode(int key) {
     switch (key) {
     case GLFW_KEY_F1: return Key::F1;
     case GLFW_KEY_F2: return Key::F2;
@@ -163,7 +170,7 @@ Key TranslateKeyCode(int key) {
     }
 }
 
-Key TranslateMouseKeyCode(int key) {
+static Key TranslateMouseKeyCode(int key) {
     switch (key) {
     case GLFW_MOUSE_BUTTON_LEFT: return Key::MouseLeft;
     case GLFW_MOUSE_BUTTON_RIGHT: return Key::MouseRight;
@@ -264,7 +271,7 @@ GLFWcharfun GLFWCallbacks::m_prevChar = nullptr;
 Window::~Window() {
     m_monitor = nullptr;
     m_mode = nullptr;
-    if (m_window != nullptr) {
+    if (m_isGLFWInit && m_window != nullptr) {
         for (int i=0; i!=LastStandartCursor+1; ++i) {
             glfwDestroyCursor(m_cursors[i]);
             m_cursors[i] = nullptr;
@@ -274,11 +281,23 @@ Window::~Window() {
         glfwDestroyWindow(m_window);
         m_window = nullptr;
     }
+    if (m_isGLFWInit) {
+        glfwTerminate();
+    }
 }
 
 bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
     m_fullscreen = isFullscreen;
     m_windowMultiplier = windowMultiplier;
+
+    glfwSetErrorCallback(GLFWErrorCallback);
+
+    int initResult = glfwInit();
+    if (initResult != GLFW_TRUE) {
+        error = fmt::format("GLFW initialization error: {}", initResult);
+        return false;
+    }
+    m_isGLFWInit = true;
 
     m_monitor = glfwGetPrimaryMonitor();
     if (m_monitor == nullptr) {

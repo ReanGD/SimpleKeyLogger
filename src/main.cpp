@@ -1,33 +1,29 @@
-#include <iostream>
-#include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+
 #include "editor/editor.h"
 
 
-void glfwErrorCallback(int error, const char* description) {
-    std::cout << "GLFW error (" << error << "): " << description << std::endl;
-}
-
-int main() {
-    glfwSetErrorCallback(glfwErrorCallback);
-
-    if (glfwInit() != GLFW_TRUE) {
-        return EXIT_FAILURE;
+static bool run(bool isFullscreen, float windowMultiplier, spdlog::level::level_enum logLevel, bool logToFile) {
+    spdlog::set_level(logLevel);
+    if (logToFile) {
+        auto file_logger = spdlog::basic_logger_mt("basic_logger", "rtge.log");
+        spdlog::set_default_logger(file_logger);
     }
-    std::shared_ptr<void> _(nullptr, [](...){ glfwTerminate(); });
 
     try {
         Engine engine;
         Editor editor(engine);
 
         std::string error;
-        if(!engine.Init(false, 0.8f, error)) {
-            std::cerr << "Error init engine: " << error << std::endl;
-            return EXIT_FAILURE;
+        if(!engine.Init(isFullscreen, windowMultiplier, error)) {
+            spdlog::error("Engine initialization error: {}", error);
+            return false;
         }
 
         if(!editor.Init(error)) {
-            std::cerr << "Error init editor: " << error << std::endl;
-            return EXIT_FAILURE;
+            spdlog::error("Editor initialization error: {}", error);
+            return false;
         }
 
         engine.Run([&editor](){
@@ -36,9 +32,13 @@ int main() {
 
         editor.Destroy();
     } catch(const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
-        return EXIT_FAILURE;
+        spdlog::error("Runtime exception: {}", e.what());
+        return false;
     }
 
-    return EXIT_SUCCESS;
+    return true;
+}
+
+int main() {
+    return run(false, 0.8f, spdlog::level::debug, true) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

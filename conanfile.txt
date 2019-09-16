@@ -5,6 +5,7 @@ glfw/3.3@bincrafters/stable
 fmt/5.3.0@bincrafters/stable
 glew/2.1.0@bincrafters/stable
 imgui/1.73@bincrafters/stable
+spdlog/1.4.2@bincrafters/stable
 
 [generators]
 cmake

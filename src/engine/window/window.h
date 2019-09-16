@@ -53,6 +53,7 @@ private:
 
 private:
     WindowInput m_io;
+    bool m_isGLFWInit = false;
     bool m_fullscreen = false;
     float m_windowMultiplier = 0.7f;
     CursorType m_currentCursor = CursorType::Arrow;
