@@ -1,7 +1,7 @@
 #include "engine/engine.h"
 
 #include <chrono>
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
 
 
 bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
@@ -10,9 +10,7 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
         return false;
     }
 
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
-        error = "Failed to initialize GLEW";
+    if (!GLApi::Init(error)) {
         return false;
     }
 

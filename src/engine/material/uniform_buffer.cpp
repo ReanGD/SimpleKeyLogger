@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <algorithm>
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
 
 
 UniformBuffer::UniformBuffer(size_t size)

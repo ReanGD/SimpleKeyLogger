@@ -1,7 +1,7 @@
 #include "engine/mesh/geometry.h"
 
 #include <stdexcept>
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
 
 
 const VertexDecl VertexP::vDecl = {

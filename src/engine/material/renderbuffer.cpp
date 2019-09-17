@@ -1,6 +1,6 @@
 #include "engine/material/renderbuffer.h"
 
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
 
 
 Renderbuffer::Renderbuffer() {

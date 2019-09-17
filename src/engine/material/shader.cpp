@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <fmt/format.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
 
 
 static bool ReadFile(const char* filepath, std::string& data, std::string& error) {

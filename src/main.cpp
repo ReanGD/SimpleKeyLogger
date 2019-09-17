@@ -40,5 +40,5 @@ static bool run(bool isFullscreen, float windowMultiplier, spdlog::level::level_
 }
 
 int main() {
-    return run(false, 0.8f, spdlog::level::debug, true) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return run(false, 0.8f, spdlog::level::debug, false) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

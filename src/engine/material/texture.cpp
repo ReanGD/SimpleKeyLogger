@@ -5,7 +5,8 @@
 
 #include <filesystem>
 #include <fmt/format.h>
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
+
 
 GLint PixelFormatToGL(PixelFormat value) {
     switch (value) {

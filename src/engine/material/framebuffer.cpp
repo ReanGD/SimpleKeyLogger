@@ -1,6 +1,6 @@
 #include "engine/material/framebuffer.h"
 
-#include "engine/common/glapi.h"
+#include "engine/api/gl.h"
 
 
 Framebuffer::Framebuffer() {
