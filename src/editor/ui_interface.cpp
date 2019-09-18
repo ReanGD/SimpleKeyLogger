@@ -86,7 +86,7 @@ bool UIInterface::Init(std::string& error) {
         texData[i * outBytePerPixel + 2] = color.blue;
         texData[i * outBytePerPixel + 3] = color.alpha;
     }
-    m_heightmapTex.Create(512, 512, PixelFormat::RGBA, texData);
+    m_heightmapTex.Create(512, 512, PixelFormat::UNCOMPRESSED_R8G8B8A8, texData);
     delete []texData;
 
     g_Context = ed::CreateEditor();

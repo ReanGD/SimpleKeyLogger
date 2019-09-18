@@ -1,6 +1,22 @@
 #include "engine/material/framebuffer.h"
 
+#include <fmt/format.h>
 #include "engine/api/gl.h"
+
+static std::string FramebufferStatusResultToString(GLenum value) {
+    switch (value) {
+    case GL_FRAMEBUFFER_COMPLETE: return "GL_FRAMEBUFFER_COMPLETE";
+    case GL_FRAMEBUFFER_UNDEFINED: return "GL_FRAMEBUFFER_UNDEFINED";
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+    case GL_FRAMEBUFFER_UNSUPPORTED: return "GL_FRAMEBUFFER_UNSUPPORTED";
+    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: return "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+    default: return fmt::format("unknown value '{}'", value);
+    }
+}
 
 
 Framebuffer::Framebuffer() {
@@ -21,9 +37,10 @@ bool Framebuffer::Create(uint32_t width, uint32_t height, std::string& error) no
     m_colorBuffer.AttachToFramebuffer();
     m_depthBuffer.AttachToFramebuffer();
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (err != GL_FRAMEBUFFER_COMPLETE) {
         result = false;
-        error = "Framebuffer is not complete";
+        error = fmt::format("Framebuffer is not complete: {}", FramebufferStatusResultToString(err));
     }
 
     Unbind();

@@ -1,20 +1,9 @@
 #include "engine/material/texture.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include <filesystem>
-#include <fmt/format.h>
 #include "engine/api/gl.h"
+#include "engine/material/image_loader.h"
 
-
-GLint PixelFormatToGL(PixelFormat value) {
-    switch (value) {
-    case PixelFormat::RGB: return GL_RGB;
-    case PixelFormat::RGBA: return GL_RGBA;
-    default: return GL_RGB;
-    }
-}
 
 void Texture::Create(uint32_t width, uint32_t height, PixelFormat format, void* data) noexcept {
     GLuint handle;
@@ -28,8 +17,8 @@ void Texture::Create(uint32_t width, uint32_t height, PixelFormat format, void* 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     GLint level = 0;
-    GLint outFormat = PixelFormatToGL(format);
-    GLint inFormat = PixelFormatToGL(format);
+    GLint outFormat = ToOpenGL(format);
+    GLenum inFormat = static_cast<GLenum>(ToOpenGL(format));
     GLenum inType = GL_UNSIGNED_BYTE;
     GLint border = 0; // This value must be 0
 
@@ -43,31 +32,12 @@ void Texture::Create(uint32_t width, uint32_t height, PixelFormat format, void* 
 
 bool Texture::Load(const std::string& path, std::string& error) {
     const auto fullPath = std::filesystem::current_path() / "assets" / "textures" / path;
+
+    bool is16bit;
     int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
 
-    FILE *f = stbi__fopen(fullPath.c_str(), "rb");
-    if (f == nullptr) {
-        error = fmt::format("Failed to open a texture file '{}'", fullPath.c_str());
-        return false;
-    }
-
-    stbi__context s;
-    stbi__start_file(&s, f);
-    long pos = ftell(f);
-    bool is16bit = (stbi__is_16_main(&s) == 1);
-    fseek(f,pos,SEEK_SET);
-
-    void *data = nullptr;
-    if (is16bit) {
-        data = stbi__load_and_postprocess_16bit(&s, &width, &height, &channels, STBI_default);
-    } else {
-        data = stbi__load_and_postprocess_8bit(&s, &width, &height, &channels, STBI_default);
-    }
-    fclose(f);
-
-    if (data == nullptr) {
-        error = fmt::format("Failed to create a texture from file '{}', error: '{}'", fullPath.c_str(), stbi_failure_reason());
+    void *data = LoadImage(fullPath.c_str(), width, height, channels, is16bit, error);
+    if(data == nullptr) {
         return false;
     }
 
@@ -88,12 +58,12 @@ bool Texture::Load(const std::string& path, std::string& error) {
         case 3: outFormat = GL_RGB;  break;
         case 4: outFormat = GL_RGBA; break;
     }
-    GLenum inFormat = outFormat;
+    GLenum inFormat = static_cast<GLenum>(outFormat);
     GLenum inType = (is16bit) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
     GLint border = 0; // This value must be 0
     glTexImage2D(GL_TEXTURE_2D, 0, outFormat, width, height, border, inFormat, inType, data);
     glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(data);
+    FreeImage(data);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     Destroy();
