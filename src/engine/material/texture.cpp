@@ -1,14 +1,49 @@
 #include "engine/material/texture.h"
 
 #include <filesystem>
+#include <fmt/format.h>
 #include "engine/api/gl.h"
 #include "engine/material/image_loader.h"
 
 
-void Texture::Create(uint32_t width, uint32_t height, PixelFormat format, void* data) noexcept {
+bool Texture::Create(const Image& image, std::string& error) noexcept {
+    const auto pFormat = image.format;
+    if ((!GLApi::isDXTSupported) && (pFormat >= PixelFormat::FIRST_COMPRESSED)) {
+        error = fmt::format("DXT compressed texture format not supported");
+        return false;
+    }
+
+    GLenum internalFormat, format, type;
+    if (!image.GetOpenGLFormat(internalFormat, format, type)) {
+        error = fmt::format("Unsupported format: {}", ToStr(image.format));
+        return false;
+    }
+
+    // TODO: fix
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     GLuint handle;
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
+
+    GLint level = 0;
+    GLint border = 0; // This value must be 0
+    const auto width = static_cast<GLsizei>(image.width);
+    const auto height = static_cast<GLsizei>(image.height);
+    if (pFormat < PixelFormat::FIRST_COMPRESSED) {
+        glTexImage2D(GL_TEXTURE_2D, level, static_cast<GLint>(internalFormat), width, height, border, format, type, image.data);
+    } else {
+        GLsizei imageSize = static_cast<GLsizei>(image.GetSize());
+        glCompressedTexImage2D(GL_TEXTURE_2D, level, internalFormat, width, height, border, imageSize, image.data);
+    }
+
+    if (pFormat == PixelFormat::R8) {
+        GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
+        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+    } else if (pFormat == PixelFormat::R8G8) {
+        GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_RED, GL_ONE };
+        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+    }
 
     // TODO: fix
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -16,18 +51,12 @@ void Texture::Create(uint32_t width, uint32_t height, PixelFormat format, void* 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    GLint level = 0;
-    GLint outFormat = ToOpenGL(format);
-    GLenum inFormat = static_cast<GLenum>(ToOpenGL(format));
-    GLenum inType = GL_UNSIGNED_BYTE;
-    GLint border = 0; // This value must be 0
-
-    glTexImage2D(GL_TEXTURE_2D, level, outFormat, static_cast<GLsizei>(width), static_cast<GLsizei>(height), border, inFormat, inType, data);
-
     glBindTexture(GL_TEXTURE_2D, 0);
 
     Destroy();
     m_handle = handle;
+
+    return true;
 }
 
 bool Texture::Load(const std::string& path, std::string& error) {

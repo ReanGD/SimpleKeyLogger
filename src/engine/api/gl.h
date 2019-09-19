@@ -6,5 +6,7 @@
 
 
 struct GLApi {
+    static bool isDXTSupported; // DDS texture compression support
+
     static bool Init(std::string& error);
 };

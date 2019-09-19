@@ -9,7 +9,7 @@ public:
     Texture() = default;
     ~Texture() = default;
 
-    void Create(uint32_t width, uint32_t height, PixelFormat format = PixelFormat::UNCOMPRESSED_R8G8B8, void* data = nullptr) noexcept;
+    bool Create(const Image& image, std::string& error) noexcept;
     bool Load(const std::string& path, std::string& error);
 
     uint GetHandle() const noexcept {

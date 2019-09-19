@@ -29,7 +29,10 @@ Framebuffer::~Framebuffer() {
 
 bool Framebuffer::Create(uint32_t width, uint32_t height, std::string& error) noexcept {
     bool result = true;
-    m_colorBuffer.Create(width, height);
+    if(!m_colorBuffer.Create(Image(width, height, PixelFormat::R8G8B8, nullptr), error)) {
+        return false;
+    }
+
     m_depthBuffer.Create(width, height);
 
     Bind();
