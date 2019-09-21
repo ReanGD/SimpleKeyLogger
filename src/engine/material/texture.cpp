@@ -37,14 +37,6 @@ bool Texture::Create(const Image& image, std::string& error) noexcept {
         glCompressedTexImage2D(GL_TEXTURE_2D, level, internalFormat, width, height, border, imageSize, image.data);
     }
 
-    if (pFormat == PixelFormat::R8) {
-        GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
-        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
-    } else if (pFormat == PixelFormat::R8G8) {
-        GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_RED, GL_ONE };
-        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
-    }
-
     // TODO: fix
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -62,38 +54,53 @@ bool Texture::Create(const Image& image, std::string& error) noexcept {
 bool Texture::Load(const std::string& path, std::string& error) {
     const auto fullPath = std::filesystem::current_path() / "assets" / "textures" / path;
 
-    bool is16bit;
-    int width, height, channels;
-
-    void *data = LoadImage(fullPath.c_str(), width, height, channels, is16bit, error);
-    if(data == nullptr) {
+    Image image;
+    if(!LoadImage(fullPath.c_str(), image, error)) {
         return false;
     }
+
+    const auto pFormat = image.format;
+    if ((!GLApi::isDXTSupported) && (pFormat >= PixelFormat::FIRST_COMPRESSED)) {
+        error = fmt::format("DXT compressed texture format not supported");
+        FreeImage(image.data);
+        return false;
+    }
+
+    GLenum internalFormat, format, type;
+    if (!image.GetOpenGLFormat(internalFormat, format, type)) {
+        error = fmt::format("Unsupported format: {}", ToStr(image.format));
+        FreeImage(image.data);
+        return false;
+    }
+
+    // TODO: fix
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     GLuint handle;
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
 
+    GLint level = 0;
+    GLint border = 0; // This value must be 0
+    const auto width = static_cast<GLsizei>(image.width);
+    const auto height = static_cast<GLsizei>(image.height);
+    if (pFormat < PixelFormat::FIRST_COMPRESSED) {
+        glTexImage2D(GL_TEXTURE_2D, level, static_cast<GLint>(internalFormat), width, height, border, format, type, image.data);
+        glGenerateMipmap(GL_TEXTURE_2D); //!
+    } else {
+        GLsizei imageSize = static_cast<GLsizei>(image.GetSize());
+        glCompressedTexImage2D(GL_TEXTURE_2D, level, internalFormat, width, height, border, imageSize, image.data);
+        // ?
+    }
+
     // TODO: fix
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);//!
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    GLint outFormat = GL_RGB;
-    switch(channels) {
-        case 1: outFormat = GL_RED;  break;
-        case 2: outFormat = GL_RG;   break;
-        case 3: outFormat = GL_RGB;  break;
-        case 4: outFormat = GL_RGBA; break;
-    }
-    GLenum inFormat = static_cast<GLenum>(outFormat);
-    GLenum inType = (is16bit) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
-    GLint border = 0; // This value must be 0
-    glTexImage2D(GL_TEXTURE_2D, 0, outFormat, width, height, border, inFormat, inType, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    FreeImage(data);
     glBindTexture(GL_TEXTURE_2D, 0);
+    FreeImage(image.data);
 
     Destroy();
     m_handle = handle;

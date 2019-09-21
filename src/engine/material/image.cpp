@@ -7,13 +7,18 @@
 std::string ToStr(PixelFormat value) {
     switch (value) {
         case PixelFormat::R8: return "R8";
+        case PixelFormat::R16: return "R16";
         case PixelFormat::R8G8: return "R8G8";
         case PixelFormat::R5G6B5: return "R5G6B5";
         case PixelFormat::R5G5B5A1: return "R5G5B5A1";
         case PixelFormat::R4G4B4A4: return "R4G4B4A4";
         case PixelFormat::R8G8B8: return "R8G8B8";
+        case PixelFormat::R16G16: return "R16G16";
         case PixelFormat::R8G8B8A8: return "R8G8B8A8";
         case PixelFormat::R32: return "R32";
+        case PixelFormat::R16G16B16: return "R16G16B16";
+        case PixelFormat::R16G16B16A16: return "R16G16B16A16";
+        case PixelFormat::R32G32: return "R32G32";
         case PixelFormat::R32G32B32: return "R32G32B32";
         case PixelFormat::R32G32B32A32: return "R32G32B32A32";
         case PixelFormat::DXT1_RGB: return "DXT1_RGB";
@@ -39,13 +44,18 @@ bool Image::GetOpenGLFormat(uint& internalFormat, uint& inFormat, uint& type) co
     type = UNKNOWN;
     switch (format) {
         case PixelFormat::R8: internalFormat = GL_R8; inFormat = GL_RED; type = GL_UNSIGNED_BYTE; break;
+        case PixelFormat::R16: internalFormat = GL_R16; inFormat = GL_RED; type = GL_UNSIGNED_SHORT; break;
         case PixelFormat::R8G8: internalFormat = GL_RG8; inFormat = GL_RG; type = GL_UNSIGNED_BYTE; break;
         case PixelFormat::R5G6B5: internalFormat = GL_RGB565; inFormat = GL_RGB; type = GL_UNSIGNED_SHORT_5_6_5; break;
         case PixelFormat::R5G5B5A1: internalFormat = GL_RGB5_A1; inFormat = GL_RGBA; type = GL_UNSIGNED_SHORT_5_5_5_1; break;
         case PixelFormat::R4G4B4A4: internalFormat = GL_RGBA4; inFormat = GL_RGBA; type = GL_UNSIGNED_SHORT_4_4_4_4; break;
         case PixelFormat::R8G8B8: internalFormat = GL_RGB8; inFormat = GL_RGB; type = GL_UNSIGNED_BYTE; break;
+        case PixelFormat::R16G16: internalFormat = GL_RG16; inFormat = GL_RG; type = GL_UNSIGNED_SHORT; break;
         case PixelFormat::R8G8B8A8: internalFormat = GL_RGBA8; inFormat = GL_RGBA; type = GL_UNSIGNED_BYTE; break;
         case PixelFormat::R32: internalFormat = GL_R32F; inFormat = GL_RED; type = GL_FLOAT; break;
+        case PixelFormat::R16G16B16: internalFormat = GL_RGB16; inFormat = GL_RGB; type = GL_UNSIGNED_SHORT; break;
+        case PixelFormat::R16G16B16A16: internalFormat = GL_RGBA16; inFormat = GL_RGBA; type = GL_UNSIGNED_SHORT; break;
+        case PixelFormat::R32G32: internalFormat = GL_RG32F; inFormat = GL_RG; type = GL_FLOAT; break;
         case PixelFormat::R32G32B32: internalFormat = GL_RGB32F; inFormat = GL_RGB; type = GL_FLOAT; break;
         case PixelFormat::R32G32B32A32: internalFormat = GL_RGBA32F; inFormat = GL_RGBA; type = GL_FLOAT; break;
 
@@ -64,15 +74,20 @@ size_t Image::GetSize() const noexcept {
     size_t bpp = 0; // Bits per pixel
     switch (format) {
         case PixelFormat::R8: bpp = 8; break;
+        case PixelFormat::R16:
         case PixelFormat::R8G8:
         case PixelFormat::R5G6B5:
         case PixelFormat::R5G5B5A1:
         case PixelFormat::R4G4B4A4: bpp = 16; break;
         case PixelFormat::R8G8B8: bpp = 24; break;
+        case PixelFormat::R16G16:
         case PixelFormat::R8G8B8A8:
         case PixelFormat::R32: bpp = 32; break;
-        case PixelFormat::R32G32B32: bpp = 32*3; break;
-        case PixelFormat::R32G32B32A32: bpp = 32*4; break;
+        case PixelFormat::R16G16B16: bpp = 48; break;
+        case PixelFormat::R16G16B16A16:
+        case PixelFormat::R32G32: bpp = 64; break;
+        case PixelFormat::R32G32B32: bpp = 96; break;
+        case PixelFormat::R32G32B32A32: bpp = 128; break;
         case PixelFormat::DXT1_RGB:
         case PixelFormat::DXT1_RGBA: bpp = 4; break;
         case PixelFormat::DXT3_RGBA:
