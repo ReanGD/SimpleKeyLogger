@@ -1,25 +1,28 @@
 #pragma once
 
-#include <string>
 #include "engine/material/image.h"
+#include "engine/common/noncopyable.h"
 
 
-class Texture {
+class Texture : Noncopyable {
+    struct Result {
+        bool value;
+    };
+    friend class Framebuffer;
+    friend class TextureManager;
+
 public:
-    Texture() = default;
-    ~Texture() = default;
-
-    bool Create(const Image& image, std::string& error) noexcept;
-    bool Load(const std::string& path, std::string& error);
-
-    uint GetHandle() const noexcept {
-        return m_handle;
-    }
+    Texture() = delete;
+    Texture(const Image& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept;
+    ~Texture() noexcept;
 
     void Bind(uint unit) const noexcept;
     void Unbind(uint unit) const noexcept;
-    void AttachToFramebuffer() const noexcept;
-    void Destroy();
+
+private:
+    bool Create(const Image& image, bool generateMipLevelsIfNeed, std::string& error) noexcept;
+    void Destroy() noexcept;
+
 private:
     uint m_handle = 0;
 };
