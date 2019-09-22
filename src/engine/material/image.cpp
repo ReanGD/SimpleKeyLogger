@@ -29,15 +29,14 @@ std::string ToStr(PixelFormat value) {
     }
 }
 
-Image::Image(uint32_t width, uint32_t height, PixelFormat format, void* data)
+ImageHeader::ImageHeader(uint32_t width, uint32_t height, PixelFormat format)
     : width(width)
     , height(height)
-    , format(format)
-    , data(data) {
+    , format(format) {
 
 }
 
-bool Image::GetOpenGLFormat(uint& internalFormat, uint& inFormat, uint& type) const noexcept {
+bool ImageHeader::GetOpenGLFormat(uint& internalFormat, uint& inFormat, uint& type) const noexcept {
     static constexpr const uint UNKNOWN = std::numeric_limits<uint>::max();
     internalFormat = UNKNOWN;
     inFormat = UNKNOWN;
@@ -70,7 +69,7 @@ bool Image::GetOpenGLFormat(uint& internalFormat, uint& inFormat, uint& type) co
     return true;
 }
 
-size_t Image::GetSize() const noexcept {
+size_t ImageHeader::GetSize() const noexcept {
     size_t bpp = 0; // Bits per pixel
     switch (format) {
         case PixelFormat::R8: bpp = 8; break;
@@ -108,4 +107,32 @@ size_t Image::GetSize() const noexcept {
     }
 
     return size;
+}
+
+Image::Image(const ImageHeader& header, uint32_t mipCount, void* data)
+    : header(header)
+    , mipCount(mipCount)
+    , data(data) {
+
+    if (data == nullptr) {
+        mipCount = 0;
+    } else if (mipCount == 0) {
+        mipCount = 1;
+    }
+}
+
+bool Image::GetNextMiplevel(Image& image) const noexcept {
+    if (mipCount <= 1) {
+        return false;
+    }
+
+    auto offset = header.GetSize();
+
+    image.header.width = std::max(header.width / 2, 1u);
+    image.header.height = std::max(header.height / 2, 1u);
+    image.header.format = header.format;
+    image.mipCount = mipCount - 1;
+    image.data = static_cast<uint8_t*>(data) + offset;
+
+    return true;
 }

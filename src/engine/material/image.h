@@ -38,9 +38,9 @@ enum class PixelFormat : uint8_t {
 
 std::string ToStr(PixelFormat value);
 
-struct Image {
-    Image() = default;
-    Image(uint32_t width, uint32_t height, PixelFormat format, void* data);
+struct ImageHeader {
+    ImageHeader() = default;
+    ImageHeader(uint32_t width, uint32_t height, PixelFormat format);
 
     bool GetOpenGLFormat(uint& internalFormat, uint& format, uint& type) const noexcept;
     size_t GetSize() const noexcept;
@@ -48,5 +48,16 @@ struct Image {
     uint32_t width = 0;
     uint32_t height = 0;
     PixelFormat format = PixelFormat::R8G8B8;
+};
+
+struct Image {
+    Image() = default;
+    Image(const ImageHeader& header, uint32_t mipCount, void* data);
+    ~Image() = default;
+
+    bool GetNextMiplevel(Image& image) const noexcept;
+
+    ImageHeader header;
+    uint32_t mipCount = 0;
     void* data = nullptr;
 };

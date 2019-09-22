@@ -5,7 +5,7 @@
 #include <fmt/format.h>
 
 
-bool LoadImage(const char *filename, Image& image, std::string& error) {
+bool image_loader::Load(const char *filename, Image& image, std::string& error) {
     stbi_set_flip_vertically_on_load(true);
     FILE *f = stbi__fopen(filename, "rb");
     if (f == nullptr) {
@@ -32,32 +32,30 @@ bool LoadImage(const char *filename, Image& image, std::string& error) {
     fclose(f);
 
     if (data == nullptr) {
-        error = fmt::format("Failed to load a image from file '{}', error: '{}'", filename, stbi_failure_reason());
+        error = fmt::format("failed to load a image from file '{}', error: '{}'", filename, stbi_failure_reason());
         return false;
     }
 
-    if ((channels < 1) || (channels > 4)) {
-        error = fmt::format("failed to parse a image file '{}', error: wrong value of 'channels' = {}", filename, channels);
-        FreeImage(data);
-        return false;
-    }
-
-    image.width = static_cast<uint32_t>(width);
-    image.height = static_cast<uint32_t>(height);
-    image.data = data;
-
+    PixelFormat format;
     switch(channels) {
-        case 1: image.format = is16bit ? PixelFormat::R16 : PixelFormat::R8; break;
-        case 2: image.format = is16bit ? PixelFormat::RG16 : PixelFormat::RG8; break;
-        case 3: image.format = is16bit ? PixelFormat::RGB16 : PixelFormat::RGB8; break;
-        case 4: image.format = is16bit ? PixelFormat::RGBA16 : PixelFormat::RGBA8; break;
+        case 1: format = is16bit ? PixelFormat::R16 : PixelFormat::R8; break;
+        case 2: format = is16bit ? PixelFormat::RG16 : PixelFormat::RG8; break;
+        case 3: format = is16bit ? PixelFormat::RGB16 : PixelFormat::RGB8; break;
+        case 4: format = is16bit ? PixelFormat::RGBA16 : PixelFormat::RGBA8; break;
+        default:
+            error = fmt::format("failed to parse a image file '{}', error: wrong value of 'channels' = {}", filename, channels);
+            stbi_image_free(data);
+            return false;
     }
 
-    return data;
+    ImageHeader header(static_cast<uint32_t>(width), static_cast<uint32_t>(height), format);
+    image = Image(header, 1, data);
+
+    return true;
 }
 
-void FreeImage(void* data) {
-    if (data != nullptr) {
-        stbi_image_free(data);
+void image_loader::Free(Image& image) {
+    if (image.data != nullptr) {
+        stbi_image_free(image.data);
     }
 }
