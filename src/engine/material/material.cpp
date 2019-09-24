@@ -18,7 +18,7 @@ Material& Material::SetBaseColor(const glm::vec3& color) noexcept {
     return *this;
 }
 
-Material& Material::SetBaseTexture(uint unit, const Texture& texture) noexcept {
+Material& Material::SetBaseTexture(uint unit, const std::shared_ptr<Texture>& texture) noexcept {
     m_baseTexture = texture;
     m_baseTextureUnit = unit;
 
@@ -27,8 +27,10 @@ Material& Material::SetBaseTexture(uint unit, const Texture& texture) noexcept {
 
 void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const {
     m_shader->Bind();
-    m_baseTexture.Bind(m_baseTextureUnit);
-    m_shader->SetInt("uBaseTexture", int(m_baseTextureUnit));
+    if (m_baseTexture) {
+        m_baseTexture->Bind(m_baseTextureUnit);
+        m_shader->SetInt("uBaseTexture", int(m_baseTextureUnit));
+    }
     m_shader->SetVec3("uBaseColor", m_baseColor);
 
     m_shader->SetMat4("uProjMatrix", camera->GetProjMatrix());
@@ -40,6 +42,8 @@ void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matM
 }
 
 void Material::Unbind() const {
-    m_baseTexture.Unbind(m_baseTextureUnit);
+    if (m_baseTexture) {
+        m_baseTexture->Unbind(m_baseTextureUnit);
+    }
     m_shader->Unbind();
 }

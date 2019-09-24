@@ -2,6 +2,7 @@
 
 #include <fmt/format.h>
 #include "engine/api/gl.h"
+#include "engine/material/texture_manager.h"
 
 static std::string FramebufferStatusResultToString(GLenum value) {
     switch (value) {
@@ -21,6 +22,7 @@ static std::string FramebufferStatusResultToString(GLenum value) {
 
 Framebuffer::Framebuffer() {
     glGenFramebuffers(1, &m_handle);
+    glGenRenderbuffers(1, &m_renderbufferHandle);
 }
 
 Framebuffer::~Framebuffer() {
@@ -29,21 +31,27 @@ Framebuffer::~Framebuffer() {
 
 bool Framebuffer::Create(uint32_t width, uint32_t height, std::string& error) noexcept {
     bool result = true;
-    if(!m_colorBuffer.Create(Image(width, height, PixelFormat::R8G8B8, nullptr), error)) {
+
+    glBindRenderbuffer(GL_RENDERBUFFER, m_renderbufferHandle);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    m_colorBuffer = TextureManager::Get().Create(ImageHeader(width, height, PixelFormat::R8G8B8), error);
+    if(!m_colorBuffer) {
+        error = fmt::format("Can't create colorbuffer for framebuffer: {}", error);
         return false;
     }
 
-    m_depthBuffer.Create(width, height);
-
     Bind();
 
-    m_colorBuffer.AttachToFramebuffer();
-    m_depthBuffer.AttachToFramebuffer();
+    GLint mipmapLvl = 0;
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBuffer->m_handle, mipmapLvl);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbufferHandle);
 
     auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (err != GL_FRAMEBUFFER_COMPLETE) {
         result = false;
-        error = fmt::format("Framebuffer is not complete: {}", FramebufferStatusResultToString(err));
+        error = fmt::format("framebuffer is not complete: {}", FramebufferStatusResultToString(err));
     }
 
     Unbind();
@@ -60,8 +68,12 @@ void Framebuffer::Unbind() const {
 }
 
 void Framebuffer::Destroy() {
+    if (m_renderbufferHandle != 0) {
+        glDeleteRenderbuffers(1, &m_renderbufferHandle);
+        m_renderbufferHandle = 0;
+    }
+
     if (m_handle != 0) {
-        m_colorBuffer.Destroy();
         glDeleteFramebuffers(1, &m_handle);
         m_handle = 0;
     }
