@@ -6,6 +6,7 @@
 #include <noise/noise.h>
 #include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
+#include "engine/material/texture_manager.h"
 
 
 namespace ed = ax::NodeEditor;
@@ -87,11 +88,12 @@ bool UIInterface::Init(std::string& error) {
         texData[i * outBytePerPixel + 3] = color.alpha;
     }
 
-    if (!m_heightmapTex.Create(Image(512, 512, PixelFormat::R8G8B8A8, texData), error)) {
-        delete []texData;
+    ImageHeader header(512, 512, PixelFormat::R8G8B8A8);
+    m_heightmapTex = TextureManager::Get().Create(Image(header, 1, texData), error);
+    delete []texData;
+    if (!m_heightmapTex) {
         return false;
     }
-    delete []texData;
 
     g_Context = ed::CreateEditor();
 
@@ -171,7 +173,7 @@ void UIInterface::DrawRightPanel(rect& rect) {
 void UIInterface::DrawViewer(rect& rect, uint /*image*/) {
     if (BeginWindow("viewer", rect)) {
 
-        // ImGui::Image(reinterpret_cast<ImTextureID>(m_heightmapTex.GetHandle()), ImVec2(1024,1024), ImVec2(0,1), ImVec2(1,0));
+        // ImGui::Image(reinterpret_cast<ImTextureID>(m_heightmapTex->GetHandle()), ImVec2(1024,1024), ImVec2(0,1), ImVec2(1,0));
         ed::SetCurrentEditor(g_Context);
 
         ed::Begin("My Editor");

@@ -1,9 +1,12 @@
 #include "editor/editor.h"
 
 #include <fmt/format.h>
+#include <spdlog/spdlog.h>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "engine/api/gl.h"
 #include "engine/mesh/geometry_generator.h"
+#include "engine/material/texture_manager.h"
 
 
 Editor::Editor(Engine& engine)
@@ -19,6 +22,8 @@ bool Editor::Init(std::string& error) {
     SetEditorMode(m_editorMode);
 
     auto& scene = m_engine.GetScene();
+    auto& texManager = TextureManager::Get();
+    texManager.AddFindPath(std::filesystem::current_path() / "assets" / "textures");
 
     auto camera = scene.GetCamera();
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -69,24 +74,27 @@ bool Editor::Init(std::string& error) {
         return false;
     }
 
-    if(!m_texture.Load("brice.jpg", error)) {
+    auto texture = texManager.Load("brice.jpg", error);
+    if(!texture) {
         return false;
     }
-    if(!m_groundTex.Load("ground.jpg", error)) {
+    auto groundTex = texManager.Load("ground.jpg", error);
+    if(!groundTex) {
         return false;
     }
-    if(!m_heightmapTex.Load("heightmap2.jpg", error)) {
+    auto heightmapTex = texManager.Load("heightmap2.jpg", error);
+    if(!heightmapTex) {
         return false;
     }
 
     Material materialTex(shaderTex);
-    materialTex.SetBaseTexture(0, m_texture);
+    materialTex.SetBaseTexture(0, texture);
 
     Material materialGround(shaderTex);
-    materialGround.SetBaseTexture(0, m_groundTex);
+    materialGround.SetBaseTexture(0, groundTex);
 
     Material materialLandscape(shaderLandscape);
-    materialLandscape.SetBaseTexture(0, m_heightmapTex);
+    materialLandscape.SetBaseTexture(0, heightmapTex);
     m_materialLine = std::make_shared<Material>(shaderLine);
     m_materialLine->SetBaseColor(glm::vec3(0.9f, 0.9f, 0.1f));
 
@@ -111,7 +119,7 @@ bool Editor::Init(std::string& error) {
     const auto meshCntZ = 1;
     Material materialSphere(shaderTexLight);
     materialSphere.SetBaseColor(glm::vec3(0.6f, 0.1f, 0.1f));
-    materialSphere.SetBaseTexture(0, m_groundTex);
+    materialSphere.SetBaseTexture(0, groundTex);
     auto sphereGeom = GeometryGenerator::CreateSolidSphere(100);
     for(auto i=0; i!=meshCntX; ++i) {
         float posX = 1.5f * static_cast<float>(i) - static_cast<float>(meshCntX) * 1.5f / 2.0f;
@@ -166,15 +174,11 @@ void Editor::Render() {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Render(m_editorMode, m_fbo->GetColorBufferHandle());
+    m_interface.Render(m_editorMode, 0);//m_fbo->GetColorBufferHandle());
 }
 
 void Editor::Destroy() {
     m_interface.Destroy();
-
-    m_texture.Destroy();
-    m_groundTex.Destroy();
-    m_heightmapTex.Destroy();
 
     m_materialLine.reset();
     m_materialNormals.reset();

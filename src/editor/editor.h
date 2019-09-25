@@ -25,9 +25,6 @@ private:
     Engine& m_engine;
     bool m_editorMode = false;
     bool m_showNormals = false;
-    Texture m_texture;
-    Texture m_groundTex;
-    Texture m_heightmapTex;
     std::shared_ptr<Framebuffer> m_fbo;
     std::shared_ptr<Material> m_materialLine;
     std::shared_ptr<Material> m_materialNormals;
