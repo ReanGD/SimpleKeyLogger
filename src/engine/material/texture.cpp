@@ -24,7 +24,7 @@ void Texture::Unbind(uint unit) const noexcept {
 
 bool Texture::Create(const Image& image, bool generateMipLevelsIfNeed, std::string& error) noexcept {
     const auto textureFormat = image.header.format;
-    if ((!GLApi::isDXTSupported) && (textureFormat >= PixelFormat::FIRST_COMPRESSED)) {
+    if ((!GLApi::IsDXTSupported) && (textureFormat >= PixelFormat::FIRST_COMPRESSED)) {
         error = fmt::format("DXT compressed texture format ({}) not supported", ToStr(textureFormat));
         return false;
     }

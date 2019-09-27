@@ -6,7 +6,10 @@
 
 
 struct GLApi {
-    static bool isDXTSupported; // DDS texture compression support
+    static bool IsDXTSupported; // DDS texture compression supported
+    static bool IsIFormatQuerySupported; // glGetInternalformativ supported
+
+    static std::string EnumToString(const GLint value);
 
     static bool Init(std::string& error);
 };
