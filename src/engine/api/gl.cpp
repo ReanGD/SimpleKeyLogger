@@ -132,6 +132,7 @@ static void LogContextParams() {
 }
 
 static void LogTextureFormatInfo(GLenum internalformat) {
+    // see https://www.khronos.org/opengl/wiki/GLAPI/glGetInternalformat
     GLint preferred, supported, imageFormat, imageType;
 
     glGetInternalformativ(GL_TEXTURE_2D, internalformat, GL_INTERNALFORMAT_PREFERRED, 1, &preferred);
@@ -186,7 +187,6 @@ bool GLApi::Init(std::string& error) {
     glGetIntegerv(GL_NUM_EXTENSIONS, &numExt);
 
     for (GLuint i=0; i!=static_cast<GLuint>(numExt); ++i) {
-        // GLubyte
         const char* name = reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i));
         spdlog::trace("Supported extension: {}", name);
 

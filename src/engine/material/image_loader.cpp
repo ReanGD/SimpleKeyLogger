@@ -1,5 +1,8 @@
 #include "engine/material/image_loader.h"
 
+#define STBI_NO_PSD
+#define STBI_NO_PIC
+#define STBI_NO_PNM
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <fmt/format.h>
@@ -15,26 +18,26 @@ bool image_loader::Load(const char *filename, Image& image, std::string& error) 
 
     stbi__context s;
     stbi__start_file(&s, f);
-    long pos = ftell(f);
-    bool is16bit = (stbi__is_16_main(&s) == 1);
-    fseek(f,pos,SEEK_SET);
 
     int width = 0;
     int height = 0;
     int channels = 0;
-    void* data = nullptr;
-    if (is16bit) {
-        data = stbi__load_and_postprocess_16bit(&s, &width, &height, &channels, STBI_default);
-    } else {
-        data = stbi__load_and_postprocess_8bit(&s, &width, &height, &channels, STBI_default);
-    }
-    // stbi_loadf_from_file
+    stbi__result_info ri;
+    void* data = stbi__load_main(&s, &width, &height, &channels, STBI_default, &ri, 0);
+
     fclose(f);
 
     if (data == nullptr) {
         error = fmt::format("failed to load a image from file '{}', error: '{}'", filename, stbi_failure_reason());
         return false;
     }
+
+    if ((ri.bits_per_channel != 16) && (ri.bits_per_channel != 8)) {
+        error = fmt::format("failed to load a image from file '{}', error: unknown bits per channel value = {}", filename, ri.bits_per_channel);
+        return false;
+    }
+
+    bool is16bit = (ri.bits_per_channel == 16);
 
     PixelFormat format;
     switch(channels) {
