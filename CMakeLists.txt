@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(rtge VERSION 0.1 LANGUAGES CXX)
 
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-   file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.14/conan.cmake"
-                 "${CMAKE_BINARY_DIR}/conan.cmake")
-endif()
-include(${CMAKE_BINARY_DIR}/conan.cmake)
+include(${CMAKE_SOURCE_DIR}/conan.cmake)
 conan_cmake_run(CONANFILE conanfile.txt
                 BASIC_SETUP CMAKE_TARGETS
+                BUILD_TYPE "Release"
                 BUILD missing)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
@@ -21,6 +17,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 set(STB_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/material/image_loader.cpp")
+set(NOISE_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/editor/ui_interface.cpp")
 set(IMGUI_ERROR_SOURCE_FILES "${CONAN_SRC_DIRS_IMGUI}/bindings/imgui_impl_opengl3.cpp")
 
 add_compile_options(
@@ -44,19 +41,21 @@ add_compile_options(
     -Wsign-promo
 )
 
-set(STB_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-cast-qual -Wno-cast-align -Wno-implicit-int-conversion")
+set(STB_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-cast-qual -Wno-cast-align -Wno-implicit-int-conversion -Wno-unused-parameter")
 set_source_files_properties(${STB_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${STB_ERROR_COMPILE_FLAGS})
+
+set(NOISE_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-shorten-64-to-32 -Wno-non-virtual-dtor")
+set_source_files_properties(${NOISE_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${NOISE_ERROR_COMPILE_FLAGS})
 
 set(IMGUI_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion")
 set_source_files_properties(${IMGUI_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${IMGUI_ERROR_COMPILE_FLAGS})
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/libucl")
-add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/libnoise")
 add_subdirectory("${CMAKE_SOURCE_DIR}/third_party/imgui_node_editor")
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${IMGUI_ERROR_SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE "src" "${CONAN_SRC_DIRS_IMGUI}/bindings")
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS} ucl noise imgui_node_editor)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CONAN_LIBS} ucl imgui_node_editor)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17

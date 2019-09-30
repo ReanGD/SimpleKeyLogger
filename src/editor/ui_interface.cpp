@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <filesystem>
 #include <fmt/format.h>
-#include <noise/noise.h>
+#include <noise.h>
 #include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
 #include "engine/material/texture_manager.h"
