@@ -7,8 +7,10 @@
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
-            "configurationProvider": "vector-of-bool.cmake-tools",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "cppStandard": "c++20",
+            "cStandard": "c11",
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
