@@ -38,8 +38,8 @@ struct GeometryGenerator : Noncopyable {
     */
     static std::shared_ptr<Geometry> CreateSolidSphere(uint16_t cntVertexCircle);
     /*!
-        Creates a square plane at the beginning of coordinates with an edge side equal to 1
-        The plane is located in the X0Z plane, the normatives are directed along the OY
+        Creates a square plane at the beginning of the coordinates with the edge side equal to 1.
+        The plane is located in the X0Z plane, the normals are directed along the Y axis.
 
         cntXSides - Number of vertices on 0X axis (cntXSides >= 2)
         cntZSides - Number of vertices on 0Z axis (cntZSides >= 2)

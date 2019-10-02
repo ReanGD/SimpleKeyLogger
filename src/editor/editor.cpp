@@ -105,7 +105,7 @@ bool Editor::Init(std::string& error) {
     cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
     auto matModel = glm::translate(glm::mat4(1.0f), glm::vec3(3.0, 0.51f, 0));
     cube.SetModelMatrix(matModel);
-    scene.Add(cube);
+    m_cube = scene.Add(cube);
 
     Mesh plane;
     plane.Add(GeometryGenerator::CreateSolidPlane(100, 100, 1.0f, 1.0f), materialLandscape);
@@ -155,6 +155,8 @@ void Editor::Render() {
 
     GLuint index = 0;
     m_ubCamera->Bind(index);
+
+    scene.SetModelMatrix(m_cube, m_engine.GetPhysics().GetMatrix());
 
     scene.Draw();
     m_fbo->Bind();

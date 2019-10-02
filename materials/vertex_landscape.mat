@@ -24,7 +24,7 @@ uniform sampler2D uBaseTexture;
 
 void main() {
     vec4 pos = vec4(vPosition, 1.0f);
-    float height = textureLod(uBaseTexture, vTexCoord, 0).r * 2.0f;
+    float height = textureLod(uBaseTexture, vTexCoord, 0).r * 1.0f;
     pos.y = height;
 	gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * pos;
     vsOut.normal = uNormalMatrix * vNormal;

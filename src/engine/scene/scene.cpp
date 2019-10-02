@@ -4,8 +4,17 @@ Scene::Scene() {
     m_camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
 }
 
-void Scene::Add(const Mesh& mesh) {
+size_t Scene::Add(const Mesh& mesh) {
+    const size_t index = m_meshes.size();
     m_meshes.push_back(mesh);
+
+    return index;
+}
+
+void Scene::SetModelMatrix(size_t index, const glm::mat4& matrix) noexcept {
+    if (index < m_meshes.size()) {
+        m_meshes[index].SetModelMatrix(matrix);
+    }
 }
 
 void Scene::Draw() {

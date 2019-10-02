@@ -8,7 +8,9 @@ public:
     Scene();
     ~Scene() = default;
 
-    void Add(const Mesh& mesh);
+    size_t Add(const Mesh& mesh);
+    void SetModelMatrix(size_t index, const glm::mat4& matrix) noexcept;
+
     void Draw();
     void DrawWithMaterial(const Material& material);
 

@@ -4,6 +4,7 @@
 
 #include "engine/gui/gui.h"
 #include "engine/scene/scene.h"
+#include "engine/physics/physics.h"
 
 
 class Engine : Noncopyable {
@@ -26,6 +27,10 @@ public:
         return m_scene;
     }
 
+    Physics& GetPhysics() noexcept {
+        return m_physics;
+    }
+
     void SetFillPoligone(bool value) noexcept;
 
     bool IsFillPoligone() const noexcept {
@@ -45,8 +50,9 @@ public:
     }
 private:
     Gui m_gui;
-    Window m_window;
     Scene m_scene;
+    Window m_window;
+    Physics m_physics;
     bool m_fillPoligone = true;
     float m_deltaTime = 1.0f / 60.0f;
     uint16_t m_timeDeltasPos = 0;

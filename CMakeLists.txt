@@ -18,6 +18,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 set(STB_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/material/image_loader.cpp")
 set(NOISE_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/editor/ui_interface.cpp")
+set(PHYSICS_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/physics/physics.cpp")
 set(IMGUI_ERROR_SOURCE_FILES "${CONAN_SRC_DIRS_IMGUI}/bindings/imgui_impl_opengl3.cpp")
 
 add_compile_options(
@@ -46,6 +47,9 @@ set_source_files_properties(${STB_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS $
 
 set(NOISE_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-shorten-64-to-32 -Wno-non-virtual-dtor")
 set_source_files_properties(${NOISE_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${NOISE_ERROR_COMPILE_FLAGS})
+
+set(PHYSICS_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-float-equal -Wno-implicit-float-conversion -Wno-unused-parameter -Wno-cast-align")
+set_source_files_properties(${PHYSICS_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${PHYSICS_ERROR_COMPILE_FLAGS})
 
 set(IMGUI_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion")
 set_source_files_properties(${IMGUI_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${IMGUI_ERROR_COMPILE_FLAGS})

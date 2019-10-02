@@ -18,6 +18,10 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
         return false;
     }
 
+    if (!m_physics.Init(error)) {
+        return false;
+    }
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -49,6 +53,7 @@ void Engine::Run(const std::function<void ()>& callback) {
         m_timeDeltasPos = (m_timeDeltasPos+1) % m_timeDeltas.size();
 
         m_gui.Update(m_window, m_deltaTime);
+        m_physics.Update(m_deltaTime);
         callback();
 
         m_window.EndFrame();
