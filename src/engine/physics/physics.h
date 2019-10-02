@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
-#include <glm/mat4x4.hpp>
 
 #include "engine/common/noncopyable.h"
+#include "engine/physics/physical_node.h"
 
 
 class btDefaultCollisionConfiguration;
@@ -18,17 +18,14 @@ public:
     ~Physics();
 
     bool Init(std::string& error);
+    void AddNode(PhysicalNode* node);
+
     void Update(float deltaTime);
-    glm::mat4x4 GetMatrix() const noexcept {
-        return m_matrix;
-    }
 
 private:
     void Destroy();
 
 private:
-    glm::mat4x4 m_matrix = glm::mat4x4(1.0f);
-
     btDefaultCollisionConfiguration* m_collisionConfiguration;
     btCollisionDispatcher* m_dispatcher;
     btBroadphaseInterface* m_overlappingPairCache;

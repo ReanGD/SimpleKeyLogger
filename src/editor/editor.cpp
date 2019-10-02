@@ -106,6 +106,8 @@ bool Editor::Init(std::string& error) {
     auto matModel = glm::translate(glm::mat4(1.0f), glm::vec3(3.0, 0.51f, 0));
     cube.SetModelMatrix(matModel);
     m_cube = scene.Add(cube);
+    m_pcube = new PhysicalBox(glm::vec3(1, 1, 1), glm::vec3(2, 10, 0), 10);
+    m_engine.GetPhysics().AddNode(m_pcube);
 
     Mesh plane;
     plane.Add(GeometryGenerator::CreateSolidPlane(100, 100, 1.0f, 1.0f), materialLandscape);
@@ -156,7 +158,9 @@ void Editor::Render() {
     GLuint index = 0;
     m_ubCamera->Bind(index);
 
-    scene.SetModelMatrix(m_cube, m_engine.GetPhysics().GetMatrix());
+    glm::mat4 matCube;
+    m_pcube->GetMatrix(matCube);
+    scene.SetModelMatrix(m_cube, matCube);
 
     scene.Draw();
     m_fbo->Bind();
@@ -180,6 +184,10 @@ void Editor::Render() {
 }
 
 void Editor::Destroy() {
+    if (m_pcube) {
+        delete m_pcube;
+        m_pcube = nullptr;
+    }
     m_interface.Destroy();
 
     m_materialLine.reset();

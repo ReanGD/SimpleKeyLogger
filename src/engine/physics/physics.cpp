@@ -47,40 +47,15 @@ bool Physics::Init(std::string& /*error*/) {
 		m_dynamicsWorld->addRigidBody(body);
 	}
 
-	{
-		//create a dynamic rigidbody
-
-		btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		// btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-		m_collisionShapes.push_back(colShape);
-
-		/// Create Dynamic Objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(1.f);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(2, 10, 0));
-
-		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		m_dynamicsWorld->addRigidBody(body);
-	}
     return true;
 }
 
+void Physics::AddNode(PhysicalNode* node) {
+	m_dynamicsWorld->addRigidBody(node->m_body);
+}
+
 void Physics::Update(float deltaTime) {
-    m_dynamicsWorld->stepSimulation(1.f / 60.f, 10);
+    m_dynamicsWorld->stepSimulation(deltaTime, 10);
 
     //print positions of all objects
     for (int j = m_dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
@@ -96,10 +71,6 @@ void Physics::Update(float deltaTime) {
         {
             trans = obj->getWorldTransform();
         }
-
-		if (j == 1) {
-			trans.getOpenGLMatrix(glm::value_ptr(m_matrix));
-		}
     }
 }
 
