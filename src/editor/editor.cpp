@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/random.hpp>
 
 #include "engine/api/gl.h"
 #include "engine/mesh/geometry_generator.h"
@@ -101,17 +102,19 @@ bool Editor::Init(std::string& error) {
     m_materialNormals = std::make_shared<Material>(shaderNormals);
     m_materialNormals->SetBaseColor(glm::vec3(0.9f, 0.9f, 0.4f));
 
-    Mesh cube;
-    cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
-    auto matModel = glm::translate(glm::mat4(1.0f), glm::vec3(3.0, 0.51f, 0));
-    cube.SetModelMatrix(matModel);
-    m_cube = scene.Add(cube);
-    m_pcube = new PhysicalBox(glm::vec3(1, 1, 1), glm::vec3(2, 10, 0), 10);
-    m_engine.GetPhysics().AddNode(m_pcube);
+    for (size_t i=0; i!=10; ++i) {
+        Mesh cube;
+        cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
+        auto pcube = std::make_shared<PhysicalBox>(glm::vec3(0.5, 0.5, 0.5), glm::linearRand(glm::vec3(0, 20, -7), glm::vec3(12, 200, 7)), glm::linearRand(1, 100));
+        m_engine.GetPhysics().AddNode(pcube);
+        cube.SetPhysicalNode(pcube);
+        scene.Add(cube);
+    }
+
 
     Mesh plane;
     plane.Add(GeometryGenerator::CreateSolidPlane(100, 100, 1.0f, 1.0f), materialLandscape);
-    matModel = glm::scale(glm::mat4(1.0), glm::vec3(100.0f, 1.0f, 100.0f));
+    auto matModel = glm::scale(glm::mat4(1.0), glm::vec3(100.0f, 0.0f, 100.0f));
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
 
@@ -158,10 +161,6 @@ void Editor::Render() {
     GLuint index = 0;
     m_ubCamera->Bind(index);
 
-    glm::mat4 matCube;
-    m_pcube->GetMatrix(matCube);
-    scene.SetModelMatrix(m_cube, matCube);
-
     scene.Draw();
     m_fbo->Bind();
     glViewport(0, 0, 2000, 2000);
@@ -184,10 +183,6 @@ void Editor::Render() {
 }
 
 void Editor::Destroy() {
-    if (m_pcube) {
-        delete m_pcube;
-        m_pcube = nullptr;
-    }
     m_interface.Destroy();
 
     m_materialLine.reset();

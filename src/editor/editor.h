@@ -26,8 +26,6 @@ private:
     Engine& m_engine;
     bool m_editorMode = false;
     bool m_showNormals = false;
-    size_t m_cube;
-    PhysicalNode* m_pcube = nullptr;
     std::shared_ptr<Framebuffer> m_fbo;
     std::shared_ptr<Material> m_materialLine;
     std::shared_ptr<Material> m_materialNormals;

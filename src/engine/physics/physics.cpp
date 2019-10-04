@@ -14,20 +14,20 @@ bool Physics::Init(std::string& /*error*/) {
     m_overlappingPairCache = new btDbvtBroadphase();
     m_solver = new btSequentialImpulseConstraintSolver;
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_solver, m_collisionConfiguration);
-	m_dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	m_dynamicsWorld->setGravity(btVector3(0, -9.8, 0));
 
 	///create a few basic rigid bodies
 
 	//the ground is a cube of side 100 at position y = -56.
 	//the sphere will hit it at y = -6, with center at -5
 	{
-		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(50.), btScalar(50.)));
+		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(1.), btScalar(50.)));
 
 		m_collisionShapes.push_back(groundShape);
 
 		btTransform groundTransform;
 		groundTransform.setIdentity();
-		groundTransform.setOrigin(btVector3(0, -50, 0));
+		groundTransform.setOrigin(btVector3(0, -1, 0));
 
 		btScalar mass(0.);
 
@@ -41,6 +41,7 @@ bool Physics::Init(std::string& /*error*/) {
 		//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
+		rbInfo.m_restitution = 0.5;
 		btRigidBody* body = new btRigidBody(rbInfo);
 
 		//add the body to the dynamics world
@@ -50,7 +51,7 @@ bool Physics::Init(std::string& /*error*/) {
     return true;
 }
 
-void Physics::AddNode(PhysicalNode* node) {
+void Physics::AddNode(const std::shared_ptr<PhysicalNode>& node) {
 	m_dynamicsWorld->addRigidBody(node->m_body);
 }
 

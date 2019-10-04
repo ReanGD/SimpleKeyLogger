@@ -1,16 +1,29 @@
 #include "engine/mesh/mesh.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "engine/physics/physical_node.h"
 
 
 void Mesh::Add(const std::shared_ptr<Geometry>& geometry, const Material& material) noexcept {
     m_objects.push_back(std::make_pair(geometry, material));
 }
 
+void Mesh::SetPhysicalNode(const std::shared_ptr<PhysicalNode>& node) noexcept {
+    m_physicalNode = node;
+}
+
 void Mesh::SetModelMatrix(const glm::mat4& matrix) noexcept {
     m_matModel = matrix;
     m_matNormal = glm::inverseTranspose(glm::mat3(m_matModel));
+}
+
+void Mesh::Update() {
+    if (m_physicalNode) {
+        m_physicalNode->GetMatrix(m_matModel);
+        m_matNormal = glm::inverseTranspose(glm::mat3(m_matModel));
+    }
 }
 
 uint32_t Mesh::Draw(const std::shared_ptr<Camera>& camera) const {

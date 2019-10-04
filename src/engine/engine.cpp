@@ -54,6 +54,7 @@ void Engine::Run(const std::function<void ()>& callback) {
 
         m_gui.Update(m_window, m_deltaTime);
         m_physics.Update(m_deltaTime);
+        m_scene.Update();
         callback();
 
         m_window.EndFrame();

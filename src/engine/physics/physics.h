@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include "engine/common/noncopyable.h"
 #include "engine/physics/physical_node.h"
@@ -18,7 +19,7 @@ public:
     ~Physics();
 
     bool Init(std::string& error);
-    void AddNode(PhysicalNode* node);
+    void AddNode(const std::shared_ptr<PhysicalNode>& node);
 
     void Update(float deltaTime);
 
