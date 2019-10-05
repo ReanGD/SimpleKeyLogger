@@ -6,6 +6,7 @@
 #include <glm/gtc/random.hpp>
 
 #include "engine/api/gl.h"
+#include "engine/heightmap/heightmap.h"
 #include "engine/mesh/geometry_generator.h"
 #include "engine/material/texture_manager.h"
 
@@ -87,6 +88,12 @@ bool Editor::Init(std::string& error) {
     if(!heightmapTex) {
         return false;
     }
+
+    auto heightmapBody = Heightmap().Load("heightmap2.jpg", error);
+    if (!heightmapBody) {
+        return false;
+    }
+    m_engine.GetPhysics().AddNode(heightmapBody);
 
     Material materialTex(shaderTex);
     materialTex.SetBaseTexture(0, texture);

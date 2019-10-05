@@ -7,6 +7,23 @@ void TextureManager::AddFindPath(const std::filesystem::path& path) {
     m_basePaths.push_back(path);
 }
 
+bool TextureManager::GetFullPath(const std::filesystem::path& inPath, std::filesystem::path& outPath, std::string& error) const noexcept {
+    outPath = inPath;
+    if (std::filesystem::exists(outPath)) {
+        return true;
+    }
+
+    for (const auto& base: m_basePaths) {
+        outPath = base / inPath;
+        if (std::filesystem::exists(outPath)) {
+            return true;
+        }
+    }
+
+    error = fmt::format("the texture of the path '{}' was not found", inPath.c_str());
+    return false;
+}
+
 std::shared_ptr<Texture> TextureManager::Create(const ImageHeader& header, std::string& error) noexcept {
     Texture::Result isSuccess;
     const bool generateMipLevelsIfNeed = false;
@@ -31,20 +48,8 @@ std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path,
 }
 
 std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed, std::string& error) noexcept {
-    std::filesystem::path fullPath = path;
-    bool found = std::filesystem::exists(fullPath);
-    if (!found) {
-        for (const auto& base: m_basePaths) {
-            fullPath = base / path;
-            if (std::filesystem::exists(fullPath)) {
-                found = true;
-                break;
-            }
-        }
-    }
-
-    if (!found) {
-        error = fmt::format("the texture of the path '{}' was not found", path.c_str());
+    std::filesystem::path fullPath;
+    if (!GetFullPath(path, fullPath, error)) {
         return nullptr;
     }
 

@@ -28,3 +28,8 @@ class PhysicalBox : public PhysicalNode {
 public:
     PhysicalBox(const glm::vec3& boxHalfExtents, const glm::vec3& position, float bodyMass);
 };
+
+class PhysicalTerrain : public PhysicalNode {
+public:
+    PhysicalTerrain(uint32_t gridSize, const void* rawHeightfieldData, float heightScale, float minHeight, float maxHeight);
+};

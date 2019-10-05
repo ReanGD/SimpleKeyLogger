@@ -17,6 +17,7 @@ public:
     }
 
     void AddFindPath(const std::filesystem::path& path);
+    bool GetFullPath(const std::filesystem::path& inPath, std::filesystem::path& outPath, std::string& error) const noexcept;
 
     std::shared_ptr<Texture> Create(const ImageHeader& header, std::string& error) noexcept;
 

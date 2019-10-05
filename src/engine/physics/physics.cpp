@@ -43,9 +43,10 @@ bool Physics::Init(std::string& /*error*/) {
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
 		rbInfo.m_restitution = 0.5;
 		btRigidBody* body = new btRigidBody(rbInfo);
+		body = nullptr;
 
 		//add the body to the dynamics world
-		m_dynamicsWorld->addRigidBody(body);
+		// m_dynamicsWorld->addRigidBody(body);
 	}
 
     return true;
