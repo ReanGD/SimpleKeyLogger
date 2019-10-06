@@ -34,8 +34,7 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
 
     uint8_t* data = reinterpret_cast<uint8_t*>(image.data);
     uint32_t gridSize = image.header.width;
-    // float gridSpacing = 0.2f;
-    float heightScale = 0.2f;
+    float heightScale = 0.1f;
     size_t bytesPerElement = sizeof(uint8_t);
     float minHeight, maxHeight;
 
@@ -43,11 +42,9 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     uint8_t* p = rawHeightfieldData;
     for (uint32_t j=0; j!=gridSize; ++j) {
         for (uint32_t i=0; i!=gridSize; ++i) {
-            // float x = i * gridSpacing;
-            // float y = j * gridSpacing;
-            float heightScaling = (14. / 256.);
-            float z = static_cast<float>(data[(gridSize - 1 - i) * 3 + gridSize * j * 3]) * heightScaling;
-            *p = static_cast<unsigned char>(z / heightScale);
+            uint8_t rawZ = data[i * 3 + gridSize * j * 3];
+            float z = static_cast<float>(rawZ) * heightScale;
+            *p = rawZ;
 
             if (!i && !j) {
                 minHeight = z;
@@ -68,5 +65,5 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     image_loader::Free(image);
 
     // TODO: remove rawHeightfieldData
-    return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight);
+    return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, (minHeight + maxHeight) / 2.0f);
 }

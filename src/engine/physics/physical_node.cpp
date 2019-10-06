@@ -56,8 +56,7 @@ PhysicalBox::PhysicalBox(const glm::vec3& boxHalfExtents, const glm::vec3& posit
     : PhysicalNode(new btBoxShape(btVector3(boxHalfExtents.x, boxHalfExtents.y, boxHalfExtents.z)), position, bodyMass) {
 }
 
-PhysicalTerrain::PhysicalTerrain(uint32_t gridSize, const void* rawHeightfieldData, float heightScale, float minHeight, float maxHeight)
+PhysicalTerrain::PhysicalTerrain(uint32_t gridSize, const void* rawHeightfieldData, float heightScale, float minHeight, float maxHeight, float yPos)
     : PhysicalNode(new btHeightfieldTerrainShape(static_cast<int>(gridSize), gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, 1 /*upAxis*/, PHY_UCHAR, false/*flipQuadEdges*/),
-        glm::vec3(0), 0) {
-
+        glm::vec3(0, yPos, 0), 0) {
 }

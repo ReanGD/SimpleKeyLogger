@@ -118,10 +118,9 @@ bool Editor::Init(std::string& error) {
         scene.Add(cube);
     }
 
-
     Mesh plane;
-    plane.Add(GeometryGenerator::CreateSolidPlane(100, 100, 1.0f, 1.0f), materialLandscape);
-    auto matModel = glm::scale(glm::mat4(1.0), glm::vec3(100.0f, 0.0f, 100.0f));
+    plane.Add(GeometryGenerator::CreateSolidPlane(2048, 2048, 1.0f, 1.0f), materialLandscape);
+    auto matModel = glm::scale(glm::mat4(1.0), glm::vec3(2048., 1.0f, 2048.));
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
 

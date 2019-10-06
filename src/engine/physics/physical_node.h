@@ -31,5 +31,5 @@ public:
 
 class PhysicalTerrain : public PhysicalNode {
 public:
-    PhysicalTerrain(uint32_t gridSize, const void* rawHeightfieldData, float heightScale, float minHeight, float maxHeight);
+    PhysicalTerrain(uint32_t gridSize, const void* rawHeightfieldData, float heightScale, float minHeight, float maxHeight, float yPos);
 };
