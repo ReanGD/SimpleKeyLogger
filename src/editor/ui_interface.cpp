@@ -127,7 +127,7 @@ void UIInterface::Render(bool editorMode, uint image) {
     } else {
         rect.posX = 0;
         rect.posY = 0;
-        rect.sizeX = 300;
+        rect.sizeX = 500;
         rect.sizeY = 50;
         DrawInfoBar(rect);
     }
@@ -142,7 +142,11 @@ void UIInterface::Destroy() {
 void UIInterface::DrawInfoBar(rect& rect) {
     if (BeginWindow("infobar", rect)) {
         ImGui::PushFont(m_fontMono);
-        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M", m_engine.GetFps(), static_cast<double>(m_engine.GetTpf()) / 1000.0 / 1000.0);
+        auto pos = m_engine.GetScene().GetCamera()->GetPosition();
+        auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M Pos = {:.1f}:{:.1f}:{:.1f}",
+            m_engine.GetFps(),
+            static_cast<double>(m_engine.GetTpf()) / 1000.0 / 1000.0,
+            pos.x, pos.y, pos.z);
         ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "%s", text.c_str());
         ImGui::PopFont();
 

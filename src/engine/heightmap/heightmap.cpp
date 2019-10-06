@@ -14,7 +14,7 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     }
 
     Image image;
-    if(!image_loader::Load(fullPath.c_str(), image, error)) {
+    if(!image_loader::Load(fullPath.c_str(), image, true, error)) {
         return nullptr;
     }
 

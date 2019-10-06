@@ -8,7 +8,7 @@
 #include <fmt/format.h>
 
 
-bool image_loader::Load(const char *filename, Image& image, std::string& error) {
+bool image_loader::Load(const char *filename, Image& image, bool verticallyFlip, std::string& error) {
     stbi_set_flip_vertically_on_load(true);
     FILE *f = stbi__fopen(filename, "rb");
     if (f == nullptr) {
@@ -23,7 +23,11 @@ bool image_loader::Load(const char *filename, Image& image, std::string& error) 
     int height = 0;
     int channels = 0;
     stbi__result_info ri;
+    stbi__vertically_flip_on_load = verticallyFlip;
     void* data = stbi__load_main(&s, &width, &height, &channels, STBI_default, &ri, 0);
+    if (stbi__vertically_flip_on_load) {
+        stbi__vertical_flip(data, width, height, channels * ri.bits_per_channel / 8);
+    }
 
     fclose(f);
 

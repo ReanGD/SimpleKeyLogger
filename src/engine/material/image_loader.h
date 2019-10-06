@@ -4,6 +4,6 @@
 
 
 namespace image_loader {
-    bool Load(const char *filename, Image& image, std::string& error);
+    bool Load(const char *filename, Image& image, bool verticallyFlip, std::string& error);
     void Free(Image& image);
 };
