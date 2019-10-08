@@ -71,6 +71,11 @@ bool Editor::Init(std::string& error) {
         return false;
     }
 
+    auto shaderSprite = Shader::Create("vertex_sprite", "fragment_clr", error);
+    if (!shaderSprite) {
+        return false;
+    }
+
     auto shaderNormals = Shader::Create("vertex_normals", "geometry_normals", "fragment_normals", error);
     if (!shaderNormals) {
         return false;
@@ -98,6 +103,12 @@ bool Editor::Init(std::string& error) {
     Material materialTex(shaderTex);
     materialTex.SetBaseTexture(0, texture);
 
+    Material materialSprite(shaderSprite);
+    materialSprite.SetBaseColor(glm::vec3(0.4, 0.7, 0.1));
+
+    m_materialCube = std::make_shared<Material>(shaderClrLight);
+    m_materialCube->SetBaseColor(glm::vec3(0.9, 0.1, 0.1));
+
     Material materialGround(shaderTex);
     materialGround.SetBaseTexture(0, groundTex);
 
@@ -112,7 +123,7 @@ bool Editor::Init(std::string& error) {
     for (size_t i=0; i!=10; ++i) {
         Mesh cube;
         cube.Add(GeometryGenerator::CreateSolidCube(), materialTex);
-        auto pcube = std::make_shared<PhysicalBox>(glm::vec3(0.5, 0.5, 0.5), glm::linearRand(glm::vec3(0, 20, -7), glm::vec3(12, 200, 7)), glm::linearRand(1, 100));
+        auto pcube = std::make_shared<PhysicalBox>(glm::vec3(0.5, 0.5, 0.5), glm::linearRand(glm::vec3(0, 25, -7), glm::vec3(12, 200, 7)), glm::linearRand(1, 100));
         m_engine.GetPhysics().AddNode(pcube);
         cube.SetPhysicalNode(pcube);
         scene.Add(cube);
@@ -123,6 +134,10 @@ bool Editor::Init(std::string& error) {
     auto matModel = glm::scale(glm::mat4(1.0), glm::vec3(2048., 1.0f, 2048.));
     plane.SetModelMatrix(matModel);
     scene.Add(plane);
+
+    Mesh sprite;
+    sprite.Add(GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f), materialSprite);
+    scene.Add(sprite);
 
     m_line = GeometryGenerator::CreateLine(glm::vec3(0), glm::vec3(10.0f));
 
@@ -243,6 +258,33 @@ void Editor::ProcessIO() {
             if (!vertexBuffer.Unlock()) {
                 throw std::runtime_error("Can't unlock vertex buffer in GeometryGenerator::CreateLine");
             }
+        }
+    } else {
+        auto& scene = m_engine.GetScene();
+        auto camera = scene.GetCamera();
+        auto pos = camera->GetPosition();
+
+        if (wio.IsKeyReleasedFirstTime(Key::MouseLeft)) {
+            glm::vec2 coord(0);
+            glm::vec3 rayWorld = camera->HomogeneousPositionToRay(coord);
+
+            glm::vec3 collisionPos;
+            if (m_engine.GetPhysics().RayTest(pos, pos + rayWorld*100.0f, collisionPos)) {
+                Mesh sphere;
+                sphere.Add(GeometryGenerator::CreateSolidSphere(10), *m_materialCube);
+                auto mat = glm::scale(glm::translate(glm::mat4(1), collisionPos), glm::vec3(0.2f));
+                sphere.SetModelMatrix(mat);
+                scene.Add(sphere);
+            }
+        }
+
+        if (wio.IsKeyReleasedFirstTime(Key::MouseRight)) {
+            Mesh cube;
+            cube.Add(GeometryGenerator::CreateSolidCube(), *m_materialCube);
+            auto pcube = std::make_shared<PhysicalBox>(glm::vec3(0.5, 0.5, 0.5), pos, 10);
+            m_engine.GetPhysics().AddNode(pcube);
+            cube.SetPhysicalNode(pcube);
+            scene.Add(cube);
         }
     }
 

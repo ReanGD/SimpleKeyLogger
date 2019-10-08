@@ -1,0 +1,28 @@
+material {
+    name : "vertex_sprite",
+}
+
+vertex = <<SHADER
+#version 330 core
+
+layout (location = 0) in vec3 vPosition;
+layout (location = 1) in vec3 vNormal;
+layout (location = 2) in vec3 vTangent;
+layout (location = 3) in vec2 vTexCoord;
+
+out VS_OUT {
+    smooth vec3 normal;
+    smooth vec2 texCoord;
+} vsOut;
+
+uniform mat4 uProjMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uModelMatrix;
+uniform mat3 uNormalMatrix;
+
+void main() {
+	gl_Position = vec4(vPosition.x * 0.02, vPosition.z * 0.02, 0, 1.0f);
+    vsOut.normal = vNormal;
+	vsOut.texCoord = vTexCoord;
+}
+SHADER

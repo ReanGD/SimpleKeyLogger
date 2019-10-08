@@ -65,5 +65,5 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     image_loader::Free(image);
 
     // TODO: remove rawHeightfieldData
-    return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, (minHeight + maxHeight) / 2.0f);
+    return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, 0.5f * (minHeight + maxHeight));
 }

@@ -20,6 +20,7 @@ public:
 
     bool Init(std::string& error);
     void AddNode(const std::shared_ptr<PhysicalNode>& node);
+    bool RayTest(const glm::vec3& from, const glm::vec3& to, glm::vec3& result);
 
     void Update(float deltaTime);
 

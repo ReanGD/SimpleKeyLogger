@@ -25,9 +25,12 @@ PhysicalNode::PhysicalNode(btCollisionShape* collisionShape, const glm::vec3& po
     rbInfo.m_friction = 0.5;
 
 	m_body = new btRigidBody(rbInfo);
+    // m_body->setCcdSweptSphereRadius(0.1f);
+    // m_body->setCcdMotionThreshold(0.0001f);
 }
 
 PhysicalNode::~PhysicalNode() {
+    // TODO: remove memory
     // if (m_body) {
     //     auto* collisionShape = m_body->getCollisionShape();
     //     if (collisionShape) {
