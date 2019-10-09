@@ -1,11 +1,12 @@
 #include "editor/ui_interface.h"
 
 #include <imgui.h>
+#include <noise.h>
 #include <filesystem>
 #include <fmt/format.h>
-#include <noise.h>
 #include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
+
 #include "engine/material/texture_manager.h"
 
 
@@ -176,8 +177,13 @@ void UIInterface::DrawRightPanel(rect& rect) {
 
 void UIInterface::DrawViewer(rect& rect, uint /*image*/) {
     if (BeginWindow("viewer", rect)) {
+        m_engine.GetGui().Image(m_heightmapTex, glm::vec2(1024,1024), glm::vec2(0,1), glm::vec2(1,0));
+        ImGui::End();
+    }
+}
 
-        // ImGui::Image(reinterpret_cast<ImTextureID>(m_heightmapTex->GetHandle()), ImVec2(1024,1024), ImVec2(0,1), ImVec2(1,0));
+void UIInterface::DrawNodeEditor(rect& rect) {
+    if (BeginWindow("node_editor", rect)) {
         ed::SetCurrentEditor(g_Context);
 
         ed::Begin("My Editor");

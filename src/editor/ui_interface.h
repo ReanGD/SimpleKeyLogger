@@ -24,6 +24,7 @@ private:
     void DrawInfoBar(rect& rect);
     void DrawRightPanel(rect& rect);
     void DrawViewer(rect& rect, uint image);
+    void DrawNodeEditor(rect& rect);
     void DrawExample();
 private:
     Engine& m_engine;

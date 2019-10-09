@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
+#include "engine/material/texture.h"
 
 
 static void UpdateMouseCursor(Window& window, ImGuiIO& io) {
@@ -172,4 +173,10 @@ void Gui::NewFrame() const {
 void Gui::EndFrame() const {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Gui::Image(const std::shared_ptr<Texture>& texture, const glm::vec2& size, const glm::vec2& uv0, const glm::vec2& uv1, const glm::vec4& tintCol, const glm::vec4& borderCol) {
+    ImGui::Image(reinterpret_cast<ImTextureID>(texture->m_handle), ImVec2(size.x, size.y),
+        ImVec2(uv0.x, uv0.y), ImVec2(uv1.x, uv1.y),
+        ImVec4(tintCol.x, tintCol.y, tintCol.z, tintCol.w), ImVec4(borderCol.x, borderCol.y, borderCol.z, borderCol.w));
 }

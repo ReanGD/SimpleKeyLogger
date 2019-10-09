@@ -8,6 +8,7 @@ class Texture : Noncopyable {
     struct Result {
         bool value;
     };
+    friend class Gui;
     friend class Framebuffer;
     friend class TextureManager;
 
