@@ -10,6 +10,7 @@ struct rect {
 };
 
 struct ImFont;
+class Heightmap;
 class UIInterface : Noncopyable {
 public:
     UIInterface() = delete;
@@ -30,5 +31,5 @@ private:
     Engine& m_engine;
     ImFont* m_fontDefault = nullptr;
     ImFont* m_fontMono = nullptr;
-    std::shared_ptr<Texture> m_heightmapTex;
+    std::shared_ptr<Heightmap> m_heightmap;
 };

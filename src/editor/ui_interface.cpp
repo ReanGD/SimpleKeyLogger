@@ -1,13 +1,10 @@
 #include "editor/ui_interface.h"
 
 #include <imgui.h>
-#include <noise.h>
 #include <filesystem>
 #include <fmt/format.h>
-#include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
-
-#include "engine/material/texture_manager.h"
+#include "engine/heightmap/heightmap.h"
 
 
 namespace ed = ax::NodeEditor;
@@ -44,59 +41,12 @@ bool UIInterface::Init(std::string& error) {
         return false;
     }
 
-    module::Perlin myModule;
-    myModule.SetOctaveCount(6);
-    myModule.SetFrequency(1.0);
-    myModule.SetPersistence(0.5);
+    g_Context = ed::CreateEditor();
 
-    utils::NoiseMap heightMap;
-    utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule(myModule);
-    heightMapBuilder.SetDestNoiseMap(heightMap);
-    heightMapBuilder.SetDestSize(512, 512);
-    heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
-    heightMapBuilder.Build();
-
-    utils::RendererImage renderer;
-    utils::Image image;
-    renderer.SetSourceNoiseMap(heightMap);
-    renderer.SetDestImage(image);
-
-    renderer.ClearGradient();
-    renderer.AddGradientPoint(-1.0000, utils::Color(  0,   0, 128, 255)); // deeps
-    renderer.AddGradientPoint(-0.2500, utils::Color(  0,   0, 255, 255)); // shallow
-    renderer.AddGradientPoint( 0.0000, utils::Color(  0, 128, 255, 255)); // shore
-    renderer.AddGradientPoint( 0.0625, utils::Color(240, 240,  64, 255)); // sand
-    renderer.AddGradientPoint( 0.1250, utils::Color( 32, 160,   0, 255)); // grass
-    renderer.AddGradientPoint( 0.3750, utils::Color(224, 224,   0, 255)); // dirt
-    renderer.AddGradientPoint( 0.7500, utils::Color(128, 128, 128, 255)); // rock
-    renderer.AddGradientPoint( 1.0000, utils::Color(255, 255, 255, 255)); // snow
-    renderer.EnableLight();
-    renderer.SetLightContrast(3.0);
-    renderer.SetLightBrightness(2.0);
-
-    renderer.Render();
-
-    size_t cntPixel = image.GetMemUsed();
-    utils::Color* colors = image.GetSlabPtr();
-    size_t outBytePerPixel = 4;
-    uint8* texData = new uint8[cntPixel * outBytePerPixel];
-    for (size_t i=0 ; i!=cntPixel; ++i) {
-        utils::Color color = colors[i];
-        texData[i * outBytePerPixel + 0] = color.red;
-        texData[i * outBytePerPixel + 1] = color.green;
-        texData[i * outBytePerPixel + 2] = color.blue;
-        texData[i * outBytePerPixel + 3] = color.alpha;
-    }
-
-    ImageHeader header(512, 512, PixelFormat::R8G8B8A8);
-    m_heightmapTex = TextureManager::Get().Create(Image(header, 1, texData), error);
-    delete []texData;
-    if (!m_heightmapTex) {
+    m_heightmap = std::make_shared<Heightmap>();
+    if (!m_heightmap->Create(error)) {
         return false;
     }
-
-    g_Context = ed::CreateEditor();
 
     return true;
 }
@@ -177,7 +127,7 @@ void UIInterface::DrawRightPanel(rect& rect) {
 
 void UIInterface::DrawViewer(rect& rect, uint /*image*/) {
     if (BeginWindow("viewer", rect)) {
-        m_engine.GetGui().Image(m_heightmapTex, glm::vec2(1024,1024), glm::vec2(0,1), glm::vec2(1,0));
+        m_engine.GetGui().Image(m_heightmap->GetPreview(), glm::vec2(1024,1024), glm::vec2(0,1), glm::vec2(1,0));
         ImGui::End();
     }
 }

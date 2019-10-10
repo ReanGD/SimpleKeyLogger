@@ -17,7 +17,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 set(STB_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/material/image_loader.cpp")
-set(NOISE_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/editor/ui_interface.cpp")
+set(NOISE_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/heightmap/heightmap.cpp")
 set(PHYSICS_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/physics/physics.cpp")
 set(PHYSICS2_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/physics/physical_node.cpp")
 set(IMGUI_ERROR_SOURCE_FILES "${CONAN_SRC_DIRS_IMGUI}/bindings/imgui_impl_opengl3.cpp")
