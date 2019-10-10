@@ -14,11 +14,13 @@ public:
 
     bool Create(std::string& error) noexcept;
     std::shared_ptr<PhysicalNode> Load(const std::filesystem::path& path, std::string& error) noexcept;
+    void DrawSettings();
 
     std::shared_ptr<Texture> GetPreview() const noexcept {
         return m_previewTex;
     }
 
 private:
+    uint8_t m_octaveCount = 6;
     std::shared_ptr<Texture> m_previewTex;
 };

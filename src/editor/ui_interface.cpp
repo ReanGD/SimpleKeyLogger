@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 #include <imgui_node_editor.h>
 #include "engine/heightmap/heightmap.h"
+#include "engine/gui/widgets.h"
 
 
 namespace ed = ax::NodeEditor;
@@ -108,7 +109,7 @@ void UIInterface::DrawInfoBar(rect& rect) {
 void UIInterface::DrawRightPanel(rect& rect) {
     if (BeginWindow("right_panel", rect)) {
 
-        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_None)) {
             auto camera = m_engine.GetScene().GetCamera();
             float nearPlane = camera->GetNearPlane();
             if (ImGui::DragFloat("near plane", &nearPlane, 0.1f, 0.1f, 10.0f, "%.1f")) {
@@ -119,6 +120,10 @@ void UIInterface::DrawRightPanel(rect& rect) {
             if (ImGui::DragFloat("far plane", &farPlane, 1.0f, 10.0f, 5000.0f, "%.0f")) {
                 camera->SetFarPlane(farPlane);
             }
+        }
+
+        if (ImGui::CollapsingHeader("Heightmap", ImGuiTreeNodeFlags_DefaultOpen)) {
+            m_heightmap->DrawSettings();
         }
 
         ImGui::End();

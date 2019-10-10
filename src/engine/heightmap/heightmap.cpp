@@ -2,16 +2,16 @@
 
 #include <noise.h>
 #include <fmt/format.h>
-#include <spdlog/spdlog.h>
 #include <noise/noiseutils.h>
 
+#include "engine/gui/widgets.h"
 #include "engine/material/image_loader.h"
 #include "engine/material/texture_manager.h"
 
 
 bool Heightmap::Create(std::string& error) noexcept {
     module::Perlin myModule;
-    myModule.SetOctaveCount(6);
+    myModule.SetOctaveCount(m_octaveCount);
     myModule.SetFrequency(1.0);
     myModule.SetPersistence(0.5);
 
@@ -19,7 +19,7 @@ bool Heightmap::Create(std::string& error) noexcept {
     utils::NoiseMapBuilderPlane heightMapBuilder;
     heightMapBuilder.SetSourceModule(myModule);
     heightMapBuilder.SetDestNoiseMap(heightMap);
-    heightMapBuilder.SetDestSize(512, 512);
+    heightMapBuilder.SetDestSize(256, 256);
     heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
     heightMapBuilder.Build();
 
@@ -55,7 +55,7 @@ bool Heightmap::Create(std::string& error) noexcept {
         texData[i * outBytePerPixel + 3] = color.alpha;
     }
 
-    ImageHeader header(512, 512, PixelFormat::R8G8B8A8);
+    ImageHeader header(256, 256, PixelFormat::R8G8B8A8);
     m_previewTex = TextureManager::Get().Create(Image(header, 1, texData), error);
     delete []texData;
     if (!m_previewTex) {
@@ -124,4 +124,19 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
 
     // TODO: remove rawHeightfieldData
     return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, 0.5f * (minHeight + maxHeight));
+}
+
+void Heightmap::DrawSettings() {
+    if (gui::DragScalarI("Octave count", m_octaveCount, uint8_t(1), uint8_t(2))) {
+        if (m_octaveCount < 1) {
+            m_octaveCount = 1;
+        } else if (m_octaveCount > 30) {
+            m_octaveCount = 30;
+        } else {
+            std::string error;
+            if (!Create(error)) {
+                // spdlog::error(error);
+            }
+        }
+    }
 }
