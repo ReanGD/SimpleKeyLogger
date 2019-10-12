@@ -49,6 +49,9 @@ struct ImageHeader {
     ImageHeader() = default;
     ImageHeader(uint32_t width, uint32_t height, PixelFormat format);
 
+    bool operator==(const ImageHeader& other) const noexcept;
+    bool operator!=(const ImageHeader& other) const noexcept;
+
     bool GetOpenGLFormat(uint& internalFormat, uint& format, uint& type) const noexcept;
     size_t GetSize() const noexcept;
 

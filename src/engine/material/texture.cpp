@@ -3,13 +3,60 @@
 #include <fmt/format.h>
 #include "engine/api/gl.h"
 
-Texture::Texture(const Image& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept {
+Texture::Texture(const Image& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept
+    : m_header(image.header) {
     glGenTextures(1, &m_handle);
     isSuccess.value = Create(image, generateMipLevelsIfNeed, error);
 }
 
 Texture::~Texture() noexcept {
     Destroy();
+}
+
+bool Texture::Update(const Image& image, std::string& error) noexcept {
+    return Update(image, true, error);
+}
+
+bool Texture::Update(const Image& image, bool generateMipLevels, std::string& error) noexcept {
+    if (image.data == nullptr) {
+        error = "Texture update data are not filled in";
+        return false;
+    }
+
+    if (image.header != m_header) {
+        error = "To update the texture, the new data formats must match the old ones";
+        return false;
+    }
+
+    GLenum internalFormat, format, type;
+    if (!image.header.GetOpenGLFormat(internalFormat, format, type)) {
+        error = fmt::format("unsupported texture format: {}", ToStr(image.header.format));
+        return false;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, m_handle);
+
+    const GLint level = 0;
+    const GLint xoffset = 0;
+    const GLint yoffset = 0;
+    const auto width = static_cast<GLsizei>(m_header.width);
+    const auto height = static_cast<GLsizei>(m_header.height);
+    glTexSubImage2D(GL_TEXTURE_2D, level, xoffset, yoffset, width, height, format, type, image.data);
+
+    bool isOneLevel = true;
+    if (generateMipLevels) {
+        glGenerateMipmap(GL_TEXTURE_2D);
+        isOneLevel = false;
+    }
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, isOneLevel ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return true;
 }
 
 void Texture::Bind(uint unit) const noexcept {

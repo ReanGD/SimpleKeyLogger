@@ -41,6 +41,14 @@ ImageHeader::ImageHeader(uint32_t width, uint32_t height, PixelFormat format)
 
 }
 
+bool ImageHeader::operator==(const ImageHeader& other) const noexcept {
+    return ((height == other.height) && (width == other.width) && (format == other.format));
+}
+
+bool ImageHeader::operator!=(const ImageHeader& other) const noexcept {
+    return !operator==(other);
+}
+
 bool ImageHeader::GetOpenGLFormat(uint& internalFormat, uint& inFormat, uint& type) const noexcept {
     static constexpr const uint UNKNOWN = std::numeric_limits<uint>::max();
     internalFormat = UNKNOWN;
