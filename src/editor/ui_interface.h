@@ -18,15 +18,14 @@ public:
     ~UIInterface() = default;
 
     bool Init(std::string& error);
-    void Render(bool editorMode, uint image);
+    void Render(bool editorMode);
     void Destroy();
 
 private:
     void DrawInfoBar(rect& rect);
     void DrawRightPanel(rect& rect);
-    void DrawViewer(rect& rect, uint image);
+    void DrawViewer(rect& rect);
     void DrawNodeEditor(rect& rect);
-    void DrawExample();
 private:
     Engine& m_engine;
     ImFont* m_fontDefault = nullptr;

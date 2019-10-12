@@ -28,7 +28,24 @@ bool DragScalar(const char* label, DataType dataType, void* value, float speed, 
 }
 
 bool InputScalar(const char* label, DataType dataType, void* value, const void* step, const void* stepFast, const char* format) {
-    // TODO: ImGuiInputTextFlags
     return ImGui::InputScalar(label, ToImGui(dataType), value, step, stepFast, format, ImGuiInputTextFlags(0));
 }
+
+bool Combo(const char* label, size_t& value, const char** items, const size_t count) {
+    bool changed = false;
+    const char* itemCurrent = items[value];
+    if (ImGui::BeginCombo(label, itemCurrent, ImGuiComboFlags(0))) {
+        for (size_t i=0; i!=count; ++i) {
+            if (ImGui::Selectable(items[i], itemCurrent == items[i])) {
+                changed = (i != value);
+                value = i;
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    return changed;
+}
+
 }

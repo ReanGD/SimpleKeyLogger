@@ -8,16 +8,28 @@
 #include "engine/material/image_loader.h"
 #include "engine/material/texture_manager.h"
 
+static const char* QualityItems[] = {"Fast", "Std", "Best"};
+
+static noise::NoiseQuality ToNoiseType(const Heightmap::Quality value) {
+    switch (value) {
+    case Heightmap::Quality::Fast: return noise::NoiseQuality::QUALITY_FAST;
+    case Heightmap::Quality::Std: return noise::NoiseQuality::QUALITY_STD;
+    case Heightmap::Quality::Best: return noise::NoiseQuality::QUALITY_BEST;
+    default: return noise::NoiseQuality::QUALITY_STD;
+    }
+}
 
 bool Heightmap::Create(std::string& error) noexcept {
-    module::Perlin myModule;
-    myModule.SetOctaveCount(m_octaveCount);
-    myModule.SetFrequency(1.0);
-    myModule.SetPersistence(0.5);
+    module::Perlin perlinModule;
+    perlinModule.SetFrequency(m_frequency);
+    perlinModule.SetLacunarity(m_lacunarity);
+    perlinModule.SetNoiseQuality(ToNoiseType(m_noiseQuality));
+    perlinModule.SetOctaveCount(m_octaveCount);
+    perlinModule.SetPersistence(m_persistence);
 
     utils::NoiseMap heightMap;
     utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule(myModule);
+    heightMapBuilder.SetSourceModule(perlinModule);
     heightMapBuilder.SetDestNoiseMap(heightMap);
     heightMapBuilder.SetDestSize(256, 256);
     heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
@@ -127,16 +139,20 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
 }
 
 void Heightmap::DrawSettings() {
-    if (gui::DragScalarI("Octave count", m_octaveCount, uint8_t(1), uint8_t(2))) {
-        if (m_octaveCount < 1) {
-            m_octaveCount = 1;
-        } else if (m_octaveCount > 30) {
-            m_octaveCount = 30;
-        } else {
-            std::string error;
-            if (!Create(error)) {
-                // spdlog::error(error);
-            }
+    bool changed = false;
+
+    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, Quality::Count);
+    changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
+    changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
+    changed |= gui::InputScalar("Octave count", m_octaveCount,
+        gui::Step(uint8_t(1), uint8_t(2)),
+        gui::Range(uint8_t(1), static_cast<uint8_t>(noise::module::PERLIN_MAX_OCTAVE)));
+    changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
+
+    if (changed) {
+        std::string error;
+        if (!Create(error)) {
+            // spdlog::error(error);
         }
     }
 }
