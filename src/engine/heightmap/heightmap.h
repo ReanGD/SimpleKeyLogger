@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "engine/material/image.h"
 #include "engine/common/noncopyable.h"
 #include "engine/physics/physical_node.h"
 
@@ -21,6 +22,8 @@ public:
 
     bool Create(std::string& error) noexcept;
     std::shared_ptr<PhysicalNode> Load(const std::filesystem::path& path, std::string& error) noexcept;
+
+    Image Generate() const noexcept;
     void DrawSettings();
 
     std::shared_ptr<Texture> GetPreview() const noexcept {
@@ -33,6 +36,7 @@ private:
     Quality m_noiseQuality = Quality::Std; // DEFAULT_PERLIN_QUALITY
     uint8_t m_octaveCount = 6;             // DEFAULT_PERLIN_OCTAVE_COUNT
     double m_persistence = 0.5;            // DEFAULT_PERLIN_PERSISTENCE
+    int32_t m_seed = 0;                    // DEFAULT_PERLIN_SEED
 
     std::shared_ptr<Texture> m_previewTex;
 };

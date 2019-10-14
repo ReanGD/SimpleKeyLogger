@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 
+
 bool GLApi::IsDXTSupported = false;
 bool GLApi::IsIFormatQuerySupported = false;
 

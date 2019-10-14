@@ -20,55 +20,9 @@ static noise::NoiseQuality ToNoiseType(const Heightmap::Quality value) {
 }
 
 bool Heightmap::Create(std::string& error) noexcept {
-    module::Perlin perlinModule;
-    perlinModule.SetFrequency(m_frequency);
-    perlinModule.SetLacunarity(m_lacunarity);
-    perlinModule.SetNoiseQuality(ToNoiseType(m_noiseQuality));
-    perlinModule.SetOctaveCount(m_octaveCount);
-    perlinModule.SetPersistence(m_persistence);
-
-    utils::NoiseMap heightMap;
-    utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule(perlinModule);
-    heightMapBuilder.SetDestNoiseMap(heightMap);
-    heightMapBuilder.SetDestSize(256, 256);
-    heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
-    heightMapBuilder.Build();
-
-    utils::RendererImage renderer;
-    utils::Image image;
-    renderer.SetSourceNoiseMap(heightMap);
-    renderer.SetDestImage(image);
-
-    renderer.ClearGradient();
-    renderer.AddGradientPoint(-1.0000, utils::Color(  0,   0, 128, 255)); // deeps
-    renderer.AddGradientPoint(-0.2500, utils::Color(  0,   0, 255, 255)); // shallow
-    renderer.AddGradientPoint( 0.0000, utils::Color(  0, 128, 255, 255)); // shore
-    renderer.AddGradientPoint( 0.0625, utils::Color(240, 240,  64, 255)); // sand
-    renderer.AddGradientPoint( 0.1250, utils::Color( 32, 160,   0, 255)); // grass
-    renderer.AddGradientPoint( 0.3750, utils::Color(224, 224,   0, 255)); // dirt
-    renderer.AddGradientPoint( 0.7500, utils::Color(128, 128, 128, 255)); // rock
-    renderer.AddGradientPoint( 1.0000, utils::Color(255, 255, 255, 255)); // snow
-    renderer.EnableLight();
-    renderer.SetLightContrast(3.0);
-    renderer.SetLightBrightness(2.0);
-
-    renderer.Render();
-
-    size_t cntPixel = image.GetMemUsed();
-    utils::Color* colors = image.GetSlabPtr();
-    size_t outBytePerPixel = 4;
-    uint8* texData = new uint8[cntPixel * outBytePerPixel];
-    for (size_t i=0 ; i!=cntPixel; ++i) {
-        utils::Color color = colors[i];
-        texData[i * outBytePerPixel + 0] = color.red;
-        texData[i * outBytePerPixel + 1] = color.green;
-        texData[i * outBytePerPixel + 2] = color.blue;
-        texData[i * outBytePerPixel + 3] = color.alpha;
-    }
-
-    ImageHeader header(256, 256, PixelFormat::R8G8B8A8);
-    m_previewTex = TextureManager::Get().Create(Image(header, 1, texData), error);
+    auto image = Generate();
+    m_previewTex = TextureManager::Get().Create(image, error);
+    uint8* texData = reinterpret_cast<uint8*>(image.data);
     delete []texData;
     if (!m_previewTex) {
         return false;
@@ -138,6 +92,77 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, 0.5f * (minHeight + maxHeight));
 }
 
+Image Heightmap::Generate() const noexcept {
+    module::Perlin perlinModule;
+    perlinModule.SetFrequency(m_frequency);
+    perlinModule.SetLacunarity(m_lacunarity);
+    perlinModule.SetNoiseQuality(ToNoiseType(m_noiseQuality));
+    perlinModule.SetOctaveCount(m_octaveCount);
+    perlinModule.SetPersistence(m_persistence);
+    perlinModule.SetSeed(m_seed);
+
+    module::RidgedMulti mountainTerrain;
+
+    module::Billow baseFlatTerrain;
+    baseFlatTerrain.SetFrequency(2.0);
+
+    module::ScaleBias flatTerrain;
+    flatTerrain.SetScale(0.125);
+    flatTerrain.SetBias(-0.75);
+    flatTerrain.SetSourceModule(0, baseFlatTerrain);
+
+    module::Select finalTerrain;
+    finalTerrain.SetSourceModule(0, flatTerrain);
+    finalTerrain.SetSourceModule(1, mountainTerrain);
+    finalTerrain.SetControlModule(perlinModule);
+    finalTerrain.SetBounds(0.0, 1000.0);
+    finalTerrain.SetEdgeFalloff(0.125);
+
+    utils::NoiseMap heightMap;
+    utils::NoiseMapBuilderPlane heightMapBuilder;
+    heightMapBuilder.SetSourceModule(perlinModule);
+    heightMapBuilder.SetSourceModule(finalTerrain);
+    heightMapBuilder.SetDestNoiseMap(heightMap);
+    heightMapBuilder.SetDestSize(256, 256);
+    heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
+    heightMapBuilder.Build();
+
+    utils::RendererImage renderer;
+    utils::Image image;
+    renderer.SetSourceNoiseMap(heightMap);
+    renderer.SetDestImage(image);
+
+    renderer.ClearGradient();
+    renderer.AddGradientPoint(-1.0000, utils::Color(  0,   0, 128, 255)); // deeps
+    renderer.AddGradientPoint(-0.2500, utils::Color(  0,   0, 255, 255)); // shallow
+    renderer.AddGradientPoint( 0.0000, utils::Color(  0, 128, 255, 255)); // shore
+    renderer.AddGradientPoint( 0.0625, utils::Color(240, 240,  64, 255)); // sand
+    renderer.AddGradientPoint( 0.1250, utils::Color( 32, 160,   0, 255)); // grass
+    renderer.AddGradientPoint( 0.3750, utils::Color(224, 224,   0, 255)); // dirt
+    renderer.AddGradientPoint( 0.7500, utils::Color(128, 128, 128, 255)); // rock
+    renderer.AddGradientPoint( 1.0000, utils::Color(255, 255, 255, 255)); // snow
+    renderer.EnableLight();
+    renderer.SetLightContrast(3.0);
+    renderer.SetLightBrightness(2.0);
+
+    renderer.Render();
+
+    size_t cntPixel = image.GetMemUsed();
+    utils::Color* colors = image.GetSlabPtr();
+    size_t outBytePerPixel = 4;
+    uint8* texData = new uint8[cntPixel * outBytePerPixel];
+    for (size_t i=0 ; i!=cntPixel; ++i) {
+        utils::Color color = colors[i];
+        texData[i * outBytePerPixel + 0] = color.red;
+        texData[i * outBytePerPixel + 1] = color.green;
+        texData[i * outBytePerPixel + 2] = color.blue;
+        texData[i * outBytePerPixel + 3] = color.alpha;
+    }
+
+    ImageHeader header(256, 256, PixelFormat::R8G8B8A8);
+    return Image(header, 1, texData);
+}
+
 void Heightmap::DrawSettings() {
     bool changed = false;
 
@@ -148,11 +173,15 @@ void Heightmap::DrawSettings() {
         gui::Step(uint8_t(1), uint8_t(2)),
         gui::Range(uint8_t(1), static_cast<uint8_t>(noise::module::PERLIN_MAX_OCTAVE)));
     changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
+    changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
 
     if (changed) {
         std::string error;
-        if (!Create(error)) {
+        auto image = Generate();
+        if (!m_previewTex->Update(image, error)) {
             // spdlog::error(error);
         }
+        uint8* texData = reinterpret_cast<uint8*>(image.data);
+        delete []texData;
     }
 }
