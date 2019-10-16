@@ -11,6 +11,7 @@ struct rect {
 
 struct ImFont;
 class Heightmap;
+class UINodeEditor;
 class UIInterface : Noncopyable {
 public:
     UIInterface() = delete;
@@ -28,6 +29,7 @@ private:
     void DrawNodeEditor(rect& rect);
 private:
     Engine& m_engine;
+    std::shared_ptr<UINodeEditor> m_nodeEditor = nullptr;
     ImFont* m_fontDefault = nullptr;
     ImFont* m_fontMono = nullptr;
     std::shared_ptr<Heightmap> m_heightmap;
