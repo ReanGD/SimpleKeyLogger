@@ -1,6 +1,30 @@
 #pragma once
 #include <string>
 
+namespace math {
+
+struct Color {
+    Color() = default;
+    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255): value((a << 24) | (b << 16) | (g << 8) | (r << 0)) {}
+
+    uint32_t value = 0;
+};
+
+
+template <typename T>
+struct BasicSize {
+    BasicSize(): w(0), h(0) {}
+    BasicSize(T w, T h): w(w), h(h) {}
+
+    T w = 0;
+    T h = 0;
+};
+
+using Size = BasicSize<int32_t>;
+using Sizef = BasicSize<float>;
+
+}
+
 namespace detail {
     enum class DataType : uint8_t {
         S8,       // signed char / char (with sensible compilers)
@@ -72,6 +96,15 @@ namespace detail {
 }
 
 namespace gui {
+    enum class IconType : uint8_t {
+        Flow,
+        Circle,
+        Square,
+        Grid,
+        RoundSquare,
+        Diamond
+    };
+
     template<typename T> struct Step {
         Step(const T& normal, const T& fast) : normal(normal), fast(fast) {}
 
@@ -131,4 +164,6 @@ namespace gui {
 
             return false;
         }
-};
+
+    void NodeIcon(const math::Sizef& size, gui::IconType type, bool filled, math::Color color = math::Color(1, 1, 1, 1), math::Color innerColor = math::Color(0, 0, 0, 0));
+}
