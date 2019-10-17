@@ -1,9 +1,64 @@
 #include "editor/ui_node_editor.h"
 
+#include "engine/gui/widgets.h"
+
+
 namespace ne = ax::NodeEditor;
 
-struct LinkInfo
-{
+void BasePin::Draw(ne::PinKind direction, bool connected, uint8_t alpha) const noexcept {
+    ne::BeginPin(ne::PinId(this), direction);
+        gui::NodeIcon(math::Size(24, 24), gui::IconType::Flow, connected, math::Color(220, 48, 48, alpha), math::Color(32, 32, 32, alpha));
+    ne::EndPin();
+}
+
+BaseNode::BaseNode(const std::string& name)
+    : m_name(name) {
+
+}
+
+BaseNode::~BaseNode() {
+    for (auto* pin: m_inPins) {
+        delete pin;
+    }
+    m_inPins.clear();
+
+    for (auto* pin: m_outPins) {
+        delete pin;
+    }
+    m_outPins.clear();
+}
+
+void BaseNode::AddInPin(BasePin* item) {
+    m_inPins.push_back(item);
+}
+
+void BaseNode::AddOutPin(BasePin* item) {
+    m_outPins.push_back(item);
+}
+
+void BaseNode::Draw() const noexcept {
+    auto alpha = static_cast<uint8_t>(ImGui::GetStyle().Alpha * 255.0f);
+    ne::BeginNode(ne::NodeId(this));
+        ImGui::TextUnformatted(m_name.c_str());
+
+        ImGui::BeginGroup();
+        for (const auto* pin: m_inPins) {
+            pin->Draw(ne::PinKind::Input, false, alpha);
+        }
+        ImGui::EndGroup();
+
+        ImGui::SameLine();
+
+        ImGui::BeginGroup();
+        for (const auto* pin: m_outPins) {
+            pin->Draw(ne::PinKind::Output, false, alpha);
+        }
+        ImGui::EndGroup();
+
+    ne::EndNode();
+}
+
+struct LinkInfo {
     ne::LinkId Id;
     ne::PinId InputId;
     ne::PinId OutputId;
@@ -12,9 +67,23 @@ struct LinkInfo
 static ImVector<LinkInfo>   g_Links;
 static int                  g_NextLinkId = 100;
 
+
 bool UINodeEditor::Create(std::string& /*error*/) {
     m_context = ne::CreateEditor();
 
+    auto node1 = std::make_shared<BaseNode>("Perlin noise");
+    node1->AddInPin(new BasePin());
+    node1->AddInPin(new BasePin());
+    node1->AddOutPin(new BasePin());
+
+    m_nodes.push_back(node1);
+
+    auto node2 = std::make_shared<BaseNode>("Perlin noise2");
+    node2->AddInPin(new BasePin());
+    node2->AddInPin(new BasePin());
+    node2->AddOutPin(new BasePin());
+
+    m_nodes.push_back(node2);
     return true;
 }
 
@@ -22,51 +91,9 @@ void UINodeEditor::Draw() {
     ne::SetCurrentEditor(m_context);
     ne::Begin("My Editor");
 
-    unsigned long uniqueId = 1;
-
-    // Node A
-    ne::NodeId nodeA_Id = uniqueId++;
-    ne::PinId  nodeA_InputPinId = uniqueId++;
-    ne::PinId  nodeA_OutputPinId = uniqueId++;
-
-    ne::BeginNode(nodeA_Id);
-        ImGui::Text("Node A");
-        ne::BeginPin(nodeA_InputPinId, ne::PinKind::Input);
-            ImGui::Text("-> In");
-        ne::EndPin();
-        ImGui::SameLine();
-        ne::BeginPin(nodeA_OutputPinId, ne::PinKind::Output);
-            ImGui::Text("Out ->");
-        ne::EndPin();
-    ne::EndNode();
-
-    // Node B
-    ne::NodeId nodeB_Id = uniqueId++;
-    ne::PinId  nodeB_InputPinId1 = uniqueId++;
-    ne::PinId  nodeB_InputPinId2 = uniqueId++;
-    ne::PinId  nodeB_OutputPinId = uniqueId++;
-
-    ne::BeginNode(nodeB_Id);
-        ImGui::Text("Node B");
-        // ImGuiEx_BeginColumn();
-        ImGui::BeginGroup();
-            ne::BeginPin(nodeB_InputPinId1, ne::PinKind::Input);
-                ImGui::Text("-> In1");
-            ne::EndPin();
-            ne::BeginPin(nodeB_InputPinId2, ne::PinKind::Input);
-                ImGui::Text("-> In2");
-            ne::EndPin();
-        // ImGuiEx_NextColumn();
-        ImGui::EndGroup();
-        ImGui::SameLine();
-        ImGui::BeginGroup();
-        //
-            ne::BeginPin(nodeB_OutputPinId, ne::PinKind::Output);
-                ImGui::Text("Out ->");
-            ne::EndPin();
-        // ImGuiEx_EndColumn();
-        ImGui::EndGroup();
-    ne::EndNode();
+    for (const auto& node: m_nodes) {
+        node->Draw();
+    }
 
     // Submit Links
     for (auto& linkInfo : g_Links) {

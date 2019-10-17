@@ -5,7 +5,8 @@ namespace math {
 
 struct Color {
     Color() = default;
-    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255): value((a << 24) | (b << 16) | (g << 8) | (r << 0)) {}
+    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+        : value(static_cast<uint32_t>(a << 24) | static_cast<uint32_t>(b << 16) | static_cast<uint32_t>(g << 8) | static_cast<uint32_t>(r << 0)) {}
 
     uint32_t value = 0;
 };
@@ -165,5 +166,5 @@ namespace gui {
             return false;
         }
 
-    void NodeIcon(const math::Sizef& size, gui::IconType type, bool filled, math::Color color = math::Color(1, 1, 1, 1), math::Color innerColor = math::Color(0, 0, 0, 0));
+    void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color = math::Color(1, 1, 1, 1), math::Color innerColor = math::Color(0, 0, 0, 0));
 }

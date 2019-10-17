@@ -283,13 +283,13 @@ void DrawNodeIcon(ImDrawList* drawList, math::Rect rect, gui::IconType type, boo
 
 namespace gui {
 
-void NodeIcon(const math::Sizef& size, gui::IconType type, bool filled, math::Color color, math::Color innerColor) {
+void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color, math::Color innerColor) {
     const ImVec2 imSize(size.w, size.h);
     if (ImGui::IsRectVisible(imSize)) {
         auto cursorPos = ImGui::GetCursorScreenPos();
         auto drawList  = ImGui::GetWindowDrawList();
 
-        math::Rect rect(static_cast<int32_t>(cursorPos.x), static_cast<int32_t>(cursorPos.y), static_cast<int32_t>(size.w), static_cast<int32_t>(size.h));
+        math::Rect rect(static_cast<int32_t>(cursorPos.x), static_cast<int32_t>(cursorPos.y), size.w, size.h);
         detail::DrawNodeIcon(drawList, rect, type, filled, color.value, innerColor.value);
     }
 
