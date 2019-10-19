@@ -7,21 +7,22 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
+#include "engine/material/texture.h"
+
 
 namespace math {
 
-template <typename T>
-struct BasicPoint {
-    BasicPoint() = default;
-    BasicPoint(T x, T y): x(x), y(y) {}
+static inline ImVec2 ToImGui(const math::Point& value) {
+    return ImVec2(static_cast<float>(value.x), static_cast<float>(value.y));
+}
 
-    T x = 0;
-    T y = 0;
-};
+static inline ImVec2 ToImGui(const math::Pointf& value) {
+    return ImVec2(value.x, value.y);
+}
 
-using Point = BasicPoint<int32_t>;
-using Pointf = BasicPoint<float>;
-
+static inline ImVec2 ToImGui(const math::Size& value) {
+    return ImVec2(static_cast<float>(value.w), static_cast<float>(value.h));
+}
 
 template <typename T>
 struct BasicRect {
@@ -51,7 +52,9 @@ using Rectf = BasicRect<float>;
 
 }
 
+namespace gui {
 namespace detail {
+
 static ImGuiDataType_ ToImGui(DataType value) {
     switch (value) {
         case DataType::S8: return ImGuiDataType_S8;
@@ -68,6 +71,12 @@ static ImGuiDataType_ ToImGui(DataType value) {
             throw std::runtime_error(fmt::format("unknown value of widget type: '{}'", static_cast<uint8_t>(value)).c_str());
     }
 }
+
+struct TextureGetter {
+    static uint GetId(const std::shared_ptr<Texture>& texture) {
+        return texture->m_handle;
+    }
+};
 
 bool DragScalar(const char* label, DataType dataType, void* value, float speed, const void* minValue, const void* maxValue, const char* format, float power) {
     return ImGui::DragScalar(label, ToImGui(dataType), value, speed, minValue, maxValue, format, power);
@@ -92,10 +101,6 @@ bool Combo(const char* label, size_t& value, const char** items, const size_t co
     }
 
     return changed;
-}
-
-static inline ImVec2 ToImGui(const math::Point& value) {
-    return ImVec2(static_cast<float>(value.x), static_cast<float>(value.y));
 }
 
 void DrawNodeIcon(ImDrawList* drawList, math::Rect rect, gui::IconType type, bool filled, ImU32 color, ImU32 innerColor) {
@@ -279,9 +284,7 @@ void DrawNodeIcon(ImDrawList* drawList, math::Rect rect, gui::IconType type, boo
     }
 }
 
-}
-
-namespace gui {
+} // end namespace gui::detail
 
 void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color, math::Color innerColor) {
     const ImVec2 imSize(size.w, size.h);
@@ -296,4 +299,30 @@ void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Col
     ImGui::Dummy(imSize);
 }
 
+void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
+    const math::Pointf& uv0, const math::Pointf& uv1, math::Color tintCol, math::Color borderCol) {
+
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (window->SkipItems) {
+        return;
+    }
+
+    ImRect bb(window->DC.CursorPos, window->DC.CursorPos + ToImGui(size));
+    if (borderCol.GetA() > 0) {
+        bb.Max += ImVec2(2, 2);
+    }
+    ImGui::ItemSize(bb);
+    if (!ImGui::ItemAdd(bb, 0)) {
+        return;
+    }
+
+    auto textureId = reinterpret_cast<ImTextureID>(detail::TextureGetter::GetId(texture));
+    if (borderCol.GetA() > 0) {
+        window->DrawList->AddRect(bb.Min, bb.Max, borderCol.value, 0.0f);
+        window->DrawList->AddImage(textureId, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), math::ToImGui(uv0), math::ToImGui(uv1), tintCol.value);
+    } else {
+        window->DrawList->AddImage(textureId, bb.Min, bb.Max, math::ToImGui(uv0), math::ToImGui(uv1), tintCol.value);
+    }
 }
+
+} // end namespace gui

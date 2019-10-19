@@ -136,7 +136,7 @@ void UIInterface::DrawRightPanel(rect& rect) {
 
 void UIInterface::DrawViewer(rect& rect) {
     if (BeginWindow("viewer", rect)) {
-        m_engine.GetGui().Image(m_heightmap->GetPreview(), glm::vec2(1024,1024), glm::vec2(0,1), glm::vec2(1,0));
+        gui::Image(m_heightmap->GetPreview(), math::Size(1024,1024), math::Pointf(0,1), math::Pointf(1,0));
         ImGui::End();
     }
 }

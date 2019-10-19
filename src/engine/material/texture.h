@@ -4,13 +4,18 @@
 #include "engine/common/noncopyable.h"
 
 
+namespace gui {
+    namespace detail {
+        struct TextureGetter;
+    }
+}
 class Texture : Noncopyable {
     struct Result {
         bool value;
     };
-    friend class Gui;
     friend class Framebuffer;
     friend class TextureManager;
+    friend struct gui::detail::TextureGetter;
 
 public:
     Texture() = delete;

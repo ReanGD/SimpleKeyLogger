@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 
 namespace math {
@@ -7,10 +8,26 @@ struct Color {
     Color() = default;
     Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
         : value(static_cast<uint32_t>(a << 24) | static_cast<uint32_t>(b << 16) | static_cast<uint32_t>(g << 8) | static_cast<uint32_t>(r << 0)) {}
+    Color(uint8_t v) : Color(v, v, v, v) {}
+
+    uint8_t GetA() const noexcept {
+        return static_cast<uint8_t>(value >> 24);
+    }
 
     uint32_t value = 0;
 };
 
+template <typename T>
+struct BasicPoint {
+    BasicPoint() = default;
+    BasicPoint(T x, T y): x(x), y(y) {}
+
+    T x = 0;
+    T y = 0;
+};
+
+using Point = BasicPoint<int32_t>;
+using Pointf = BasicPoint<float>;
 
 template <typename T>
 struct BasicSize {
@@ -26,7 +43,11 @@ using Sizef = BasicSize<float>;
 
 }
 
+class Texture;
+
+namespace gui {
 namespace detail {
+
     enum class DataType : uint8_t {
         S8,       // signed char / char (with sensible compilers)
         U8,       // unsigned char
@@ -94,77 +115,81 @@ namespace detail {
     bool DragScalar(const char* label, DataType dataType, void* value, float speed, const void* minValue, const void* maxValue, const char* format, float power = 1.0f);
     bool InputScalar(const char* label, DataType dataType, void* value, const void* step, const void* stepFast, const char* format);
     bool Combo(const char* label, size_t& value, const char** items, const size_t count);
-}
 
-namespace gui {
-    enum class IconType : uint8_t {
-        Flow,
-        Circle,
-        Square,
-        Grid,
-        RoundSquare,
-        Diamond
-    };
+} // end namespace gui::detail
 
-    template<typename T> struct Step {
-        Step(const T& normal, const T& fast) : normal(normal), fast(fast) {}
+enum class IconType : uint8_t {
+    Flow,
+    Circle,
+    Square,
+    Grid,
+    RoundSquare,
+    Diamond
+};
 
-        const T& normal;
-        const T& fast;
-    };
+template<typename T> struct Step {
+    Step(const T& normal, const T& fast) : normal(normal), fast(fast) {}
 
-    template<typename T> struct Range {
-        Range(const T& minValue, const T& maxValue) : minValue(minValue), maxValue(maxValue) {}
-        bool Check(const T& value) const noexcept { return ((value >= minValue) && (value <= maxValue)); }
+    const T& normal;
+    const T& fast;
+};
 
-        const T& minValue;
-        const T& maxValue;
-    };
+template<typename T> struct Range {
+    Range(const T& minValue, const T& maxValue) : minValue(minValue), maxValue(maxValue) {}
+    bool Check(const T& value) const noexcept { return ((value >= minValue) && (value <= maxValue)); }
+
+    const T& minValue;
+    const T& maxValue;
+};
 
 
-    template<typename T, typename = typename detail::isSupportedType<T>::type>
-        bool DragScalar(const char* label, T& value, float speed, const T& minValue, const T& maxValue, const char* format = nullptr, float power = 1.0f) {
-            return detail::DragScalar(label, detail::TypeID<T>(), &value, speed, &minValue, &maxValue, format, power);
-        }
+template<typename T, typename = typename detail::isSupportedType<T>::type>
+    bool DragScalar(const char* label, T& value, float speed, const T& minValue, const T& maxValue, const char* format = nullptr, float power = 1.0f) {
+        return detail::DragScalar(label, detail::TypeID<T>(), &value, speed, &minValue, &maxValue, format, power);
+    }
 
-    template<typename T, typename = typename detail::isIntegerType<T>::type>
-        bool DragScalarI(const char* label, T& value, float speed, const T& minValue, const T& maxValue, const char* format = nullptr) {
-            return detail::DragScalar(label, detail::TypeID<T>(), &value, speed, &minValue, &maxValue, format);
-        }
+template<typename T, typename = typename detail::isIntegerType<T>::type>
+    bool DragScalarI(const char* label, T& value, float speed, const T& minValue, const T& maxValue, const char* format = nullptr) {
+        return detail::DragScalar(label, detail::TypeID<T>(), &value, speed, &minValue, &maxValue, format);
+    }
 
-    template<typename T, typename = typename detail::isFloatType<T>::type>
-        bool DragScalarF(const char* label, T& value, float speed, const T& minValue, const T& maxValue, const char* format = nullptr, float power = 1.0f) {
-            return detail::DragScalar(label, detail::TypeID<T>(), &value, speed, &minValue, &maxValue, format, power);
-        }
+template<typename T, typename = typename detail::isFloatType<T>::type>
+    bool DragScalarF(const char* label, T& value, float speed, const T& minValue, const T& maxValue, const char* format = nullptr, float power = 1.0f) {
+        return detail::DragScalar(label, detail::TypeID<T>(), &value, speed, &minValue, &maxValue, format, power);
+    }
 
-    template<typename T, typename = typename detail::isSupportedType<T>::type>
-        bool InputScalar(const char* label, T& value, const Step<T>& step, const char* format = nullptr) {
-            return detail::InputScalar(label, detail::TypeID<T>(), &value, &step.normal, &step.fast, format);
-        }
+template<typename T, typename = typename detail::isSupportedType<T>::type>
+    bool InputScalar(const char* label, T& value, const Step<T>& step, const char* format = nullptr) {
+        return detail::InputScalar(label, detail::TypeID<T>(), &value, &step.normal, &step.fast, format);
+    }
 
-    template<typename T, typename = typename detail::isSupportedType<T>::type>
-        bool InputScalar(const char* label, T& value, const Step<T>& step, const Range<T>& range, const char* format = nullptr) {
-            T tmpValue = value;
-            if (detail::InputScalar(label, detail::TypeID<T>(), &tmpValue, &step.normal, &step.fast, format)) {
-                if (range.Check(tmpValue)) {
-                    value = tmpValue;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-    template<typename T>
-        bool Combo(const char* label, T& value, const char** items, const T count) {
-            size_t valueTmp = static_cast<size_t>(value);
-            if (detail::Combo(label, valueTmp, items, static_cast<size_t>(count))) {
-                value = static_cast<T>(valueTmp);
+template<typename T, typename = typename detail::isSupportedType<T>::type>
+    bool InputScalar(const char* label, T& value, const Step<T>& step, const Range<T>& range, const char* format = nullptr) {
+        T tmpValue = value;
+        if (detail::InputScalar(label, detail::TypeID<T>(), &tmpValue, &step.normal, &step.fast, format)) {
+            if (range.Check(tmpValue)) {
+                value = tmpValue;
                 return true;
             }
-
-            return false;
         }
 
-    void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color = math::Color(1, 1, 1, 1), math::Color innerColor = math::Color(0, 0, 0, 0));
-}
+        return false;
+    }
+
+template<typename T>
+    bool Combo(const char* label, T& value, const char** items, const T count) {
+        size_t valueTmp = static_cast<size_t>(value);
+        if (detail::Combo(label, valueTmp, items, static_cast<size_t>(count))) {
+            value = static_cast<T>(valueTmp);
+            return true;
+        }
+
+        return false;
+    }
+
+void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color = math::Color(1, 1, 1, 1), math::Color innerColor = math::Color(0, 0, 0, 0));
+void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
+    const math::Pointf& uv0 = math::Pointf(0, 0), const math::Pointf& uv1 = math::Pointf(1, 1),
+    math::Color tintCol = math::Color(255), math::Color borderCol = math::Color(0));
+
+} // end namespace gui
