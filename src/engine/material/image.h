@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <functional>
+#include "engine/common/noncopyable.h"
 
 
 enum class PixelFormat : uint8_t {
@@ -60,14 +62,29 @@ struct ImageHeader {
     PixelFormat format = PixelFormat::R8G8B8;
 };
 
-struct Image {
-    Image() = default;
-    Image(const ImageHeader& header, uint32_t mipCount, void* data);
-    ~Image() = default;
+struct ImageView {
+    ImageView() = default;
+    ImageView(const ImageHeader& header, uint32_t mipCount, void* data);
+    ~ImageView() = default;
 
-    bool GetNextMiplevel(Image& image) const noexcept;
+    bool GetNextMiplevel(ImageView& image) const noexcept;
 
     ImageHeader header;
     uint32_t mipCount = 0;
     void* data = nullptr;
+};
+
+struct Image : Noncopyable {
+    using Deleter = std::function<void (void*)>;
+    static void Free(void* data);
+
+    Image() = default;
+    Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter);
+    ~Image();
+
+    bool Load(const char *filename, bool verticallyFlip, std::string& error);
+    void Destroy();
+
+    ImageView view;
+    Deleter deleter = nullptr;
 };

@@ -23,7 +23,7 @@ public:
     bool Create(std::string& error) noexcept;
     std::shared_ptr<PhysicalNode> Load(const std::filesystem::path& path, std::string& error) noexcept;
 
-    Image Generate() const noexcept;
+    ImageView Generate() const noexcept;
     void DrawSettings();
 
     std::shared_ptr<Texture> GetPreview() const noexcept {

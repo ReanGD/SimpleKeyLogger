@@ -1,4 +1,4 @@
-#include "engine/material/image_loader.h"
+#include "engine/material/image.h"
 
 #define STBI_NO_PSD
 #define STBI_NO_PIC
@@ -8,7 +8,9 @@
 #include <fmt/format.h>
 
 
-bool image_loader::Load(const char *filename, Image& image, bool verticallyFlip, std::string& error) {
+bool Image::Load(const char *filename, bool verticallyFlip, std::string& error) {
+    Destroy();
+
     stbi_set_flip_vertically_on_load(true);
     FILE *f = stbi__fopen(filename, "rb");
     if (f == nullptr) {
@@ -56,13 +58,12 @@ bool image_loader::Load(const char *filename, Image& image, bool verticallyFlip,
     }
 
     ImageHeader header(static_cast<uint32_t>(width), static_cast<uint32_t>(height), format);
-    image = Image(header, 1, data);
+    view = ImageView(header, 1, data);
+    deleter = [](void* data) {
+        if (data != nullptr) {
+            stbi_image_free(data);
+        }
+    };
 
     return true;
-}
-
-void image_loader::Free(Image& image) {
-    if (image.data != nullptr) {
-        stbi_image_free(image.data);
-    }
 }

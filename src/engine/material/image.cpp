@@ -125,7 +125,7 @@ size_t ImageHeader::GetSize() const noexcept {
     return size;
 }
 
-Image::Image(const ImageHeader& header, uint32_t mipCount, void* data)
+ImageView::ImageView(const ImageHeader& header, uint32_t mipCount, void* data)
     : header(header)
     , mipCount(mipCount)
     , data(data) {
@@ -137,7 +137,7 @@ Image::Image(const ImageHeader& header, uint32_t mipCount, void* data)
     }
 }
 
-bool Image::GetNextMiplevel(Image& image) const noexcept {
+bool ImageView::GetNextMiplevel(ImageView& image) const noexcept {
     if (mipCount <= 1) {
         return false;
     }
@@ -151,4 +151,28 @@ bool Image::GetNextMiplevel(Image& image) const noexcept {
     image.data = static_cast<uint8_t*>(data) + offset;
 
     return true;
+}
+
+void Image::Free(void* data) {
+    if (data) {
+        free(data);
+    }
+}
+
+Image::Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter)
+    : view(header, mipCount, data)
+    , deleter(deleter) {
+
+}
+
+Image::~Image() {
+    Destroy();
+}
+
+void Image::Destroy() {
+    if (deleter && view.data) {
+        deleter(view.data);
+        view.data = nullptr;
+        deleter = nullptr;
+    }
 }

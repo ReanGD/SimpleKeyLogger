@@ -5,7 +5,6 @@
 #include <noise/noiseutils.h>
 
 #include "engine/gui/widgets.h"
-#include "engine/material/image_loader.h"
 #include "engine/material/texture_manager.h"
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
@@ -38,26 +37,25 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     }
 
     Image image;
-    if(!image_loader::Load(fullPath.c_str(), image, true, error)) {
+    if(!image.Load(fullPath.c_str(), true, error)) {
         return nullptr;
     }
 
-    if (image.header.format != PixelFormat::R8G8B8) {
+    auto header = image.view.header;
+    if (header.format != PixelFormat::R8G8B8) {
         error = fmt::format("wrong image ({}) format for heightmap, expected: {}, actual: '{}'",
-            fullPath.c_str(), ToStr(PixelFormat::R8G8B8), ToStr(image.header.format));
-        image_loader::Free(image);
+            fullPath.c_str(), ToStr(PixelFormat::R8G8B8), ToStr(header.format));
         return nullptr;
     }
 
-    if (image.header.width != image.header.height) {
+    if (header.width != header.height) {
         error = fmt::format("wrong image ({}) size for heightmap, expected: width == height, actual: width = {}, height = {}",
-            fullPath.c_str(), image.header.width, image.header.height);
-        image_loader::Free(image);
+            fullPath.c_str(), header.width, header.height);
         return nullptr;
     }
 
-    uint8_t* data = reinterpret_cast<uint8_t*>(image.data);
-    uint32_t gridSize = image.header.width;
+    uint8_t* data = reinterpret_cast<uint8_t*>(image.view.data);
+    uint32_t gridSize = header.width;
     float heightScale = 0.1f;
     size_t bytesPerElement = sizeof(uint8_t);
     float minHeight, maxHeight;
@@ -86,13 +84,11 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
         }
     }
 
-    image_loader::Free(image);
-
     // TODO: remove rawHeightfieldData
     return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, 0.5f * (minHeight + maxHeight));
 }
 
-Image Heightmap::Generate() const noexcept {
+ImageView Heightmap::Generate() const noexcept {
     module::Perlin perlinModule;
     perlinModule.SetFrequency(m_frequency);
     perlinModule.SetLacunarity(m_lacunarity);
@@ -160,7 +156,7 @@ Image Heightmap::Generate() const noexcept {
     }
 
     ImageHeader header(256, 256, PixelFormat::R8G8B8A8);
-    return Image(header, 1, texData);
+    return ImageView(header, 1, texData);
 }
 
 void Heightmap::DrawSettings() {

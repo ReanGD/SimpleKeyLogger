@@ -72,7 +72,7 @@ void PerlinNode::DrawPreview() {
     gui::Image(m_preview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
 }
 
-Image PerlinNode::GenerateImage() const noexcept {
+ImageView PerlinNode::GenerateImage() const noexcept {
     module::Perlin module;
     module.SetFrequency(m_frequency);
     module.SetLacunarity(m_lacunarity);
@@ -108,5 +108,5 @@ Image PerlinNode::GenerateImage() const noexcept {
     }
 
     ImageHeader header(m_previewSize, m_previewSize, PixelFormat::R8G8B8A8);
-    return Image(header, 1, texData);
+    return ImageView(header, 1, texData);
 }

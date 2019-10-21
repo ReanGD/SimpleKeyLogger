@@ -20,7 +20,7 @@ public:
     bool Create(std::string& error) noexcept;
     bool DrawSettings() override;
     void DrawPreview() override;
-    Image GenerateImage() const noexcept;
+    ImageView GenerateImage() const noexcept;
 
 protected:
     double m_frequency = 1.0;              // DEFAULT_PERLIN_FREQUENCY

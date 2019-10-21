@@ -3,7 +3,7 @@
 #include <fmt/format.h>
 #include "engine/api/gl.h"
 
-Texture::Texture(const Image& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept
+Texture::Texture(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept
     : m_header(image.header) {
     glGenTextures(1, &m_handle);
     isSuccess.value = Create(image, generateMipLevelsIfNeed, error);
@@ -13,11 +13,11 @@ Texture::~Texture() noexcept {
     Destroy();
 }
 
-bool Texture::Update(const Image& image, std::string& error) noexcept {
+bool Texture::Update(const ImageView& image, std::string& error) noexcept {
     return Update(image, true, error);
 }
 
-bool Texture::Update(const Image& image, bool generateMipLevels, std::string& error) noexcept {
+bool Texture::Update(const ImageView& image, bool generateMipLevels, std::string& error) noexcept {
     if (image.data == nullptr) {
         error = "Texture update data are not filled in";
         return false;
@@ -69,7 +69,7 @@ void Texture::Unbind(uint unit) const noexcept {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-bool Texture::Create(const Image& image, bool generateMipLevelsIfNeed, std::string& error) noexcept {
+bool Texture::Create(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error) noexcept {
     const auto textureFormat = image.header.format;
     if ((!GLApi::IsDXTSupported) && (textureFormat >= PixelFormat::FIRST_COMPRESSED)) {
         error = fmt::format("DXT compressed texture format ({}) not supported", ToStr(textureFormat));
