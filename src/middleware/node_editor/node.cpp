@@ -8,7 +8,7 @@ namespace ne = ax::NodeEditor;
 
 void BasePin::Draw(bool connected, uint8_t alpha) const noexcept {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
-        gui::NodeIcon(math::Size(24, 24), gui::IconType::Flow, connected, math::Color(220, 48, 48, alpha), math::Color(32, 32, 32, alpha));
+        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, connected, math::Color(48, 220, 48, alpha), math::Color(32, 32, 32, alpha));
     ne::EndPin();
 }
 
@@ -53,7 +53,7 @@ void BaseNode::Draw() noexcept {
         if (m_drawSettings) {
             DrawSettings();
         } else {
-            DrawPreview(m_previewSize);
+            DrawPreview();
         }
         ImGui::SameLine();
 

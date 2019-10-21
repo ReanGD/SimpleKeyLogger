@@ -38,7 +38,7 @@ struct BasicSize {
     T h = 0;
 };
 
-using Size = BasicSize<int32_t>;
+using Size = BasicSize<uint32_t>;
 using Sizef = BasicSize<float>;
 
 }

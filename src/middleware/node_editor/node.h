@@ -28,12 +28,14 @@ public:
     void AddOutPin(BasePin* item);
     void Draw() noexcept;
     virtual bool DrawSettings() { return false; };
-    virtual void DrawPreview(int32_t /*previewSize*/) {};
+    virtual void DrawPreview() {};
+
+protected:
+    uint32_t m_previewSize = 64;
 
 private:
     std::string m_name;
     std::vector<BasePin*> m_inPins;
     std::vector<BasePin*> m_outPins;
-    bool m_drawSettings = true;
-    int32_t m_previewSize = 64;
+    bool m_drawSettings = false;
 };

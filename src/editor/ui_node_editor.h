@@ -3,35 +3,17 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <imgui_node_editor.h>
 
 #include "engine/common/noncopyable.h"
 
 
-class BasePin : Noncopyable {
-public:
-    BasePin() = default;
-    ~BasePin() = default;
+namespace ax {
+    namespace NodeEditor {
+        struct EditorContext;
+    }
+}
 
-    void Draw(ne::PinKind direction, bool connected, uint8_t alpha) const noexcept;
-};
-
-class BaseNode : Noncopyable {
-public:
-    BaseNode() = delete;
-    BaseNode(const std::string& name);
-    ~BaseNode();
-
-    void AddInPin(BasePin* item);
-    void AddOutPin(BasePin* item);
-    void Draw() const noexcept;
-
-protected:
-    std::string m_name;
-    std::vector<BasePin*> m_inPins;
-    std::vector<BasePin*> m_outPins;
-};
-
+class BaseNode;
 class UINodeEditor : Noncopyable {
 public:
     UINodeEditor() = default;

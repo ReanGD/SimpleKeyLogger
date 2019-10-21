@@ -292,7 +292,7 @@ void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Col
         auto cursorPos = ImGui::GetCursorScreenPos();
         auto drawList  = ImGui::GetWindowDrawList();
 
-        math::Rect rect(static_cast<int32_t>(cursorPos.x), static_cast<int32_t>(cursorPos.y), size.w, size.h);
+        math::Rect rect(static_cast<int32_t>(cursorPos.x), static_cast<int32_t>(cursorPos.y), static_cast<int32_t>(size.w), static_cast<int32_t>(size.h));
         detail::DrawNodeIcon(drawList, rect, type, filled, color.value, innerColor.value);
     }
 
