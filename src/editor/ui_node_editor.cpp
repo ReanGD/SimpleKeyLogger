@@ -21,20 +21,8 @@ bool UINodeEditor::Create(std::string& /*error*/) {
     m_context = ne::CreateEditor();
 
     m_nodes.push_back(std::make_shared<PerlinNode>());
+    m_nodes.push_back(std::make_shared<BillowNode>());
 
-    auto node1 = std::make_shared<BaseNode>("Perlin noise1");
-    node1->AddInPin(new BasePin());
-    node1->AddInPin(new BasePin());
-    node1->AddOutPin(new BasePin());
-
-    m_nodes.push_back(node1);
-
-    auto node2 = std::make_shared<BaseNode>("Perlin noise2");
-    node2->AddInPin(new BasePin());
-    node2->AddInPin(new BasePin());
-    node2->AddOutPin(new BasePin());
-
-    m_nodes.push_back(node2);
     return true;
 }
 
