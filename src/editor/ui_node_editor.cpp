@@ -16,15 +16,11 @@ static ImVector<LinkInfo>   g_Links;
 static int                  g_NextLinkId = 100;
 
 
-bool UINodeEditor::Create(std::string& error) {
+bool UINodeEditor::Create(std::string& /*error*/) {
     Destroy();
     m_context = ne::CreateEditor();
 
-    auto perlinNode = std::make_shared<PerlinNode>();
-    if (!perlinNode->Create(error)) {
-        return false;
-    }
-    m_nodes.push_back(perlinNode);
+    m_nodes.push_back(std::make_shared<PerlinNode>());
 
     auto node1 = std::make_shared<BaseNode>("Perlin noise1");
     node1->AddInPin(new BasePin());

@@ -1,6 +1,8 @@
 #include "middleware/node_editor/node.h"
 
+#include <spdlog/spdlog.h>
 #include <imgui_node_editor.h>
+
 #include "engine/gui/widgets.h"
 
 
@@ -40,8 +42,17 @@ void BaseNode::AddOutPin(BasePin* item) {
 }
 
 void BaseNode::Draw() noexcept {
+    if (m_wrongNode) {
+        return;
+    }
+
     auto alpha = static_cast<uint8_t>(ImGui::GetStyle().Alpha * 255.0f);
-    ne::BeginNode(ne::NodeId(this));
+    ne::NodeId id(this);
+    ne::BeginNode(id);
+        if (ne::GetDoubleClickedNode() == id) {
+            m_drawSettings = !m_drawSettings;
+        }
+
         ImGui::TextUnformatted(m_name.c_str());
 
         ImGui::BeginGroup();
@@ -50,8 +61,20 @@ void BaseNode::Draw() noexcept {
         }
         ImGui::EndGroup();
 
+        if (m_needUpdate) {
+            std::string error;
+            if (Update(error)) {
+                m_needUpdate = false;
+            } else {
+                m_wrongNode = true;
+                spdlog::error("Can't update node: {}", error);
+            }
+        }
+
         if (m_drawSettings) {
-            DrawSettings();
+            if (DrawSettings()) {
+                m_needUpdate = true;
+            }
         } else {
             DrawPreview();
         }

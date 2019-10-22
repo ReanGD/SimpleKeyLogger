@@ -27,19 +27,61 @@ PerlinNode::PerlinNode()
         AddOutPin(new BasePin());
 }
 
-bool PerlinNode::Create(std::string& error) noexcept {
-    auto image = GenerateImage();
-    m_preview = TextureManager::Get().Create(image, error);
-    uint8* texData = reinterpret_cast<uint8*>(image.data);
-    delete []texData;
-    if (!m_preview) {
-        return false;
+bool PerlinNode::Update(std::string& error) noexcept {
+    module::Perlin module;
+    module.SetFrequency(m_frequency);
+    module.SetLacunarity(m_lacunarity);
+    module.SetNoiseQuality(ToNoiseType(m_noiseQuality));
+    module.SetOctaveCount(m_octaveCount);
+    module.SetPersistence(m_persistence);
+    module.SetSeed(m_seed);
+
+    utils::NoiseMap noiseMap;
+    utils::NoiseMapBuilderPlane noiseMapBuilder;
+    noiseMapBuilder.SetSourceModule(module);
+    noiseMapBuilder.SetDestNoiseMap(noiseMap);
+    noiseMapBuilder.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
+    noiseMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
+    noiseMapBuilder.Build();
+
+    utils::Image image;
+    utils::RendererImage renderer;
+    renderer.SetSourceNoiseMap(noiseMap);
+    renderer.SetDestImage(image);
+    renderer.Render();
+
+    auto header = m_imagePreview.view.header;
+    bool needRecreate = ((header.height != m_previewSize) || (header.width != m_previewSize));
+    if (needRecreate) {
+        m_imagePreview.Create(ImageHeader(m_previewSize, m_previewSize, PixelFormat::R8G8B8A8));
+    }
+
+    size_t cntPixel = image.GetMemUsed();
+    auto* inPtr = image.GetSlabPtr();
+    auto* outPtr = static_cast<uint8_t*>(m_imagePreview.view.data);
+    for (size_t i=0 ; i!=cntPixel; ++i) {
+        const auto color = *inPtr++;
+        *outPtr++ = color.red;
+        *outPtr++ = color.green;
+        *outPtr++ = color.blue;
+        *outPtr++ = color.alpha;
+    }
+
+    if (!m_texturePreview || needRecreate) {
+        m_texturePreview = TextureManager::Get().Create(m_imagePreview.view, error);
+        if (!m_texturePreview) {
+            return false;
+        }
+    } else {
+        if (!m_texturePreview->Update(m_imagePreview.view, error)) {
+            return false;
+        }
     }
 
     return true;
 }
 
-bool PerlinNode::DrawSettings() {
+bool PerlinNode::DrawSettings() noexcept {
     ImGui::SameLine();
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
     ImGui::SameLine();
@@ -67,46 +109,7 @@ bool PerlinNode::DrawSettings() {
     return changed;
 }
 
-void PerlinNode::DrawPreview() {
+void PerlinNode::DrawPreview() noexcept {
     ImGui::SameLine();
-    gui::Image(m_preview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
-}
-
-ImageView PerlinNode::GenerateImage() const noexcept {
-    module::Perlin module;
-    module.SetFrequency(m_frequency);
-    module.SetLacunarity(m_lacunarity);
-    module.SetNoiseQuality(ToNoiseType(m_noiseQuality));
-    module.SetOctaveCount(m_octaveCount);
-    module.SetPersistence(m_persistence);
-    module.SetSeed(m_seed);
-
-    utils::NoiseMap noiseMap;
-    utils::NoiseMapBuilderPlane noiseMapBuilder;
-    noiseMapBuilder.SetSourceModule(module);
-    noiseMapBuilder.SetDestNoiseMap(noiseMap);
-    noiseMapBuilder.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
-    noiseMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
-    noiseMapBuilder.Build();
-
-    utils::Image image;
-    utils::RendererImage renderer;
-    renderer.SetSourceNoiseMap(noiseMap);
-    renderer.SetDestImage(image);
-    renderer.Render();
-
-    size_t cntPixel = image.GetMemUsed();
-    utils::Color* colors = image.GetSlabPtr();
-    size_t outBytePerPixel = 4;
-    uint8* texData = new uint8[cntPixel * outBytePerPixel];
-    for (size_t i=0 ; i!=cntPixel; ++i) {
-        utils::Color color = colors[i];
-        texData[i * outBytePerPixel + 0] = color.red;
-        texData[i * outBytePerPixel + 1] = color.green;
-        texData[i * outBytePerPixel + 2] = color.blue;
-        texData[i * outBytePerPixel + 3] = color.alpha;
-    }
-
-    ImageHeader header(m_previewSize, m_previewSize, PixelFormat::R8G8B8A8);
-    return ImageView(header, 1, texData);
+    gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
 }

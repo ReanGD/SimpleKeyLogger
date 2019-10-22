@@ -82,6 +82,8 @@ struct Image : Noncopyable {
     Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter);
     ~Image();
 
+    // With memory allocation and without mip livels
+    void Create(const ImageHeader& header);
     bool Load(const char *filename, bool verticallyFlip, std::string& error);
     void Destroy();
 

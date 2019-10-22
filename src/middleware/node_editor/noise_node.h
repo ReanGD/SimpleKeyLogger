@@ -17,10 +17,9 @@ public:
     PerlinNode();
     ~PerlinNode() = default;
 
-    bool Create(std::string& error) noexcept;
-    bool DrawSettings() override;
-    void DrawPreview() override;
-    ImageView GenerateImage() const noexcept;
+    bool Update(std::string& error) noexcept override;
+    bool DrawSettings() noexcept override;
+    void DrawPreview() noexcept override;
 
 protected:
     double m_frequency = 1.0;              // DEFAULT_PERLIN_FREQUENCY
@@ -30,5 +29,6 @@ protected:
     double m_persistence = 0.5;            // DEFAULT_PERLIN_PERSISTENCE
     int32_t m_seed = 0;                    // DEFAULT_PERLIN_SEED
 
-    std::shared_ptr<Texture> m_preview;
+    Image m_imagePreview;
+    std::shared_ptr<Texture> m_texturePreview = nullptr;
 };

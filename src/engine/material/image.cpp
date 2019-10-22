@@ -169,6 +169,13 @@ Image::~Image() {
     Destroy();
 }
 
+void Image::Create(const ImageHeader& header) {
+    Destroy();
+    uint32_t mipCount = 1;
+    view = ImageView(header, mipCount, malloc(header.GetSize()));
+    deleter = Image::Free;
+}
+
 void Image::Destroy() {
     if (deleter && view.data) {
         deleter(view.data);
