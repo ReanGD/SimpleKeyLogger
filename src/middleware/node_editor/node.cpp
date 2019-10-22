@@ -8,9 +8,14 @@
 
 namespace ne = ax::NodeEditor;
 
-void BasePin::Draw(bool connected, uint8_t alpha) const noexcept {
+BasePin::BasePin(uint32_t id)
+    : m_id(id) {
+
+}
+
+void BasePin::Draw(uint8_t alpha) const noexcept {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
-        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, connected, math::Color(48, 220, 48, alpha), math::Color(32, 32, 32, alpha));
+        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, m_linkCount > 0, math::Color(48, 220, 48, alpha), math::Color(32, 32, 32, alpha));
     ne::EndPin();
 }
 
@@ -31,14 +36,21 @@ BaseNode::~BaseNode() {
     m_outPins.clear();
 }
 
-void BaseNode::AddInPin(BasePin* item) {
-    item->m_isInput = true;
-    m_inPins.push_back(item);
+void BaseNode::AddInPin(BasePin* pin) {
+    pin->m_isInput = true;
+    pin->m_node = this;
+    m_inPins.push_back(pin);
 }
 
-void BaseNode::AddOutPin(BasePin* item) {
-    item->m_isInput = false;
-    m_outPins.push_back(item);
+void BaseNode::AddOutPin(BasePin* pin) {
+    pin->m_isInput = false;
+    pin->m_node = this;
+    m_outPins.push_back(pin);
+}
+
+void BaseNode::AddIncomingLink(BasePin* src, BasePin* dst) {
+    m_needUpdate = true;
+    OnIncomingLink(src, dst);
 }
 
 void BaseNode::Draw() noexcept {
@@ -57,7 +69,7 @@ void BaseNode::Draw() noexcept {
 
         ImGui::BeginGroup();
         for (const auto* pin: m_inPins) {
-            pin->Draw(false, alpha);
+            pin->Draw(alpha);
         }
         ImGui::EndGroup();
 
@@ -82,7 +94,7 @@ void BaseNode::Draw() noexcept {
 
         ImGui::BeginGroup();
         for (const auto* pin: m_outPins) {
-            pin->Draw(false, alpha);
+            pin->Draw(alpha);
         }
         ImGui::EndGroup();
 

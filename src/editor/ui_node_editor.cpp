@@ -22,6 +22,7 @@ bool UINodeEditor::Create(std::string& /*error*/) {
 
     m_nodes.push_back(std::make_shared<PerlinNode>());
     m_nodes.push_back(std::make_shared<BillowNode>());
+    m_nodes.push_back(std::make_shared<ScaleBiasNode>());
 
     return true;
 }
@@ -55,20 +56,32 @@ void UINodeEditor::Draw() {
             //   * input invalid, output valid - user started to drag new ling from output pin
             //   * input valid, output valid   - user dragged link over other pin, can be validated
 
+
             // both are valid, let's accept link
             if (inputPinId && outputPinId) {
-                // ne::AcceptNewItem() return true when user release mouse button.
-                if (ne::AcceptNewItem()) {
-                    // Since we accepted new link, lets add one to our list of links.
-                    g_Links.push_back({ ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++)), inputPinId, outputPinId });
+                BasePin* pin1 = inputPinId.AsPointer<BasePin>();
+                BasePin* pin2 = outputPinId.AsPointer<BasePin>();
+                if ((pin1->IsInput() == pin2->IsInput()) || (pin1->GetNode() == pin2->GetNode())) {
+                    ne::RejectNewItem();
+                } else {
+                    // ne::AcceptNewItem() return true when user release mouse button.
+                    if (ne::AcceptNewItem()) {
+                        auto* src = pin1->IsInput() ? pin2 : pin1;
+                        auto* dst = pin1->IsInput() ? pin1 : pin2;
 
-                    // Draw new link.
-                    ne::Link(g_Links.back().Id, g_Links.back().InputId, g_Links.back().OutputId);
+                        dst->GetNode()->AddIncomingLink(src, dst);
+                        src->AddLink();
+                        dst->AddLink();
+
+                        // Since we accepted new link, lets add one to our list of links.
+                        g_Links.push_back({ ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++)), inputPinId, outputPinId });
+
+                        // Draw new link.
+                        ne::Link(g_Links.back().Id, g_Links.back().InputId, g_Links.back().OutputId);
+                    }
                 }
-
-                // You may choose to reject connection between these nodes
-                // by calling ne::RejectNewItem(). This will allow editor to give
-                // visual feedback by changing link thickness and color.
+            } else {
+                ne::RejectNewItem();
             }
         }
         ne::EndCreate();

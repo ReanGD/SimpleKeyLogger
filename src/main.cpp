@@ -34,6 +34,9 @@ static bool run(bool isFullscreen, float windowMultiplier, spdlog::level::level_
     } catch(const std::exception& e) {
         spdlog::error("Runtime exception: {}", e.what());
         return false;
+    } catch(...) {
+        spdlog::error("Unhandled exception");
+        return false;
     }
 
     return true;
