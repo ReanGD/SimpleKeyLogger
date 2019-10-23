@@ -20,8 +20,9 @@ bool UINodeEditor::Create(std::string& /*error*/) {
     Destroy();
     m_context = ne::CreateEditor();
 
-    m_nodes.push_back(std::make_shared<PerlinNode>());
     m_nodes.push_back(std::make_shared<BillowNode>());
+    m_nodes.push_back(std::make_shared<CheckerboardNode>());
+    m_nodes.push_back(std::make_shared<PerlinNode>());
     m_nodes.push_back(std::make_shared<ScaleBiasNode>());
 
     return true;

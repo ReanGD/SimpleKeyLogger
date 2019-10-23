@@ -73,41 +73,6 @@ void BaseNoiseNode::DrawPreview() noexcept {
     }
 }
 
-PerlinNode::PerlinNode()
-    : BaseNoiseNode("Perlin noise") {
-        AddOutPin(new BasePin(0));
-}
-
-bool PerlinNode::Update(std::string& error) noexcept {
-    return UpdateImpl(this, error);
-}
-
-bool PerlinNode::DrawSettings() noexcept {
-    ImGui::SameLine();
-    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-    ImGui::SameLine();
-
-    ImGui::BeginGroup();
-    ImGui::PushItemWidth(180);
-
-    bool changed = false;
-
-    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
-    changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
-    changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
-    changed |= gui::InputScalar("Octave count", m_octaveCount, gui::Step(1, 2), gui::Range(1, noise::module::PERLIN_MAX_OCTAVE));
-    changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
-    changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
-
-    ImGui::PopItemWidth();
-    ImGui::EndGroup();
-
-    ImGui::SameLine();
-    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-
-    return changed;
-}
-
 BillowNode::BillowNode()
     : BaseNoiseNode("Billow noise") {
         AddOutPin(new BasePin(0));
@@ -131,6 +96,54 @@ bool BillowNode::DrawSettings() noexcept {
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
     changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
     changed |= gui::InputScalar("Octave count", m_octaveCount, gui::Step(1, 2), gui::Range(1, noise::module::BILLOW_MAX_OCTAVE));
+    changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
+    changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
+
+    ImGui::PopItemWidth();
+    ImGui::EndGroup();
+
+    ImGui::SameLine();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+
+    return changed;
+}
+
+CheckerboardNode::CheckerboardNode()
+    : BaseNoiseNode("Checkerboard noise") {
+        AddOutPin(new BasePin(0));
+}
+
+bool CheckerboardNode::Update(std::string& error) noexcept {
+    return UpdateImpl(this, error);
+}
+
+bool CheckerboardNode::DrawSettings() noexcept {
+    return false;
+}
+
+PerlinNode::PerlinNode()
+    : BaseNoiseNode("Perlin noise") {
+        AddOutPin(new BasePin(0));
+}
+
+bool PerlinNode::Update(std::string& error) noexcept {
+    return UpdateImpl(this, error);
+}
+
+bool PerlinNode::DrawSettings() noexcept {
+    ImGui::SameLine();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+    ImGui::SameLine();
+
+    ImGui::BeginGroup();
+    ImGui::PushItemWidth(180);
+
+    bool changed = false;
+
+    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
+    changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
+    changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
+    changed |= gui::InputScalar("Octave count", m_octaveCount, gui::Step(1, 2), gui::Range(1, noise::module::PERLIN_MAX_OCTAVE));
     changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
     changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
 

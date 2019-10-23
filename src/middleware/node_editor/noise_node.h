@@ -20,27 +20,23 @@ protected:
     std::shared_ptr<Texture> m_texturePreview = nullptr;
 };
 
-class PerlinNode : public BaseNoiseNode, private noise::module::Perlin {
+class BillowNode : public BaseNoiseNode, private noise::module::Billow {
 public:
-    enum class Quality : uint8_t {
-        Fast = 0,
-        Std,
-        Best,
-        Count,
-    };
-public:
-    PerlinNode();
-    ~PerlinNode() = default;
-
+    BillowNode();
     bool Update(std::string& error) noexcept override;
     bool DrawSettings() noexcept override;
 };
 
-class BillowNode : public BaseNoiseNode, private noise::module::Billow {
+class CheckerboardNode : public BaseNoiseNode, private noise::module::Checkerboard {
 public:
-    BillowNode();
-    ~BillowNode() = default;
+    CheckerboardNode();
+    bool Update(std::string& error) noexcept override;
+    bool DrawSettings() noexcept override;
+};
 
+class PerlinNode : public BaseNoiseNode, private noise::module::Perlin {
+public:
+    PerlinNode();
     bool Update(std::string& error) noexcept override;
     bool DrawSettings() noexcept override;
 };
@@ -48,8 +44,6 @@ public:
 class ScaleBiasNode : public BaseNoiseNode, private noise::module::ScaleBias {
 public:
     ScaleBiasNode();
-    ~ScaleBiasNode() = default;
-
     void OnIncomingLink(BasePin* src, BasePin* dst) noexcept override;
     bool Update(std::string& error) noexcept override;
     bool DrawSettings() noexcept override;
