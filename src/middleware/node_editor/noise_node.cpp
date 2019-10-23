@@ -1,6 +1,5 @@
 #include "middleware/node_editor/noise_node.h"
 
-#include <noise.h>
 #include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
 #include <imgui_internal.h>
@@ -12,20 +11,12 @@
 namespace ne = ax::NodeEditor;
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
-static noise::NoiseQuality ToNoiseType(const PerlinNode::Quality value) noexcept {
-    switch (value) {
-    case PerlinNode::Quality::Fast: return noise::NoiseQuality::QUALITY_FAST;
-    case PerlinNode::Quality::Std: return noise::NoiseQuality::QUALITY_STD;
-    case PerlinNode::Quality::Best: return noise::NoiseQuality::QUALITY_BEST;
-    default: return noise::NoiseQuality::QUALITY_STD;
-    }
-}
 
 BaseNoiseNode::BaseNoiseNode(const std::string& name)
     : BaseNode(name) {
 }
 
-bool BaseNoiseNode::UpdateImpl(noise::module::Module* module, std::string& error) noexcept {
+bool BaseNoiseNode::UpdateImpl(const noise::module::Module* module, std::string& error) noexcept {
     if (!m_isFull) {
         return true;
     }
@@ -88,15 +79,7 @@ PerlinNode::PerlinNode()
 }
 
 bool PerlinNode::Update(std::string& error) noexcept {
-    module::Perlin module;
-    module.SetFrequency(m_frequency);
-    module.SetLacunarity(m_lacunarity);
-    module.SetNoiseQuality(ToNoiseType(m_noiseQuality));
-    module.SetOctaveCount(m_octaveCount);
-    module.SetPersistence(m_persistence);
-    module.SetSeed(m_seed);
-
-    return UpdateImpl(&module, error);
+    return UpdateImpl(this, error);
 }
 
 bool PerlinNode::DrawSettings() noexcept {
@@ -109,12 +92,10 @@ bool PerlinNode::DrawSettings() noexcept {
 
     bool changed = false;
 
-    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, Quality::Count);
+    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
     changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
-    changed |= gui::InputScalar("Octave count", m_octaveCount,
-        gui::Step(uint8_t(1), uint8_t(2)),
-        gui::Range(uint8_t(1), static_cast<uint8_t>(noise::module::PERLIN_MAX_OCTAVE)));
+    changed |= gui::InputScalar("Octave count", m_octaveCount, gui::Step(1, 2), gui::Range(1, noise::module::PERLIN_MAX_OCTAVE));
     changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
     changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
 
@@ -133,15 +114,7 @@ BillowNode::BillowNode()
 }
 
 bool BillowNode::Update(std::string& error) noexcept {
-    module::Billow module;
-    module.SetFrequency(m_frequency);
-    module.SetLacunarity(m_lacunarity);
-    module.SetNoiseQuality(ToNoiseType(m_noiseQuality));
-    module.SetOctaveCount(m_octaveCount);
-    module.SetPersistence(m_persistence);
-    module.SetSeed(m_seed);
-
-    return UpdateImpl(&module, error);
+    return UpdateImpl(this, error);
 }
 
 bool BillowNode::DrawSettings() noexcept {
@@ -154,12 +127,10 @@ bool BillowNode::DrawSettings() noexcept {
 
     bool changed = false;
 
-    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, PerlinNode::Quality::Count);
+    changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
     changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
-    changed |= gui::InputScalar("Octave count", m_octaveCount,
-        gui::Step(uint8_t(1), uint8_t(2)),
-        gui::Range(uint8_t(1), static_cast<uint8_t>(noise::module::BILLOW_MAX_OCTAVE)));
+    changed |= gui::InputScalar("Octave count", m_octaveCount, gui::Step(1, 2), gui::Range(1, noise::module::BILLOW_MAX_OCTAVE));
     changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
     changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
 
@@ -183,12 +154,9 @@ void ScaleBiasNode::OnIncomingLink(BasePin* /*src*/, BasePin* /*dst*/) noexcept 
 }
 
 bool ScaleBiasNode::Update(std::string& error) noexcept {
-    module::ScaleBias module;
-    module.SetBias(m_bias);
-    module.SetScale(m_scale);
     m_isFull = false;
 
-    return UpdateImpl(&module, error);
+    return UpdateImpl(this, error);
 }
 
 bool ScaleBiasNode::DrawSettings() noexcept {
