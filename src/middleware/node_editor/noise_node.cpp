@@ -26,6 +26,10 @@ BaseNoiseNode::BaseNoiseNode(const std::string& name)
 }
 
 bool BaseNoiseNode::UpdateImpl(noise::module::Module* module, std::string& error) noexcept {
+    if (!m_isFull) {
+        return true;
+    }
+
     utils::NoiseMap noiseMap;
     utils::NoiseMapBuilderPlane noiseMapBuilder;
     noiseMapBuilder.SetSourceModule(*module);
@@ -72,13 +76,15 @@ bool BaseNoiseNode::UpdateImpl(noise::module::Module* module, std::string& error
 }
 
 void BaseNoiseNode::DrawPreview() noexcept {
-    ImGui::SameLine();
-    gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
+    if (m_isFull) {
+        ImGui::SameLine();
+        gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
+    }
 }
 
 PerlinNode::PerlinNode()
     : BaseNoiseNode("Perlin noise") {
-        AddOutPin(new BasePin());
+        AddOutPin(new BasePin(0));
 }
 
 bool PerlinNode::Update(std::string& error) noexcept {
@@ -123,7 +129,7 @@ bool PerlinNode::DrawSettings() noexcept {
 
 BillowNode::BillowNode()
     : BaseNoiseNode("Billow noise") {
-        AddOutPin(new BasePin());
+        AddOutPin(new BasePin(0));
 }
 
 bool BillowNode::Update(std::string& error) noexcept {
@@ -156,6 +162,47 @@ bool BillowNode::DrawSettings() noexcept {
         gui::Range(uint8_t(1), static_cast<uint8_t>(noise::module::BILLOW_MAX_OCTAVE)));
     changed |= gui::InputScalar("Persistence", m_persistence, gui::Step(0.01, 0.1), gui::Range(0.0, 1.0), "%.2f");
     changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
+
+    ImGui::PopItemWidth();
+    ImGui::EndGroup();
+
+    ImGui::SameLine();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+
+    return changed;
+}
+
+ScaleBiasNode::ScaleBiasNode()
+    : BaseNoiseNode("ScaleBias modifier") {
+        AddInPin(new BasePin(0));
+        AddOutPin(new BasePin(0));
+}
+
+void ScaleBiasNode::OnIncomingLink(BasePin* /*src*/, BasePin* /*dst*/) noexcept {
+
+}
+
+bool ScaleBiasNode::Update(std::string& error) noexcept {
+    module::ScaleBias module;
+    module.SetBias(m_bias);
+    module.SetScale(m_scale);
+    m_isFull = false;
+
+    return UpdateImpl(&module, error);
+}
+
+bool ScaleBiasNode::DrawSettings() noexcept {
+    ImGui::SameLine();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+    ImGui::SameLine();
+
+    ImGui::BeginGroup();
+    ImGui::PushItemWidth(180);
+
+    bool changed = false;
+
+    changed |= gui::InputScalar("Bias", m_bias, gui::Step(0.1, 1.0), "%.1f");
+    changed |= gui::InputScalar("Scale", m_scale, gui::Step(0.1, 1.0), "%.1f");
 
     ImGui::PopItemWidth();
     ImGui::EndGroup();

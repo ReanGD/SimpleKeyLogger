@@ -3,6 +3,7 @@
 #include "engine/material/image.h"
 #include "middleware/node_editor/node.h"
 
+
 namespace noise {
   namespace module {
       class Module;
@@ -17,6 +18,7 @@ protected:
     bool UpdateImpl(noise::module::Module* module, std::string& error) noexcept;
     void DrawPreview() noexcept override;
 
+    bool m_isFull = true;
     Image m_imagePreview;
     std::shared_ptr<Texture> m_texturePreview = nullptr;
 };
@@ -60,4 +62,18 @@ protected:
     uint8_t m_octaveCount = 6;             // DEFAULT_BILLOW_OCTAVE_COUNT
     double m_persistence = 0.5;            // DEFAULT_BILLOW_PERSISTENCE
     int32_t m_seed = 0;                    // DEFAULT_BILLOW_SEED
+};
+
+class ScaleBiasNode : public BaseNoiseNode {
+public:
+    ScaleBiasNode();
+    ~ScaleBiasNode() = default;
+
+    void OnIncomingLink(BasePin* src, BasePin* dst) noexcept override;
+    bool Update(std::string& error) noexcept override;
+    bool DrawSettings() noexcept override;
+
+protected:
+    double m_bias = 0.0;  // DEFAULT_BIAS
+    double m_scale = 1.0; // DEFAULT_SCALE
 };
