@@ -12,18 +12,19 @@ namespace ne = ax::NodeEditor;
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
 
-BaseNoiseNode::BaseNoiseNode(const std::string& name)
-    : BaseNode(name) {
+BaseNoiseNode::BaseNoiseNode(const noise::module::Module* module, const std::string& name)
+    : BaseNode(name)
+    , m_module(module) {
 }
 
-bool BaseNoiseNode::UpdateImpl(const noise::module::Module* module, std::string& error) noexcept {
+bool BaseNoiseNode::Update(std::string& error) noexcept {
     if (!m_isFull) {
         return true;
     }
 
     utils::NoiseMap noiseMap;
     utils::NoiseMapBuilderPlane noiseMapBuilder;
-    noiseMapBuilder.SetSourceModule(*module);
+    noiseMapBuilder.SetSourceModule(*m_module);
     noiseMapBuilder.SetDestNoiseMap(noiseMap);
     noiseMapBuilder.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
     noiseMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
@@ -74,12 +75,8 @@ void BaseNoiseNode::DrawPreview() noexcept {
 }
 
 BillowNode::BillowNode()
-    : BaseNoiseNode("Billow noise") {
-        AddOutPin(new BasePin(0));
-}
-
-bool BillowNode::Update(std::string& error) noexcept {
-    return UpdateImpl(this, error);
+    : BaseNoiseNode(this, "Billow noise") {
+    AddOutPin(new BasePin(0));
 }
 
 bool BillowNode::DrawSettings() noexcept {
@@ -109,12 +106,8 @@ bool BillowNode::DrawSettings() noexcept {
 }
 
 CheckerboardNode::CheckerboardNode()
-    : BaseNoiseNode("Checkerboard noise") {
-        AddOutPin(new BasePin(0));
-}
-
-bool CheckerboardNode::Update(std::string& error) noexcept {
-    return UpdateImpl(this, error);
+    : BaseNoiseNode(this, "Checkerboard noise") {
+    AddOutPin(new BasePin(0));
 }
 
 bool CheckerboardNode::DrawSettings() noexcept {
@@ -122,12 +115,8 @@ bool CheckerboardNode::DrawSettings() noexcept {
 }
 
 PerlinNode::PerlinNode()
-    : BaseNoiseNode("Perlin noise") {
-        AddOutPin(new BasePin(0));
-}
-
-bool PerlinNode::Update(std::string& error) noexcept {
-    return UpdateImpl(this, error);
+    : BaseNoiseNode(this, "Perlin noise") {
+    AddOutPin(new BasePin(0));
 }
 
 bool PerlinNode::DrawSettings() noexcept {
@@ -157,19 +146,39 @@ bool PerlinNode::DrawSettings() noexcept {
 }
 
 ScaleBiasNode::ScaleBiasNode()
-    : BaseNoiseNode("ScaleBias modifier") {
-        AddInPin(new BasePin(0));
-        AddOutPin(new BasePin(0));
-}
+    : BaseNoiseNode(this, "ScaleBias modifier") {
 
-void ScaleBiasNode::OnIncomingLink(BasePin* /*src*/, BasePin* /*dst*/) noexcept {
-
-}
-
-bool ScaleBiasNode::Update(std::string& error) noexcept {
     m_isFull = false;
+    AddInPin(new BasePin(0));
+    AddOutPin(new BasePin(0));
+}
 
-    return UpdateImpl(this, error);
+bool ScaleBiasNode::OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
+    auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
+    if (!srcNode) {
+        return false;
+    }
+    auto index = static_cast<int>(dst->GetUserIndex());
+    if ((index >= GetSourceModuleCount()) || (index < 0)) {
+        return false;
+    }
+
+    if (checkOnly) {
+        return true;
+    }
+
+    SetSourceModule(index, srcNode->GetModule());
+
+    try {
+        for (int i=0; i!=GetSourceModuleCount(); ++i) {
+                GetSourceModule(i);
+        }
+        m_isFull = true;
+    } catch(const noise::ExceptionNoModule&) {
+        m_isFull = false;
+    }
+
+    return true;
 }
 
 bool ScaleBiasNode::DrawSettings() noexcept {

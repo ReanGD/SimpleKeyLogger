@@ -8,14 +8,14 @@
 
 namespace ne = ax::NodeEditor;
 
-BasePin::BasePin(uint32_t id)
-    : m_id(id) {
+BasePin::BasePin(uint32_t userIndex)
+    : m_userIndex(userIndex) {
 
 }
 
 void BasePin::Draw(uint8_t alpha) const noexcept {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
-        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, m_linkCount > 0, math::Color(48, 220, 48, alpha), math::Color(32, 32, 32, alpha));
+        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, IsConnected(), math::Color(48, 220, 48, alpha), math::Color(32, 32, 32, alpha));
     ne::EndPin();
 }
 
@@ -48,9 +48,19 @@ void BaseNode::AddOutPin(BasePin* pin) {
     m_outPins.push_back(pin);
 }
 
-void BaseNode::AddIncomingLink(BasePin* src, BasePin* dst) {
-    m_needUpdate = true;
-    OnIncomingLink(src, dst);
+bool BaseNode::AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) {
+    if (dst->IsConnected()) {
+        return false;
+    }
+
+    bool result = OnIncomingLink(src, dst, checkOnly);
+    if (!checkOnly) {
+        src->AddLink();
+        dst->AddLink();
+        m_needUpdate = true;
+    }
+
+    return result;
 }
 
 void BaseNode::Draw() noexcept {

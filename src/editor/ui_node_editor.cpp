@@ -65,14 +65,14 @@ void UINodeEditor::Draw() {
                 if ((pin1->IsInput() == pin2->IsInput()) || (pin1->GetNode() == pin2->GetNode())) {
                     ne::RejectNewItem();
                 } else {
-                    // ne::AcceptNewItem() return true when user release mouse button.
-                    if (ne::AcceptNewItem()) {
-                        auto* src = pin1->IsInput() ? pin2 : pin1;
-                        auto* dst = pin1->IsInput() ? pin1 : pin2;
-
-                        dst->GetNode()->AddIncomingLink(src, dst);
-                        src->AddLink();
-                        dst->AddLink();
+                    auto* src = pin1->IsInput() ? pin2 : pin1;
+                    auto* dst = pin1->IsInput() ? pin1 : pin2;
+                    bool checkOnly = true;
+                    if (!dst->GetNode()->AddIncomingLink(src, dst, checkOnly)) {
+                        ne::RejectNewItem();
+                    } else if (ne::AcceptNewItem()) { // ne::AcceptNewItem() return true when user release mouse button.
+                        checkOnly = false;
+                        dst->GetNode()->AddIncomingLink(src, dst, checkOnly);
 
                         // Since we accepted new link, lets add one to our list of links.
                         g_Links.push_back({ ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++)), inputPinId, outputPinId });
