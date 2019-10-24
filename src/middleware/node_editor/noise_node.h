@@ -16,7 +16,10 @@ public:
 
 protected:
     bool Update(std::string& error) noexcept override;
+    bool DrawSettings() noexcept override;
     void DrawPreview() noexcept override;
+
+    virtual bool DrawSettingsImpl() noexcept { return false; }
 
     bool m_isFull = true;
     Image m_imagePreview;
@@ -27,24 +30,29 @@ protected:
 class BillowNode : public BaseNoiseNode, private noise::module::Billow {
 public:
     BillowNode();
-    bool DrawSettings() noexcept override;
+    bool DrawSettingsImpl() noexcept override;
 };
 
 class CheckerboardNode : public BaseNoiseNode, private noise::module::Checkerboard {
 public:
     CheckerboardNode();
-    bool DrawSettings() noexcept override;
 };
 
 class PerlinNode : public BaseNoiseNode, private noise::module::Perlin {
 public:
     PerlinNode();
-    bool DrawSettings() noexcept override;
+    bool DrawSettingsImpl() noexcept override;
+};
+
+class RidgedMultiNode : public BaseNoiseNode, private noise::module::RidgedMulti {
+public:
+    RidgedMultiNode();
+    bool DrawSettingsImpl() noexcept override;
 };
 
 class ScaleBiasNode : public BaseNoiseNode, private noise::module::ScaleBias {
 public:
     ScaleBiasNode();
     bool OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept override;
-    bool DrawSettings() noexcept override;
+    bool DrawSettingsImpl() noexcept override;
 };
