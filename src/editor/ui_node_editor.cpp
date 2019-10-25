@@ -74,6 +74,7 @@ void UINodeEditor::Draw() {
                     } else if (ne::AcceptNewItem()) { // ne::AcceptNewItem() return true when user release mouse button.
                         checkOnly = false;
                         dst->GetNode()->AddIncomingLink(src, dst, checkOnly);
+                        src->GetNode()->LinkDstNode(dst->GetNode());
 
                         // Since we accepted new link, lets add one to our list of links.
                         g_Links.push_back({ ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++)), inputPinId, outputPinId });

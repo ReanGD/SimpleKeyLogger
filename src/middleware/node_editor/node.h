@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <memory>
 #include <string>
 #include <vector>
@@ -38,13 +39,15 @@ public:
     void AddInPin(BasePin* pin);
     void AddOutPin(BasePin* pin);
 
-    bool AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly);
+    bool AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept;
+    void LinkDstNode(BaseNode* dst) noexcept;
+    void SetNeedUpdate() noexcept;
     void Draw() noexcept;
 
     virtual bool OnIncomingLink(BasePin* /*src*/, BasePin* /*dst*/, bool /*checkOnly*/) noexcept { return false; }
-    virtual bool Update(std::string& /*error*/) noexcept = 0;
-    virtual bool DrawSettings() noexcept = 0;
-    virtual void DrawPreview() noexcept = 0;
+    virtual bool OnUpdate(std::string& /*error*/) noexcept = 0;
+    virtual bool OnDrawSettings() noexcept = 0;
+    virtual void OnDrawPreview() noexcept = 0;
 
 protected:
     uint32_t m_previewSize = 64;
@@ -53,6 +56,7 @@ private:
     std::string m_name;
     std::vector<BasePin*> m_inPins;
     std::vector<BasePin*> m_outPins;
+    std::set<BaseNode*> m_LinkedDstNodes;
     bool m_wrongNode = false;
     bool m_needUpdate = true;
     bool m_drawSettings = false;

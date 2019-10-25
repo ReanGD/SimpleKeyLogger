@@ -17,7 +17,7 @@ BaseNoiseNode::BaseNoiseNode(const noise::module::Module* module, const std::str
     , m_module(module) {
 }
 
-bool BaseNoiseNode::Update(std::string& error) noexcept {
+bool BaseNoiseNode::OnUpdate(std::string& error) noexcept {
     if (!m_isFull) {
         return true;
     }
@@ -67,7 +67,7 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
     return true;
 }
 
-bool BaseNoiseNode::DrawSettings() noexcept {
+bool BaseNoiseNode::OnDrawSettings() noexcept {
     ImGui::SameLine();
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
     ImGui::SameLine();
@@ -75,7 +75,7 @@ bool BaseNoiseNode::DrawSettings() noexcept {
     ImGui::BeginGroup();
     ImGui::PushItemWidth(180);
 
-    bool changed = DrawSettingsImpl();
+    bool changed = OnDrawSettingsImpl();
 
     ImGui::PopItemWidth();
     ImGui::EndGroup();
@@ -86,7 +86,7 @@ bool BaseNoiseNode::DrawSettings() noexcept {
     return changed;
 }
 
-void BaseNoiseNode::DrawPreview() noexcept {
+void BaseNoiseNode::OnDrawPreview() noexcept {
     if (m_isFull) {
         ImGui::SameLine();
         gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
@@ -98,7 +98,7 @@ BillowNode::BillowNode()
     AddOutPin(new BasePin(0));
 }
 
-bool BillowNode::DrawSettingsImpl() noexcept {
+bool BillowNode::OnDrawSettingsImpl() noexcept {
     bool changed = false;
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -121,7 +121,7 @@ PerlinNode::PerlinNode()
     AddOutPin(new BasePin(0));
 }
 
-bool PerlinNode::DrawSettingsImpl() noexcept {
+bool PerlinNode::OnDrawSettingsImpl() noexcept {
     bool changed = false;
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -139,7 +139,7 @@ RidgedMultiNode::RidgedMultiNode()
     AddOutPin(new BasePin(0));
 }
 
-bool RidgedMultiNode::DrawSettingsImpl() noexcept {
+bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
     bool changed = false;
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -187,7 +187,7 @@ bool ScaleBiasNode::OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) n
     return true;
 }
 
-bool ScaleBiasNode::DrawSettingsImpl() noexcept {
+bool ScaleBiasNode::OnDrawSettingsImpl() noexcept {
     bool changed = false;
 
     changed |= gui::InputScalar("Bias", m_bias, gui::Step(0.1, 1.0), "%.1f");

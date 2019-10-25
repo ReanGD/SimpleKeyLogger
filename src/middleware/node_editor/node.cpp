@@ -34,6 +34,8 @@ BaseNode::~BaseNode() {
         delete pin;
     }
     m_outPins.clear();
+
+    m_LinkedDstNodes.clear();
 }
 
 void BaseNode::AddInPin(BasePin* pin) {
@@ -48,7 +50,7 @@ void BaseNode::AddOutPin(BasePin* pin) {
     m_outPins.push_back(pin);
 }
 
-bool BaseNode::AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) {
+bool BaseNode::AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
     if (dst->IsConnected()) {
         return false;
     }
@@ -57,10 +59,21 @@ bool BaseNode::AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) {
     if (!checkOnly) {
         src->AddLink();
         dst->AddLink();
-        m_needUpdate = true;
+        SetNeedUpdate();
     }
 
     return result;
+}
+
+void BaseNode::LinkDstNode(BaseNode* dst) noexcept {
+    m_LinkedDstNodes.insert(dst);
+}
+
+void BaseNode::SetNeedUpdate() noexcept {
+    m_needUpdate = true;
+    for (auto& node: m_LinkedDstNodes) {
+        node->SetNeedUpdate();
+    }
 }
 
 void BaseNode::Draw() noexcept {
@@ -85,7 +98,7 @@ void BaseNode::Draw() noexcept {
 
         if (m_needUpdate) {
             std::string error;
-            if (Update(error)) {
+            if (OnUpdate(error)) {
                 m_needUpdate = false;
             } else {
                 m_wrongNode = true;
@@ -94,11 +107,11 @@ void BaseNode::Draw() noexcept {
         }
 
         if (m_drawSettings) {
-            if (DrawSettings()) {
-                m_needUpdate = true;
+            if (OnDrawSettings()) {
+                SetNeedUpdate();
             }
         } else {
-            DrawPreview();
+            OnDrawPreview();
         }
         ImGui::SameLine();
 
