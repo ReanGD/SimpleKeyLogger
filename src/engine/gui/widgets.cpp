@@ -10,8 +10,6 @@
 #include "engine/material/texture.h"
 
 
-namespace math {
-
 static inline ImVec2 ToImGui(const math::Point& value) {
     return ImVec2(static_cast<float>(value.x), static_cast<float>(value.y));
 }
@@ -24,53 +22,25 @@ static inline ImVec2 ToImGui(const math::Size& value) {
     return ImVec2(static_cast<float>(value.w), static_cast<float>(value.h));
 }
 
-template <typename T>
-struct BasicRect {
-    using point_t = BasicPoint<T>;
-
-    BasicRect() = default;
-    BasicRect(const point_t& pos1, const point_t& pos2): x(pos1.x), y(pos1.y), w(pos2.x - pos1.x), h(pos2.y - pos1.y) {}
-    BasicRect(T x, T y, T w, T h): x(x), y(y), w(w), h(h) {}
-
-    T Left() const { return x; }
-    T Right() const { return x + w; }
-    T Top() const { return y; }
-    T Bottom() const { return y + h; }
-
-    T CenterX() const { return x + w / 2; }
-    T CenterY() const { return y + h / 2; }
-    point_t Center() const { return point_t(CenterX(), CenterY()); }
-
-    T x = 0;
-    T y = 0;
-    T w = 0;
-    T h = 0;
-};
-
-using Rect = BasicRect<int32_t>;
-using Rectf = BasicRect<float>;
-
-}
-
-namespace gui {
-namespace detail {
-
-static ImGuiDataType_ ToImGui(DataType value) {
+static ImGuiDataType_ ToImGui(gui::detail::DataType value) {
     switch (value) {
-        case DataType::S8: return ImGuiDataType_S8;
-        case DataType::U8: return ImGuiDataType_U8;
-        case DataType::S16: return ImGuiDataType_S16;
-        case DataType::U16: return ImGuiDataType_U16;
-        case DataType::S32: return ImGuiDataType_S32;
-        case DataType::U32: return ImGuiDataType_U32;
-        case DataType::S64: return ImGuiDataType_S64;
-        case DataType::U64: return ImGuiDataType_U64;
-        case DataType::Float: return ImGuiDataType_Float;
-        case DataType::Double: return ImGuiDataType_Double;
+        case gui::detail::DataType::S8: return ImGuiDataType_S8;
+        case gui::detail::DataType::U8: return ImGuiDataType_U8;
+        case gui::detail::DataType::S16: return ImGuiDataType_S16;
+        case gui::detail::DataType::U16: return ImGuiDataType_U16;
+        case gui::detail::DataType::S32: return ImGuiDataType_S32;
+        case gui::detail::DataType::U32: return ImGuiDataType_U32;
+        case gui::detail::DataType::S64: return ImGuiDataType_S64;
+        case gui::detail::DataType::U64: return ImGuiDataType_U64;
+        case gui::detail::DataType::Float: return ImGuiDataType_Float;
+        case gui::detail::DataType::Double: return ImGuiDataType_Double;
         default:
             throw std::runtime_error(fmt::format("unknown value of widget type: '{}'", static_cast<uint8_t>(value)).c_str());
     }
 }
+
+namespace gui {
+namespace detail {
 
 struct TextureGetter {
     static uint GetId(const std::shared_ptr<Texture>& texture) {
@@ -308,7 +278,7 @@ void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
     }
 
     ImRect bb(window->DC.CursorPos, window->DC.CursorPos + ToImGui(size));
-    if (borderCol.GetA() > 0) {
+    if (borderCol.GetAlpha() > 0) {
         bb.Max += ImVec2(2, 2);
     }
     ImGui::ItemSize(bb);
@@ -317,11 +287,11 @@ void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
     }
 
     auto textureId = reinterpret_cast<ImTextureID>(detail::TextureGetter::GetId(texture));
-    if (borderCol.GetA() > 0) {
+    if (borderCol.GetAlpha() > 0) {
         window->DrawList->AddRect(bb.Min, bb.Max, borderCol.value, 0.0f);
-        window->DrawList->AddImage(textureId, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), math::ToImGui(uv0), math::ToImGui(uv1), tintCol.value);
+        window->DrawList->AddImage(textureId, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), ToImGui(uv0), ToImGui(uv1), tintCol.value);
     } else {
-        window->DrawList->AddImage(textureId, bb.Min, bb.Max, math::ToImGui(uv0), math::ToImGui(uv1), tintCol.value);
+        window->DrawList->AddImage(textureId, bb.Min, bb.Max, ToImGui(uv0), ToImGui(uv1), tintCol.value);
     }
 }
 

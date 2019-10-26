@@ -1,47 +1,8 @@
 #pragma once
 #include <memory>
 #include <string>
+#include "engine/gui/math.h"
 
-namespace math {
-
-struct Color {
-    Color() = default;
-    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
-        : value(static_cast<uint32_t>(a << 24) | static_cast<uint32_t>(b << 16) | static_cast<uint32_t>(g << 8) | static_cast<uint32_t>(r << 0)) {}
-    Color(uint8_t v) : Color(v, v, v, v) {}
-
-    uint8_t GetA() const noexcept {
-        return static_cast<uint8_t>(value >> 24);
-    }
-
-    uint32_t value = 0;
-};
-
-template <typename T>
-struct BasicPoint {
-    BasicPoint() = default;
-    BasicPoint(T x, T y): x(x), y(y) {}
-
-    T x = 0;
-    T y = 0;
-};
-
-using Point = BasicPoint<int32_t>;
-using Pointf = BasicPoint<float>;
-
-template <typename T>
-struct BasicSize {
-    BasicSize(): w(0), h(0) {}
-    BasicSize(T w, T h): w(w), h(h) {}
-
-    T w = 0;
-    T h = 0;
-};
-
-using Size = BasicSize<uint32_t>;
-using Sizef = BasicSize<float>;
-
-}
 
 class Texture;
 
