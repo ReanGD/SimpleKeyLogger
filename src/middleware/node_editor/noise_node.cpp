@@ -12,9 +12,37 @@ namespace ne = ax::NodeEditor;
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
 
-BaseNoiseNode::BaseNoiseNode(const noise::module::Module* module, const std::string& name)
+BaseNoiseNode::BaseNoiseNode(noise::module::Module* module, const std::string& name)
     : BaseNode(name)
     , m_module(module) {
+}
+
+bool BaseNoiseNode::OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
+    auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
+    if (!srcNode) {
+        return false;
+    }
+    auto index = static_cast<int>(dst->GetUserIndex());
+    if ((index >= m_module->GetSourceModuleCount()) || (index < 0)) {
+        return false;
+    }
+
+    if (checkOnly) {
+        return true;
+    }
+
+    m_module->SetSourceModule(index, srcNode->GetModule());
+
+    try {
+        for (int i=0; i!=m_module->GetSourceModuleCount(); ++i) {
+                m_module->GetSourceModule(i);
+        }
+        m_isFull = true;
+    } catch(const noise::ExceptionNoModule&) {
+        m_isFull = false;
+    }
+
+    return true;
 }
 
 bool BaseNoiseNode::OnUpdate(std::string& error) noexcept {
@@ -144,7 +172,10 @@ bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
-    changed |= gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f");
+    if (gui::InputScalar("Lacunarity", m_lacunarity, gui::Step(0.01, 0.1), gui::Range(1.5, 3.5), "%.2f")) {
+        SetLacunarity(m_lacunarity);
+        changed = true;
+    }
     changed |= gui::InputScalar("Octave count", m_octaveCount, gui::Step(1, 2), gui::Range(1, noise::module::RIDGED_MAX_OCTAVE));
     changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
 
@@ -159,39 +190,35 @@ ScaleBiasNode::ScaleBiasNode()
     AddOutPin(new BasePin(0));
 }
 
-bool ScaleBiasNode::OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
-    auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
-    if (!srcNode) {
-        return false;
-    }
-    auto index = static_cast<int>(dst->GetUserIndex());
-    if ((index >= GetSourceModuleCount()) || (index < 0)) {
-        return false;
-    }
-
-    if (checkOnly) {
-        return true;
-    }
-
-    SetSourceModule(index, srcNode->GetModule());
-
-    try {
-        for (int i=0; i!=GetSourceModuleCount(); ++i) {
-                GetSourceModule(i);
-        }
-        m_isFull = true;
-    } catch(const noise::ExceptionNoModule&) {
-        m_isFull = false;
-    }
-
-    return true;
-}
-
 bool ScaleBiasNode::OnDrawSettingsImpl() noexcept {
     bool changed = false;
 
     changed |= gui::InputScalar("Bias", m_bias, gui::Step(0.1, 1.0), "%.1f");
     changed |= gui::InputScalar("Scale", m_scale, gui::Step(0.1, 1.0), "%.1f");
+
+    return changed;
+}
+
+SelectNode::SelectNode()
+    : BaseNoiseNode(this, "Selector") {
+
+    m_isFull = false;
+    AddInPin(new BasePin(0));
+    AddInPin(new BasePin(1));
+    AddInPin(new BasePin(2, math::Color(220, 48, 48)));
+    AddOutPin(new BasePin(0));
+}
+
+bool SelectNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Edge falloff", m_edgeFalloff, gui::Step(0.01, 0.1), "%.2f");
+    changed |= gui::InputScalar("Lower bound", m_lowerBound, gui::Step(0.01, 0.1), gui::Range(-1.0, m_upperBound - 0.01), "%.2f");
+    changed |= gui::InputScalar("Upper bound", m_upperBound, gui::Step(0.01, 0.1), gui::Range(m_lowerBound + 0.01, 1.0), "%.2f");
+
+    if (changed) {
+        SetBounds(m_lowerBound, m_upperBound);
+    }
 
     return changed;
 }

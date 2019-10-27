@@ -9,12 +9,13 @@
 class Texture;
 class BaseNoiseNode : public BaseNode {
 protected:
-    BaseNoiseNode(const noise::module::Module* module, const std::string& name);
+    BaseNoiseNode(noise::module::Module* module, const std::string& name);
 
 public:
     const noise::module::Module& GetModule() const noexcept { return *m_module; }
 
 protected:
+    bool OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept override;
     bool OnUpdate(std::string& error) noexcept override;
     bool OnDrawSettings() noexcept override;
     void OnDrawPreview() noexcept override;
@@ -24,7 +25,7 @@ protected:
     bool m_isFull = true;
     Image m_imagePreview;
     std::shared_ptr<Texture> m_texturePreview = nullptr;
-    const noise::module::Module* m_module = nullptr;
+    noise::module::Module* m_module = nullptr;
 };
 
 class BillowNode : public BaseNoiseNode, private noise::module::Billow {
@@ -53,6 +54,11 @@ public:
 class ScaleBiasNode : public BaseNoiseNode, private noise::module::ScaleBias {
 public:
     ScaleBiasNode();
-    bool OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept override;
+    bool OnDrawSettingsImpl() noexcept override;
+};
+
+class SelectNode : public BaseNoiseNode, private noise::module::Select {
+public:
+    SelectNode();
     bool OnDrawSettingsImpl() noexcept override;
 };

@@ -8,14 +8,17 @@
 
 namespace ne = ax::NodeEditor;
 
-BasePin::BasePin(uint32_t userIndex)
-    : m_userIndex(userIndex) {
+BasePin::BasePin(uint32_t userIndex, math::Color color)
+    : m_userIndex(userIndex)
+    , m_color(color) {
 
 }
 
 void BasePin::Draw(uint8_t alpha) const noexcept {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
-        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, IsConnected(), math::Color(48, 220, 48, alpha), math::Color(32, 32, 32, alpha));
+        math::Color color = m_color;
+        color.SetAlpha(alpha);
+        gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, IsConnected(), color, math::Color(32, 32, 32, alpha));
     ne::EndPin();
 }
 

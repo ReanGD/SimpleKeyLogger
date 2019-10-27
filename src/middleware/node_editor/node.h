@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "engine/gui/math.h"
 #include "engine/common/noncopyable.h"
 
 
@@ -13,7 +14,7 @@ class BasePin : Noncopyable {
     friend class BaseNode;
 public:
     BasePin() = delete;
-    BasePin(uint32_t userIndex);
+    BasePin(uint32_t userIndex, math::Color color = math::Color(48, 220, 48));
     ~BasePin() = default;
 
     bool IsInput() const noexcept { return m_isInput; }
@@ -27,6 +28,7 @@ protected:
     bool m_isInput = true;
     uint32_t m_userIndex = 0;
     uint32_t m_linkCount = 0;
+    math::Color m_color = math::Color(48, 220, 48);
     BaseNode* m_node = nullptr;
 };
 
@@ -44,8 +46,8 @@ public:
     void SetNeedUpdate() noexcept;
     void Draw() noexcept;
 
-    virtual bool OnIncomingLink(BasePin* /*src*/, BasePin* /*dst*/, bool /*checkOnly*/) noexcept { return false; }
-    virtual bool OnUpdate(std::string& /*error*/) noexcept = 0;
+    virtual bool OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept = 0;
+    virtual bool OnUpdate(std::string& error) noexcept = 0;
     virtual bool OnDrawSettings() noexcept = 0;
     virtual void OnDrawPreview() noexcept = 0;
 
