@@ -1,5 +1,6 @@
 #include "editor/ui_node_editor.h"
 
+#include <unordered_map>
 #include <imgui_node_editor.h>
 #include "middleware/node_editor/noise_node.h"
 
@@ -7,12 +8,19 @@
 namespace ne = ax::NodeEditor;
 
 struct LinkInfo {
-    ne::LinkId Id;
-    ne::PinId InputId;
-    ne::PinId OutputId;
+    ne::PinId srcPin;
+    ne::PinId dstPin;
 };
 
-static ImVector<LinkInfo>   g_Links;
+namespace std {
+  template <> struct hash<ne::LinkId> {
+    size_t operator()(const ne::LinkId& k) const {
+        return size_t(k);
+    }
+  };
+}
+
+static std::unordered_map<ne::LinkId, LinkInfo>  g_links;
 static int                  g_NextLinkId = 100;
 
 
@@ -38,29 +46,13 @@ void UINodeEditor::Draw() {
         node->Draw();
     }
 
-    // Submit Links
-    for (auto& linkInfo : g_Links) {
-        ne::Link(linkInfo.Id, linkInfo.InputId, linkInfo.OutputId);
+    for (const auto& [linkId, info] : g_links) {
+        ne::Link(linkId, info.srcPin, info.dstPin);
     }
 
-    // Handle creation action, returns true if editor want to create new object (node or link)
     if (ne::BeginCreate()) {
         ne::PinId inputPinId, outputPinId;
         if (ne::QueryNewLink(&inputPinId, &outputPinId)) {
-            // QueryNewLink returns true if editor want to create new link between pins.
-            //
-            // Link can be created only for two valid pins, it is up to you to
-            // validate if connection make sense. Editor is happy to make any.
-            //
-            // Link always goes from input to output. User may choose to drag
-            // link from output pin or input pin. This determine which pin ids
-            // are valid and which are not:
-            //   * input valid, output invalid - user started to drag new ling from input pin
-            //   * input invalid, output valid - user started to drag new ling from output pin
-            //   * input valid, output valid   - user dragged link over other pin, can be validated
-
-
-            // both are valid, let's accept link
             if (inputPinId && outputPinId) {
                 BasePin* pin1 = inputPinId.AsPointer<BasePin>();
                 BasePin* pin2 = outputPinId.AsPointer<BasePin>();
@@ -75,13 +67,11 @@ void UINodeEditor::Draw() {
                     } else if (ne::AcceptNewItem()) { // ne::AcceptNewItem() return true when user release mouse button.
                         checkOnly = false;
                         dst->GetNode()->AddIncomingLink(src, dst, checkOnly);
-                        src->GetNode()->LinkDstNode(dst->GetNode());
+                        src->GetNode()->AddOutgoingLink(dst->GetNode());
 
-                        // Since we accepted new link, lets add one to our list of links.
-                        g_Links.push_back({ ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++)), inputPinId, outputPinId });
-
-                        // Draw new link.
-                        ne::Link(g_Links.back().Id, g_Links.back().InputId, g_Links.back().OutputId);
+                        auto linkId = ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++));
+                        g_links[linkId] = LinkInfo{ne::PinId(src), ne::PinId(dst)};
+                        ne::Link(linkId, ne::PinId(src), ne::PinId(dst));
                     }
                 }
             } else {
@@ -92,22 +82,19 @@ void UINodeEditor::Draw() {
     }
 
     if (ne::BeginDelete()) {
-        // There may be many links marked for deletion, let's loop over them.
         ne::LinkId deletedLinkId;
         while (ne::QueryDeletedLink(&deletedLinkId)) {
-            // If you agree that link can be deleted, accept deletion.
-            if (ne::AcceptDeletedItem()) {
-                // Then remove link from your data.
-                for (auto& link : g_Links) {
-                    if (link.Id == deletedLinkId) {
-                        g_Links.erase(&link);
-                        break;
-                    }
-                }
-            }
+            const auto it = g_links.find(deletedLinkId);
+            if (it == g_links.cend()) {
+                ne::RejectDeletedItem();
+            } else  if (ne::AcceptDeletedItem()) {
+                auto* src = it->second.srcPin.AsPointer<BasePin>();
+                auto* dst = it->second.dstPin.AsPointer<BasePin>();
+                dst->GetNode()->DelIncomingLink(src, dst);
+                src->GetNode()->DelOutgoingLink(dst->GetNode());
 
-            // You may reject link deletion by calling:
-            // ne::RejectDeletedItem();
+                g_links.erase(it);
+            }
         }
         ne::EndDelete();
     }

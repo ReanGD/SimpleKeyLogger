@@ -20,10 +20,13 @@ public:
     bool IsInput() const noexcept { return m_isInput; }
     uint32_t GetUserIndex() const noexcept { return m_userIndex; }
     BaseNode* GetNode() const noexcept { return m_node; }
-    bool IsConnected() const noexcept { return m_linkCount > 0; }
+
     void AddLink() noexcept { m_linkCount++; }
+    void DelLink() noexcept;
+    bool IsConnected() const noexcept { return m_linkCount > 0; }
 
     void Draw(uint8_t alpha) const noexcept;
+
 protected:
     bool m_isInput = true;
     uint32_t m_userIndex = 0;
@@ -41,13 +44,24 @@ public:
     void AddInPin(BasePin* pin);
     void AddOutPin(BasePin* pin);
 
+    // src -> dst (this)
     bool AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept;
-    void LinkDstNode(BaseNode* dst) noexcept;
+    // src -> dst (this)
+    void DelIncomingLink(BasePin* src, BasePin* dst) noexcept;
+    // this -> dst
+    void AddOutgoingLink(BaseNode* dst) noexcept;
+    // this -> dst
+    void DelOutgoingLink(BaseNode* dst) noexcept;
     void SetNeedUpdate() noexcept;
+    void CheckIsFull() noexcept;
+    void SetIsFull(bool value) noexcept;
+    bool GetIsFull() const noexcept { return m_isFull; }
     void Draw() noexcept;
 
-    virtual bool OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept = 0;
-    virtual bool OnUpdate(std::string& error) noexcept = 0;
+    virtual bool OnAddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept = 0;
+    virtual void OnDelIncomingLink(BasePin* src, BasePin* dst) noexcept = 0;
+    virtual bool Update(std::string& error) noexcept = 0;
+    virtual bool CheckIsConsistency() noexcept = 0;
     virtual bool OnDrawSettings() noexcept = 0;
     virtual void OnDrawPreview() noexcept = 0;
 
@@ -58,8 +72,12 @@ private:
     std::string m_name;
     std::vector<BasePin*> m_inPins;
     std::vector<BasePin*> m_outPins;
+    // this -> m_LinkedDstNodes
     std::set<BaseNode*> m_LinkedDstNodes;
+    // m_LinkedSrcNodes -> this
+    std::set<BaseNode*> m_LinkedSrcNodes;
     bool m_wrongNode = false;
     bool m_needUpdate = true;
+    bool m_isFull = true;
     bool m_drawSettings = false;
 };

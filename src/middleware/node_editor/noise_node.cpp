@@ -17,7 +17,7 @@ BaseNoiseNode::BaseNoiseNode(noise::module::Module* module, const std::string& n
     , m_module(module) {
 }
 
-bool BaseNoiseNode::OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
+bool BaseNoiseNode::OnAddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
     auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
     if (!srcNode) {
         return false;
@@ -27,26 +27,37 @@ bool BaseNoiseNode::OnIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) n
         return false;
     }
 
-    if (checkOnly) {
-        return true;
+    const noise::module::Module** sourceModules = GetSourceModules();
+    if (sourceModules == nullptr) {
+        return false;
     }
 
-    m_module->SetSourceModule(index, srcNode->GetModule());
-
-    try {
-        for (int i=0; i!=m_module->GetSourceModuleCount(); ++i) {
-                m_module->GetSourceModule(i);
-        }
-        m_isFull = true;
-    } catch(const noise::ExceptionNoModule&) {
-        m_isFull = false;
+    if (!checkOnly) {
+        sourceModules[index] = srcNode->m_module;
     }
 
     return true;
 }
 
-bool BaseNoiseNode::OnUpdate(std::string& error) noexcept {
-    if (!m_isFull) {
+void BaseNoiseNode::OnDelIncomingLink(BasePin* src, BasePin* dst) noexcept {
+    auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
+    if (!srcNode) {
+        return;
+    }
+    auto index = static_cast<int>(dst->GetUserIndex());
+    if ((index >= m_module->GetSourceModuleCount()) || (index < 0)) {
+        return;
+    }
+
+    const noise::module::Module** sourceModules = GetSourceModules();
+    if (sourceModules == nullptr) {
+        return;
+    }
+    sourceModules[index] = nullptr;
+}
+
+bool BaseNoiseNode::Update(std::string& error) noexcept {
+    if (!GetIsFull()) {
         return true;
     }
 
@@ -95,6 +106,21 @@ bool BaseNoiseNode::OnUpdate(std::string& error) noexcept {
     return true;
 }
 
+bool BaseNoiseNode::CheckIsConsistency() noexcept {
+    const noise::module::Module** sourceModules = GetSourceModules();
+    if (sourceModules == nullptr) {
+        return false;
+    }
+
+    for (auto i=0; i!=m_module->GetSourceModuleCount(); ++i) {
+        if (sourceModules[i] == nullptr) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool BaseNoiseNode::OnDrawSettings() noexcept {
     ImGui::SameLine();
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
@@ -115,7 +141,7 @@ bool BaseNoiseNode::OnDrawSettings() noexcept {
 }
 
 void BaseNoiseNode::OnDrawPreview() noexcept {
-    if (m_isFull) {
+    if (GetIsFull()) {
         ImGui::SameLine();
         gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
     }
@@ -184,10 +210,9 @@ bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
 
 ScaleBiasNode::ScaleBiasNode()
     : BaseNoiseNode(this, "ScaleBias modifier") {
-
-    m_isFull = false;
     AddInPin(new BasePin(0));
     AddOutPin(new BasePin(0));
+    SetIsFull(false);
 }
 
 bool ScaleBiasNode::OnDrawSettingsImpl() noexcept {
@@ -201,12 +226,11 @@ bool ScaleBiasNode::OnDrawSettingsImpl() noexcept {
 
 SelectNode::SelectNode()
     : BaseNoiseNode(this, "Selector") {
-
-    m_isFull = false;
     AddInPin(new BasePin(0));
     AddInPin(new BasePin(1));
     AddInPin(new BasePin(2, math::Color(220, 48, 48)));
     AddOutPin(new BasePin(0));
+    SetIsFull(false);
 }
 
 bool SelectNode::OnDrawSettingsImpl() noexcept {

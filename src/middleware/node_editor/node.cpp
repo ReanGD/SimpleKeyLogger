@@ -14,6 +14,12 @@ BasePin::BasePin(uint32_t userIndex, math::Color color)
 
 }
 
+void BasePin::DelLink() noexcept {
+    if (m_linkCount > 0) {
+        m_linkCount--;
+    }
+}
+
 void BasePin::Draw(uint8_t alpha) const noexcept {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
         math::Color color = m_color;
@@ -39,6 +45,7 @@ BaseNode::~BaseNode() {
     m_outPins.clear();
 
     m_LinkedDstNodes.clear();
+    m_LinkedSrcNodes.clear();
 }
 
 void BaseNode::AddInPin(BasePin* pin) {
@@ -58,24 +65,67 @@ bool BaseNode::AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexc
         return false;
     }
 
-    bool result = OnIncomingLink(src, dst, checkOnly);
+    bool result = OnAddIncomingLink(src, dst, checkOnly);
     if (!checkOnly) {
         src->AddLink();
         dst->AddLink();
-        SetNeedUpdate();
+
+        m_LinkedSrcNodes.insert(src->GetNode());
+        CheckIsFull();
     }
 
     return result;
 }
 
-void BaseNode::LinkDstNode(BaseNode* dst) noexcept {
+void BaseNode::DelIncomingLink(BasePin* src, BasePin* dst) noexcept {
+    OnDelIncomingLink(src, dst);
+    src->DelLink();
+    dst->DelLink();
+    m_LinkedSrcNodes.erase(src->GetNode());
+    CheckIsFull();
+}
+
+void BaseNode::AddOutgoingLink(BaseNode* dst) noexcept {
     m_LinkedDstNodes.insert(dst);
 }
 
+void BaseNode::DelOutgoingLink(BaseNode* dst) noexcept {
+    m_LinkedDstNodes.erase(dst);
+}
+
 void BaseNode::SetNeedUpdate() noexcept {
+
     m_needUpdate = true;
     for (auto& node: m_LinkedDstNodes) {
         node->SetNeedUpdate();
+    }
+}
+
+void BaseNode::CheckIsFull() noexcept {
+    bool isFull = CheckIsConsistency();
+    if (isFull) {
+        for(const auto& node : m_LinkedSrcNodes) {
+            if (!node->GetIsFull()) {
+                isFull = false;
+                break;
+            }
+        }
+    }
+
+    if (isFull) {
+        SetNeedUpdate();
+    }
+
+    SetIsFull(isFull);
+}
+
+void BaseNode::SetIsFull(bool value) noexcept {
+    if (m_isFull == value) {
+        return;
+    }
+    m_isFull = value;
+    for (auto& node: m_LinkedDstNodes) {
+        node->CheckIsFull();
     }
 }
 
@@ -101,7 +151,7 @@ void BaseNode::Draw() noexcept {
 
         if (m_needUpdate) {
             std::string error;
-            if (OnUpdate(error)) {
+            if (Update(error)) {
                 m_needUpdate = false;
             } else {
                 m_wrongNode = true;
