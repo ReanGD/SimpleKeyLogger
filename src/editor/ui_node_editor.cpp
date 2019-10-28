@@ -27,15 +27,6 @@ static int                  g_NextLinkId = 100;
 bool UINodeEditor::Create(std::string& /*error*/) {
     Destroy();
     m_context = ne::CreateEditor();
-
-    m_nodes.push_back(std::make_shared<BillowNode>());
-    m_nodes.push_back(std::make_shared<CheckerboardNode>());
-    m_nodes.push_back(std::make_shared<PerlinNode>());
-    m_nodes.push_back(std::make_shared<RidgedMultiNode>());
-    m_nodes.push_back(std::make_shared<AbsNode>());
-    m_nodes.push_back(std::make_shared<ScaleBiasNode>());
-    m_nodes.push_back(std::make_shared<SelectNode>());
-
     return true;
 }
 
@@ -99,6 +90,48 @@ void UINodeEditor::Draw() {
         }
         ne::EndDelete();
     }
+
+    auto currentCursorPosition = ImGui::GetMousePos();
+    static auto openPopupPosition = ImGui::GetMousePos();
+    ne::Suspend();
+    if (ne::ShowBackgroundContextMenu()) {
+        ImGui::OpenPopup("Create New Node");
+        openPopupPosition = currentCursorPosition;
+    }
+    ne::Resume();
+
+    ne::Suspend();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+
+    if (ImGui::BeginPopup("Create New Node")) {
+        std::shared_ptr<BaseNode> node = nullptr;
+
+        if (ImGui::MenuItem("Billow noise")) {
+            node = std::make_shared<BillowNode>();
+        } else if (ImGui::MenuItem("Checkerboard noise")) {
+            node = std::make_shared<CheckerboardNode>();
+        } else if (ImGui::MenuItem("Perlin noise")) {
+            node = std::make_shared<PerlinNode>();
+        } else if (ImGui::MenuItem("RidgedMulti noise")) {
+            node = std::make_shared<RidgedMultiNode>();
+        } else if (ImGui::MenuItem("Abs modifier")) {
+            node = std::make_shared<AbsNode>();
+        } else if (ImGui::MenuItem("ScaleBias modifier")) {
+            node = std::make_shared<ScaleBiasNode>();
+        } else if (ImGui::MenuItem("Selector")) {
+            node = std::make_shared<SelectNode>();
+        }
+
+        if (node) {
+            m_nodes.push_back(node);
+            ne::SetNodePosition(ne::NodeId(node.get()), openPopupPosition);
+        }
+
+        ImGui::EndPopup();
+    }
+
+    ImGui::PopStyleVar();
+    ne::Resume();
 
     ne::End();
 }

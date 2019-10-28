@@ -24,7 +24,7 @@ private:
 
 private:
     Engine& m_engine;
-    bool m_editorMode = false;
+    bool m_editorMode = true;
     bool m_showNormals = false;
     std::shared_ptr<Material> m_materialCube;
     std::shared_ptr<Framebuffer> m_fbo;

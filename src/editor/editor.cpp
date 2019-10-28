@@ -94,11 +94,11 @@ bool Editor::Init(std::string& error) {
         return false;
     }
 
-    auto heightmapBody = Heightmap().Load("heightmap2.jpg", error);
-    if (!heightmapBody) {
-        return false;
-    }
-    m_engine.GetPhysics().AddNode(heightmapBody);
+    // auto heightmapBody = Heightmap().Load("heightmap2.jpg", error);
+    // if (!heightmapBody) {
+    //     return false;
+    // }
+    // m_engine.GetPhysics().AddNode(heightmapBody);
 
     Material materialTex(shaderTex);
     materialTex.SetBaseTexture(0, texture);
@@ -200,7 +200,7 @@ void Editor::Render() {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Render(m_editorMode, 0);//m_fbo->GetColorBufferHandle());
+    m_interface.Render(m_editorMode);
 }
 
 void Editor::Destroy() {

@@ -5,6 +5,7 @@ RTGE - game engine
 
 ```console
 sudo pip install conan
+conan remote add achary https://api.bintray.com/conan/achary/achary
 conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 conan remote add anotherfoxguy https://api.bintray.com/conan/anotherfoxguy/conan-packages
 ```
