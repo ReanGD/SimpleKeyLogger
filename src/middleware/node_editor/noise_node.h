@@ -54,6 +54,13 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class AbsNode : public BaseNoiseNode, private noise::module::Abs {
+public:
+    AbsNode();
+    bool OnDrawSettingsImpl() noexcept override;
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class ScaleBiasNode : public BaseNoiseNode, private noise::module::ScaleBias {
 public:
     ScaleBiasNode();

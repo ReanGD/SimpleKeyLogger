@@ -208,6 +208,17 @@ bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
     return changed;
 }
 
+AbsNode::AbsNode()
+    : BaseNoiseNode(this, "Abs modifier") {
+    AddInPin(new BasePin(0));
+    AddOutPin(new BasePin(0));
+    SetIsFull(false);
+}
+
+bool AbsNode::OnDrawSettingsImpl() noexcept {
+    return false;
+}
+
 ScaleBiasNode::ScaleBiasNode()
     : BaseNoiseNode(this, "ScaleBias modifier") {
     AddInPin(new BasePin(0));
