@@ -45,26 +45,29 @@ void UINodeEditor::Draw() {
     if (ne::BeginCreate()) {
         ne::PinId inputPinId, outputPinId;
         if (ne::QueryNewLink(&inputPinId, &outputPinId)) {
-            if (inputPinId && outputPinId) {
+            if ((inputPinId && outputPinId) && (inputPinId != outputPinId)) {
                 BasePin* pin1 = inputPinId.AsPointer<BasePin>();
                 BasePin* pin2 = outputPinId.AsPointer<BasePin>();
-                if ((pin1->IsInput() == pin2->IsInput()) || (pin1->GetNode() == pin2->GetNode())) {
-                    ne::RejectNewItem();
-                } else {
+
+                if ((pin1->IsInput() != pin2->IsInput()) && (pin1->GetNode() != pin2->GetNode()) && (pin1->GetPinType() == pin2->GetPinType())) {
                     auto* src = pin1->IsInput() ? pin2 : pin1;
                     auto* dst = pin1->IsInput() ? pin1 : pin2;
                     bool checkOnly = true;
-                    if (!dst->GetNode()->AddIncomingLink(src, dst, checkOnly)) {
-                        ne::RejectNewItem();
-                    } else if (ne::AcceptNewItem()) { // ne::AcceptNewItem() return true when user release mouse button.
-                        checkOnly = false;
-                        dst->GetNode()->AddIncomingLink(src, dst, checkOnly);
-                        src->GetNode()->AddOutgoingLink(dst->GetNode());
+                    if (dst->GetNode()->AddIncomingLink(src, dst, checkOnly)) {
+                        if (ne::AcceptNewItem()) {
+                            checkOnly = false;
+                            dst->GetNode()->AddIncomingLink(src, dst, checkOnly);
+                            src->GetNode()->AddOutgoingLink(dst->GetNode());
 
-                        auto linkId = ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++));
-                        g_links[linkId] = LinkInfo{ne::PinId(src), ne::PinId(dst)};
-                        ne::Link(linkId, ne::PinId(src), ne::PinId(dst));
+                            auto linkId = ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++));
+                            g_links[linkId] = LinkInfo{ne::PinId(src), ne::PinId(dst)};
+                            ne::Link(linkId, ne::PinId(src), ne::PinId(dst));
+                        }
+                    } else {
+                        ne::RejectNewItem();
                     }
+                } else {
+                    ne::RejectNewItem();
                 }
             } else {
                 ne::RejectNewItem();
@@ -106,7 +109,7 @@ void UINodeEditor::Draw() {
     if (ImGui::BeginPopup("Create New Node")) {
         std::shared_ptr<BaseNode> node = nullptr;
 
-        if (ImGui::BeginMenu("Noise")) {
+        if (ImGui::BeginMenu("Generator")) {
             if (ImGui::MenuItem("Billow")) {
                 node = std::make_shared<BillowNode>();
             } else if (ImGui::MenuItem("Checkerboard")) {

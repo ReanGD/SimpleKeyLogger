@@ -8,8 +8,9 @@
 
 namespace ne = ax::NodeEditor;
 
-BasePin::BasePin(uint32_t userIndex, math::Color color)
-    : m_userIndex(userIndex)
+BasePin::BasePin(PinType pinType, uint32_t userIndex, math::Color color)
+    : m_pinType(pinType)
+    , m_userIndex(userIndex)
     , m_color(color) {
 
 }

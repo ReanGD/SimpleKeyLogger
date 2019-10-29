@@ -9,15 +9,22 @@
 #include "engine/common/noncopyable.h"
 
 
+enum class PinType : uint8_t {
+    Noise,
+    NoiseMap,
+    Image
+};
+
 class BaseNode;
 class BasePin : Noncopyable {
     friend class BaseNode;
 public:
     BasePin() = delete;
-    BasePin(uint32_t userIndex, math::Color color = math::Color(48, 220, 48));
+    BasePin(PinType pinType, uint32_t userIndex, math::Color color = math::Color(48, 220, 48));
     ~BasePin() = default;
 
     bool IsInput() const noexcept { return m_isInput; }
+    PinType GetPinType() const noexcept { return m_pinType; }
     uint32_t GetUserIndex() const noexcept { return m_userIndex; }
     BaseNode* GetNode() const noexcept { return m_node; }
 
@@ -29,6 +36,7 @@ public:
 
 protected:
     bool m_isInput = true;
+    PinType m_pinType;
     uint32_t m_userIndex = 0;
     uint32_t m_linkCount = 0;
     math::Color m_color = math::Color(48, 220, 48);
@@ -64,9 +72,6 @@ public:
     virtual bool CheckIsConsistency() noexcept = 0;
     virtual bool OnDrawSettings() noexcept = 0;
     virtual void OnDrawPreview() noexcept = 0;
-
-protected:
-    uint32_t m_previewSize = 64;
 
 private:
     std::string m_name;

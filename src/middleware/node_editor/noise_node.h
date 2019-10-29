@@ -23,6 +23,7 @@ protected:
     virtual const noise::module::Module** GetSourceModules() noexcept = 0;
 
     Image m_imagePreview;
+    uint32_t m_previewSize = 64;
     std::shared_ptr<Texture> m_texturePreview = nullptr;
     noise::module::Module* m_module = nullptr;
 };
