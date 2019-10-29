@@ -15,13 +15,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_RUNTIME_OUTPUT_DIRECTO
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-set(NODE_EDITOR_DIR "${CMAKE_SOURCE_DIR}/src/middleware/node_editor")
+set(ENGINE_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
-set(STB_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/material/image_loader.cpp")
-set(NOISE_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/heightmap/heightmap.cpp" "${NODE_EDITOR_DIR}/noise_node.cpp" "${NODE_EDITOR_DIR}/generator_node.cpp")
-set(PHYSICS_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/physics/physics.cpp")
-set(PHYSICS2_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/engine/physics/physical_node.cpp")
+set(STB_ERROR_SOURCE_FILES "${ENGINE_DIR}/material/image_loader.cpp")
+set(NOISE_ERROR_SOURCE_FILES "${ENGINE_DIR}/heightmap/heightmap.cpp" "${CMAKE_SOURCE_DIR}/src/middleware/node_editor/noise_node.cpp")
+set(PHYSICS_ERROR_SOURCE_FILES "${ENGINE_DIR}/physics/physics.cpp")
+set(PHYSICS2_ERROR_SOURCE_FILES "${ENGINE_DIR}/physics/physical_node.cpp")
 set(IMGUI_ERROR_SOURCE_FILES "${CONAN_SRC_DIRS_IMGUI}/bindings/imgui_impl_opengl3.cpp")
 
 add_compile_options(
@@ -43,6 +43,9 @@ add_compile_options(
     -Wredundant-decls
     -Wsign-conversion
     -Wsign-promo
+
+    -Wno-nested-anon-types
+    -Wno-gnu-anonymous-struct
 )
 
 set(STB_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-cast-qual -Wno-cast-align -Wno-implicit-int-conversion -Wno-unused-parameter")

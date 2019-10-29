@@ -1,6 +1,5 @@
 #include "middleware/node_editor/noise_node.h"
 
-#include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
 #include <imgui_internal.h>
 

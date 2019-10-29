@@ -278,7 +278,7 @@ void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
     }
 
     ImRect bb(window->DC.CursorPos, window->DC.CursorPos + ToImGui(size));
-    if (borderCol.GetAlpha() > 0) {
+    if (borderCol.alpha > 0) {
         bb.Max += ImVec2(2, 2);
     }
     ImGui::ItemSize(bb);
@@ -287,7 +287,7 @@ void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
     }
 
     auto textureId = reinterpret_cast<ImTextureID>(detail::TextureGetter::GetId(texture));
-    if (borderCol.GetAlpha() > 0) {
+    if (borderCol.alpha > 0) {
         window->DrawList->AddRect(bb.Min, bb.Max, borderCol.value, 0.0f);
         window->DrawList->AddImage(textureId, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), ToImGui(uv0), ToImGui(uv1), tintCol.value);
     } else {

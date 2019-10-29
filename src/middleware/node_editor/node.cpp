@@ -24,7 +24,7 @@ void BasePin::DelLink() noexcept {
 void BasePin::Draw(uint8_t alpha) const noexcept {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
         math::Color color = m_color;
-        color.SetAlpha(alpha);
+        color.alpha = alpha;
         gui::NodeIcon(math::Size(24, 24), gui::IconType::Circle, IsConnected(), color, math::Color(32, 32, 32, alpha));
     ne::EndPin();
 }
