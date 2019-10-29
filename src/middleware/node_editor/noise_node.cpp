@@ -166,12 +166,12 @@ bool BillowNode::OnDrawSettingsImpl() noexcept {
 }
 
 CheckerboardNode::CheckerboardNode()
-    : BaseNoiseNode(this, "Checkerboard noise") {
+    : BaseNoiseNode(this, "Checkerboard") {
     AddOutPin(new BasePin(0));
 }
 
 PerlinNode::PerlinNode()
-    : BaseNoiseNode(this, "Perlin noise") {
+    : BaseNoiseNode(this, "Perlin") {
     AddOutPin(new BasePin(0));
 }
 
@@ -189,7 +189,7 @@ bool PerlinNode::OnDrawSettingsImpl() noexcept {
 }
 
 RidgedMultiNode::RidgedMultiNode()
-    : BaseNoiseNode(this, "RidgedMulti noise") {
+    : BaseNoiseNode(this, "RidgedMulti") {
     AddOutPin(new BasePin(0));
 }
 
@@ -209,18 +209,34 @@ bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
 }
 
 AbsNode::AbsNode()
-    : BaseNoiseNode(this, "Abs modifier") {
+    : BaseNoiseNode(this, "Abs") {
     AddInPin(new BasePin(0));
     AddOutPin(new BasePin(0));
     SetIsFull(false);
 }
 
-bool AbsNode::OnDrawSettingsImpl() noexcept {
-    return false;
+ClampNode::ClampNode()
+    : BaseNoiseNode(this, "Clamp") {
+    AddInPin(new BasePin(0));
+    AddOutPin(new BasePin(0));
+    SetIsFull(false);
+}
+
+bool ClampNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Lower bound", m_lowerBound, gui::Step(0.01, 0.1), gui::Range(-1.0, m_upperBound - 0.01), "%.2f");
+    changed |= gui::InputScalar("Upper bound", m_upperBound, gui::Step(0.01, 0.1), gui::Range(m_lowerBound + 0.01, 1.0), "%.2f");
+
+    if (changed) {
+        SetBounds(m_lowerBound, m_upperBound);
+    }
+
+    return changed;
 }
 
 ScaleBiasNode::ScaleBiasNode()
-    : BaseNoiseNode(this, "ScaleBias modifier") {
+    : BaseNoiseNode(this, "ScaleBias") {
     AddInPin(new BasePin(0));
     AddOutPin(new BasePin(0));
     SetIsFull(false);
@@ -236,7 +252,7 @@ bool ScaleBiasNode::OnDrawSettingsImpl() noexcept {
 }
 
 SelectNode::SelectNode()
-    : BaseNoiseNode(this, "Selector") {
+    : BaseNoiseNode(this, "Select") {
     AddInPin(new BasePin(0));
     AddInPin(new BasePin(1));
     AddInPin(new BasePin(2, math::Color(220, 48, 48)));

@@ -106,20 +106,35 @@ void UINodeEditor::Draw() {
     if (ImGui::BeginPopup("Create New Node")) {
         std::shared_ptr<BaseNode> node = nullptr;
 
-        if (ImGui::MenuItem("Billow noise")) {
-            node = std::make_shared<BillowNode>();
-        } else if (ImGui::MenuItem("Checkerboard noise")) {
-            node = std::make_shared<CheckerboardNode>();
-        } else if (ImGui::MenuItem("Perlin noise")) {
-            node = std::make_shared<PerlinNode>();
-        } else if (ImGui::MenuItem("RidgedMulti noise")) {
-            node = std::make_shared<RidgedMultiNode>();
-        } else if (ImGui::MenuItem("Abs modifier")) {
-            node = std::make_shared<AbsNode>();
-        } else if (ImGui::MenuItem("ScaleBias modifier")) {
-            node = std::make_shared<ScaleBiasNode>();
-        } else if (ImGui::MenuItem("Selector")) {
-            node = std::make_shared<SelectNode>();
+        if (ImGui::BeginMenu("Noise")) {
+            if (ImGui::MenuItem("Billow")) {
+                node = std::make_shared<BillowNode>();
+            } else if (ImGui::MenuItem("Checkerboard")) {
+                node = std::make_shared<CheckerboardNode>();
+            } else if (ImGui::MenuItem("Perlin")) {
+                node = std::make_shared<PerlinNode>();
+            } else if (ImGui::MenuItem("RidgedMulti")) {
+                node = std::make_shared<RidgedMultiNode>();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Modifier")) {
+            if (ImGui::MenuItem("Abs")) {
+                node = std::make_shared<AbsNode>();
+            } else if (ImGui::MenuItem("Clamp")) {
+                node = std::make_shared<ClampNode>();
+            } else if (ImGui::MenuItem("ScaleBias")) {
+                node = std::make_shared<ScaleBiasNode>();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Selector")) {
+            if (ImGui::MenuItem("Select")) {
+                node = std::make_shared<SelectNode>();
+            }
+            ImGui::EndMenu();
         }
 
         if (node) {

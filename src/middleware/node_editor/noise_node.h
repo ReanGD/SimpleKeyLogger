@@ -57,6 +57,12 @@ public:
 class AbsNode : public BaseNoiseNode, private noise::module::Abs {
 public:
     AbsNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
+class ClampNode : public BaseNoiseNode, private noise::module::Clamp {
+public:
+    ClampNode();
     bool OnDrawSettingsImpl() noexcept override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
