@@ -2,10 +2,10 @@
 
 #include <noise.h>
 #include <fmt/format.h>
-#include <noise/noiseutils.h>
 
 #include "engine/gui/widgets.h"
 #include "engine/material/texture_manager.h"
+#include "middleware/node_editor/noiseutils.h"
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
 
@@ -129,14 +129,14 @@ ImageView Heightmap::Generate() const noexcept {
     renderer.SetDestImage(image);
 
     renderer.ClearGradient();
-    renderer.AddGradientPoint(-1.0000, utils::Color(  0,   0, 128, 255)); // deeps
-    renderer.AddGradientPoint(-0.2500, utils::Color(  0,   0, 255, 255)); // shallow
-    renderer.AddGradientPoint( 0.0000, utils::Color(  0, 128, 255, 255)); // shore
-    renderer.AddGradientPoint( 0.0625, utils::Color(240, 240,  64, 255)); // sand
-    renderer.AddGradientPoint( 0.1250, utils::Color( 32, 160,   0, 255)); // grass
-    renderer.AddGradientPoint( 0.3750, utils::Color(224, 224,   0, 255)); // dirt
-    renderer.AddGradientPoint( 0.7500, utils::Color(128, 128, 128, 255)); // rock
-    renderer.AddGradientPoint( 1.0000, utils::Color(255, 255, 255, 255)); // snow
+    renderer.AddGradientPoint(-1.0000, math::Color(  0,   0, 128)); // deeps
+    renderer.AddGradientPoint(-0.2500, math::Color(  0,   0, 255)); // shallow
+    renderer.AddGradientPoint( 0.0000, math::Color(  0, 128, 255)); // shore
+    renderer.AddGradientPoint( 0.0625, math::Color(240, 240,  64)); // sand
+    renderer.AddGradientPoint( 0.1250, math::Color( 32, 160,   0)); // grass
+    renderer.AddGradientPoint( 0.3750, math::Color(224, 224,   0)); // dirt
+    renderer.AddGradientPoint( 0.7500, math::Color(128, 128, 128)); // rock
+    renderer.AddGradientPoint( 1.0000, math::Color(255, 255, 255)); // snow
     renderer.EnableLight();
     renderer.SetLightContrast(3.0);
     renderer.SetLightBrightness(2.0);
@@ -144,15 +144,10 @@ ImageView Heightmap::Generate() const noexcept {
     renderer.Render();
 
     size_t cntPixel = image.GetMemUsed();
-    utils::Color* colors = image.GetSlabPtr();
-    size_t outBytePerPixel = 4;
-    uint8* texData = new uint8[cntPixel * outBytePerPixel];
+    math::Color* colors = image.GetSlabPtr();
+    uint32_t* texData = new uint32_t[cntPixel];
     for (size_t i=0 ; i!=cntPixel; ++i) {
-        utils::Color color = colors[i];
-        texData[i * outBytePerPixel + 0] = color.red;
-        texData[i * outBytePerPixel + 1] = color.green;
-        texData[i * outBytePerPixel + 2] = color.blue;
-        texData[i * outBytePerPixel + 3] = color.alpha;
+        texData[i] = colors[i].value;
     }
 
     ImageHeader header(256, 256, PixelFormat::R8G8B8A8);
@@ -177,7 +172,7 @@ void Heightmap::DrawSettings() {
         if (!m_previewTex->Update(image, error)) {
             // spdlog::error(error);
         }
-        uint8* texData = reinterpret_cast<uint8*>(image.data);
+        uint32_t* texData = reinterpret_cast<uint32_t*>(image.data);
         delete []texData;
     }
 }

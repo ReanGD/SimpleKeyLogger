@@ -1,11 +1,11 @@
 #include "middleware/node_editor/noise_node.h"
 
-#include <noise/noiseutils.h>
 #include <imgui_node_editor.h>
 #include <imgui_internal.h>
 
 #include "engine/gui/widgets.h"
 #include "engine/material/texture_manager.h"
+#include "middleware/node_editor/noiseutils.h"
 
 
 namespace ne = ax::NodeEditor;
@@ -81,13 +81,10 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
 
     size_t cntPixel = image.GetMemUsed();
     auto* inPtr = image.GetSlabPtr();
-    auto* outPtr = static_cast<uint8_t*>(m_imagePreview.view.data);
+    auto* outPtr = static_cast<uint32_t*>(m_imagePreview.view.data);
     for (size_t i=0 ; i!=cntPixel; ++i) {
         const auto color = *inPtr++;
-        *outPtr++ = color.red;
-        *outPtr++ = color.green;
-        *outPtr++ = color.blue;
-        *outPtr++ = color.alpha;
+        *outPtr++ = color.value;
     }
 
     if (!m_texturePreview || needRecreate) {
