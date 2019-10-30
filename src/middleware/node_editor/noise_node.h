@@ -41,6 +41,13 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class ConstNode : public BaseNoiseNode, private noise::module::Const {
+public:
+    ConstNode();
+    bool OnDrawSettingsImpl() noexcept override;
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class PerlinNode : public BaseNoiseNode, private noise::module::Perlin {
 public:
     PerlinNode();

@@ -12,7 +12,7 @@ namespace ne = ax::NodeEditor;
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
 
 BillowNode::BillowNode()
-    : BaseNoiseNode(this, "Billow noise") {
+    : BaseNoiseNode(this, "Billow") {
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
@@ -32,6 +32,19 @@ bool BillowNode::OnDrawSettingsImpl() noexcept {
 CheckerboardNode::CheckerboardNode()
     : BaseNoiseNode(this, "Checkerboard") {
     AddOutPin(new BasePin(PinType::Noise, 0));
+}
+
+ConstNode::ConstNode()
+    : BaseNoiseNode(this, "Const") {
+    AddOutPin(new BasePin(PinType::Noise, 0));
+}
+
+bool ConstNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Value", m_constValue, gui::Step(0.01, 0.1), gui::Range(-1.001, 1.001), "%.2f");
+
+    return changed;
 }
 
 PerlinNode::PerlinNode()
