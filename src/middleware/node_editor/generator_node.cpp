@@ -1,13 +1,8 @@
 #include "middleware/node_editor/noise_node.h"
 
-#include <imgui_node_editor.h>
-#include <imgui_internal.h>
-
+#include <imgui.h>
 #include "engine/gui/widgets.h"
-#include "engine/material/texture_manager.h"
 
-
-namespace ne = ax::NodeEditor;
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
 

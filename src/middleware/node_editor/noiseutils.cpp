@@ -1250,6 +1250,114 @@ void RendererImage::Render ()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// RendererNormalMap2 class
+
+RendererNormalMap2::RendererNormalMap2 ():
+  m_bumpHeight      (1.0),
+  m_isWrapEnabled   (false),
+  m_pDestImage      (NULL)
+{
+}
+
+math::Color RendererNormalMap2::CalcNormalColor (double nc, double nr, double nu,
+  double bumpHeight) const
+{
+  // Calculate the surface normal.
+  nc *= bumpHeight;
+  nr *= bumpHeight;
+  nu *= bumpHeight;
+  double ncr = (nc - nr);
+  double ncu = (nc - nu);
+  double d = sqrt ((ncu * ncu) + (ncr * ncr) + 1);
+  double vxc = (nc - nr) / d;
+  double vyc = (nc - nu) / d;
+  double vzc = 1.0 / d;
+
+  // Map the normal range from the (-1.0 .. +1.0) range to the (0 .. 255)
+  // range.
+  noise::uint8 xc, yc, zc;
+  xc = (noise::uint8)((noise::uint)((floor)((vxc + 1.0) * 127.5)) & 0xff);
+  yc = (noise::uint8)((noise::uint)((floor)((vyc + 1.0) * 127.5)) & 0xff);
+  zc = (noise::uint8)((noise::uint)((floor)((vzc + 1.0) * 127.5)) & 0xff);
+
+  return math::Color (xc, yc, zc);
+}
+
+void RendererNormalMap2::Render ()
+{
+  if ( m_sourceModule == NULL
+    || m_pDestImage == NULL
+    || m_upperUBound <= m_lowerUBound
+    || m_upperVBound <= m_lowerVBound
+    || m_destWidth <= 0
+    || m_destHeight <= 0) {
+    throw noise::ExceptionInvalidParam ();
+  }
+
+  int width  = m_destWidth;
+  int height = m_destWidth;
+  m_pDestImage->SetSize (width, height);
+
+  double uExtent = m_upperUBound - m_lowerUBound;
+  double vExtent = m_upperVBound - m_lowerVBound;
+  double uDelta  = uExtent / (double)m_destWidth;
+  double vDelta  = vExtent / (double)m_destHeight;
+  double scaledU = m_lowerUBound;
+  double scaledV = m_lowerVBound;
+
+  for (int y = 0; y < height; y++) {
+    // const float* pSource = m_pSourceNoiseMap->GetConstSlabPtr (y);
+    math::Color* pDest = m_pDestImage->GetSlabPtr (y);
+    scaledU = m_lowerUBound;
+    for (int x = 0; x < width; x++) {
+
+      // Calculate the positions of the current point's right and up
+      // neighbors.
+      int xRightOffset, yUpOffset;
+      if (m_isWrapEnabled) {
+        if (x == (int)width - 1) {
+          xRightOffset = -((int)width - 1);
+        } else {
+          xRightOffset = 1;
+        }
+        if (y == (int)height - 1) {
+          yUpOffset = -((int)height - 1);
+        } else {
+          yUpOffset = 1;
+        }
+      } else {
+        if (x == (int)width - 1) {
+          xRightOffset = 0;
+        } else {
+          xRightOffset = 1;
+        }
+        if (y == (int)height - 1) {
+          yUpOffset = 0;
+        } else {
+          yUpOffset = 1;
+        }
+      }
+      // yUpOffset *= m_pSourceNoiseMap->GetStride ();
+
+      // Get the noise value of the current point in the source noise map
+      // and the noise values of its right and up neighbors.
+      double nc = m_sourceModule->GetValue(scaledU, scaledV);
+      double nr = m_sourceModule->GetValue(scaledU + xRightOffset * uDelta, scaledV); //(double)(*(pSource + xRightOffset));
+      double nu = m_sourceModule->GetValue(scaledU, scaledV + yUpOffset * vDelta); //(double)(*(pSource + yUpOffset   ));
+
+      // Calculate the normal product.
+      *pDest = CalcNormalColor (nc, nr, nu, m_bumpHeight);
+
+      // Go to the next point.
+      // ++pSource;
+      ++pDest;
+      scaledU += uDelta;
+    }
+    scaledV += vDelta;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // RendererNormalMap class
 
 RendererNormalMap::RendererNormalMap ():
@@ -1281,7 +1389,7 @@ math::Color RendererNormalMap::CalcNormalColor (double nc, double nr, double nu,
   yc = (noise::uint8)((noise::uint)((floor)((vyc + 1.0) * 127.5)) & 0xff);
   zc = (noise::uint8)((noise::uint)((floor)((vzc + 1.0) * 127.5)) & 0xff);
 
-  return math::Color (xc, yc, zc, 0);
+  return math::Color (xc, yc, zc);
 }
 
 void RendererNormalMap::Render ()
@@ -1295,6 +1403,7 @@ void RendererNormalMap::Render ()
 
   int width  = m_pSourceNoiseMap->GetWidth  ();
   int height = m_pSourceNoiseMap->GetHeight ();
+  m_pDestImage->SetSize (width, height);
 
   for (int y = 0; y < height; y++) {
     const float* pSource = m_pSourceNoiseMap->GetConstSlabPtr (y);
