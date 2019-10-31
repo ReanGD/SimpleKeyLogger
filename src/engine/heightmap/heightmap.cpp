@@ -114,19 +114,16 @@ ImageView Heightmap::Generate() const noexcept {
     finalTerrain.SetBounds(0.0, 1000.0);
     finalTerrain.SetEdgeFalloff(0.125);
 
-    utils::NoiseMap heightMap;
-    utils::NoiseMapBuilderPlane heightMapBuilder;
-    heightMapBuilder.SetSourceModule(perlinModule);
-    heightMapBuilder.SetSourceModule(finalTerrain);
-    heightMapBuilder.SetDestNoiseMap(heightMap);
-    heightMapBuilder.SetDestSize(256, 256);
-    heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
-    heightMapBuilder.Build();
+    utils::PlaneShape planeShape;
+    planeShape.SetSourceModule(finalTerrain);
 
-    utils::RendererImage renderer;
     utils::Image image;
-    renderer.SetSourceNoiseMap(heightMap);
+    utils::RendererImage renderer;
+    renderer.SetSourceModule(planeShape);
     renderer.SetDestImage(image);
+    renderer.SetDestSize(256, 256);
+    renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
+    renderer.Render();
 
     renderer.ClearGradient();
     renderer.AddGradientPoint(-1.0000, math::Color(  0,   0, 128)); // deeps

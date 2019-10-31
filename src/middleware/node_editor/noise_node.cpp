@@ -59,18 +59,15 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
         return true;
     }
 
-    utils::NoiseMap noiseMap;
-    utils::NoiseMapBuilderPlane noiseMapBuilder;
-    noiseMapBuilder.SetSourceModule(*m_module);
-    noiseMapBuilder.SetDestNoiseMap(noiseMap);
-    noiseMapBuilder.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
-    noiseMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
-    noiseMapBuilder.Build();
+    utils::PlaneShape planeShape;
+    planeShape.SetSourceModule(*m_module);
 
     utils::Image image;
     utils::RendererImage renderer;
-    renderer.SetSourceNoiseMap(noiseMap);
+    renderer.SetSourceModule(planeShape);
     renderer.SetDestImage(image);
+    renderer.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
+    renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
     renderer.Render();
 
     auto header = m_imagePreview.view.header;
