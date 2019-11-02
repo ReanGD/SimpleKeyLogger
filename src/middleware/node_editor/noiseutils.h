@@ -769,24 +769,6 @@ namespace noise
           m_isLightEnabled = enable;
         }
 
-        /// Enables or disables noise-map wrapping.
-        ///
-        /// @param enable A flag that enables or disables noise-map wrapping.
-        ///
-        /// This object requires five points (the initial point and its four
-        /// neighbors) to calculate light shading.  If wrapping is enabled,
-        /// and the initial point is on the edge of the noise map, the
-        /// appropriate neighbors that lie outside of the noise map will
-        /// "wrap" to the opposite side(s) of the noise map.  Otherwise, the
-        /// appropriate neighbors are cropped to the edge of the noise map.
-        ///
-        /// Enabling wrapping is useful when creating spherical renderings and
-        /// tileable textures.
-        void EnableWrap (bool enable = true)
-        {
-          m_isWrapEnabled = enable;
-        }
-
         /// Returns the azimuth of the light source, in degrees.
         ///
         /// @returns The azimuth of the light source.
@@ -866,26 +848,6 @@ namespace noise
           return m_isLightEnabled;
         }
 
-        /// Determines if noise-map wrapping is enabled.
-        ///
-        /// @returns
-        /// - @a true if noise-map wrapping is enabled.
-        /// - @a false if noise-map wrapping is disabled.
-        ///
-        /// This object requires five points (the initial point and its four
-        /// neighbors) to calculate light shading.  If wrapping is enabled,
-        /// and the initial point is on the edge of the noise map, the
-        /// appropriate neighbors that lie outside of the noise map will
-        /// "wrap" to the opposite side(s) of the noise map.  Otherwise, the
-        /// appropriate neighbors are cropped to the edge of the noise map.
-        ///
-        /// Enabling wrapping is useful when creating spherical renderings and
-        /// tileable textures
-        bool IsWrapEnabled () const
-        {
-          return m_isWrapEnabled;
-        }
-
         /// Renders the destination image using the contents of the source
         /// noise map and an optional background image.
         ///
@@ -904,23 +866,6 @@ namespace noise
         /// the same image, although in this case, the destination image is
         /// irretrievably blended into the background image.
         void Render ();
-
-        /// Sets the background image.
-        ///
-        /// @param backgroundImage The background image.
-        ///
-        /// If a background image has been specified, the Render() method
-        /// blends the pixels from the background image onto the corresponding
-        /// pixels in the destination image.  The blending weights are
-        /// determined by the alpha channel in the pixels in the destination
-        /// image.
-        ///
-        /// The destination image must exist throughout the lifetime of this
-        /// object unless another image replaces that image.
-        void SetBackgroundImage (const Image& backgroundImage)
-        {
-          m_pBackgroundImage = &backgroundImage;
-        }
 
         void SetBounds(double lowerUBound, double upperUBound, double lowerVBound, double upperVBound) {
           if (lowerUBound >= upperUBound || lowerVBound >= upperVBound) {
@@ -1069,13 +1014,10 @@ namespace noise
         ///
         /// @param sourceColor The source color generated from the color
         /// gradient.
-        /// @param backgroundColor The color from the background image at the
-        /// corresponding position.
         /// @param lightValue The intensity of the light at that position.
         ///
         /// @returns The destination color.
-        math::Color CalcDestColor (const math::Color& sourceColor,
-          const math::Color& backgroundColor, double lightValue) const;
+        math::Color CalcDestColor (const math::Color& sourceColor, double lightValue) const;
 
         /// Calculates the intensity of the light given some elevation values.
         ///
@@ -1102,28 +1044,25 @@ namespace noise
         GradientColor m_gradient;
 
         /// A flag specifying whether lighting is enabled.
-        bool m_isLightEnabled;
-
-        /// A flag specifying whether wrapping is enabled.
-        bool m_isWrapEnabled;
+        bool m_isLightEnabled = false;
 
         /// The azimuth of the light source, in degrees.
-        double m_lightAzimuth;
+        double m_lightAzimuth = 45.0;
 
         /// The brightness of the light source.
-        double m_lightBrightness;
+        double m_lightBrightness = 1.0;
 
         /// The color of the light source.
-        math::Color m_lightColor;
+        math::Color m_lightColor = math::Color(255);
 
         /// The contrast between areas in light and areas in shadow.
-        double m_lightContrast;
+        double m_lightContrast = 1.0;
 
         /// The elevation of the light source, in degrees.
-        double m_lightElev;
+        double m_lightElev = 45.0;
 
         /// The intensity of the light source.
-        double m_lightIntensity;
+        double m_lightIntensity = 1.0;
 
         /// Lower x boundary of the planar noise map, in units.
         /// Southern boundary of the spherical noise map, in degrees.
@@ -1151,11 +1090,8 @@ namespace noise
         /// Width of the destination noise map, in points.
         int m_destWidth = 0;
 
-        /// A pointer to the background image.
-        const Image* m_pBackgroundImage;
-
         /// A pointer to the destination image.
-        Image* m_pDestImage;
+        Image* m_pDestImage = nullptr;
 
         /// A pointer to the source noise map.
         const Shape* m_sourceModule = nullptr;
@@ -1166,7 +1102,7 @@ namespace noise
         /// When the light parameters change, this value is set to True.  When
         /// the CalcLightIntensity() method is called, this value is set to
         /// false.
-        mutable bool m_recalcLightValues;
+        mutable bool m_recalcLightValues = true;
 
         /// The sine of the azimuth of the light source.
         mutable double m_sinAzimuth;
@@ -1201,32 +1137,10 @@ namespace noise
     /// - Pass a NoiseMap object to the SetSourceNoiseMap() method.
     /// - Pass an Image object to the SetDestImage() method.
     /// - Call the Render() method.
-    class RendererNormalMap
-    {
-
+    class RendererNormalMap {
       public:
+        RendererNormalMap () = default;
 
-        /// Constructor.
-        RendererNormalMap ();
-
-        /// Enables or disables noise-map wrapping.
-        ///
-        /// @param enable A flag that enables or disables noise-map wrapping.
-        ///
-        /// This object requires three points (the initial point and the right
-        /// and up neighbors) to calculate the normal vector at that point.
-        /// If wrapping is/ enabled, and the initial point is on the edge of
-        /// the noise map, the appropriate neighbors that lie outside of the
-        /// noise map will "wrap" to the opposite side(s) of the noise map.
-        /// Otherwise, the appropriate neighbors are cropped to the edge of
-        /// the noise map.
-        ///
-        /// Enabling wrapping is useful when creating spherical and tileable
-        /// normal maps.
-        void EnableWrap (bool enable = true)
-        {
-          m_isWrapEnabled = enable;
-        }
 
         /// Returns the bump height.
         ///
@@ -1239,30 +1153,8 @@ namespace noise
         ///
         /// The spatial resolution and elevation resolution are determined by
         /// the application.
-        double GetBumpHeight () const
-        {
+        double GetBumpHeight() const {
           return m_bumpHeight;
-        }
-
-        /// Determines if noise-map wrapping is enabled.
-        ///
-        /// @returns
-        /// - @a true if noise-map wrapping is enabled.
-        /// - @a false if noise-map wrapping is disabled.
-        ///
-        /// This object requires three points (the initial point and the right
-        /// and up neighbors) to calculate the normal vector at that point.
-        /// If wrapping is/ enabled, and the initial point is on the edge of
-        /// the noise map, the appropriate neighbors that lie outside of the
-        /// noise map will "wrap" to the opposite side(s) of the noise map.
-        /// Otherwise, the appropriate neighbors are cropped to the edge of
-        /// the noise map.
-        ///
-        /// Enabling wrapping is useful when creating spherical and tileable
-        /// normal maps.
-        bool IsWrapEnabled () const
-        {
-          return m_isWrapEnabled;
         }
 
         /// Renders the noise map to the destination image.
@@ -1348,17 +1240,13 @@ namespace noise
         ///
         /// The spatial resolution and elevation resolution are determined by
         /// the application.
-        math::Color CalcNormalColor (double nc, double nr, double nu,
-          double bumpHeight) const;
+        math::Color CalcNormalColor (double nc, double nr, double nu, double bumpHeight) const;
 
         /// The bump height for the normal map.
-        double m_bumpHeight;
-
-        /// A flag specifying whether wrapping is enabled.
-        bool m_isWrapEnabled;
+        double m_bumpHeight = 1.0;
 
         /// A pointer to the destination image.
-        Image* m_pDestImage;
+        Image* m_pDestImage = nullptr;
 
         /// Lower x boundary of the planar noise map, in units.
         /// Southern boundary of the spherical noise map, in degrees.
