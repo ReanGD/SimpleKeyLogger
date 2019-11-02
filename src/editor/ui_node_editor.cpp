@@ -116,6 +116,8 @@ void UINodeEditor::Draw() {
                 node = std::make_shared<CheckerboardNode>();
             } else if (ImGui::MenuItem("Const")) {
                 node = std::make_shared<ConstNode>();
+            } else if (ImGui::MenuItem("Cylinders")) {
+                node = std::make_shared<CylindersNode>();
             } else if (ImGui::MenuItem("Perlin")) {
                 node = std::make_shared<PerlinNode>();
             } else if (ImGui::MenuItem("RidgedMulti")) {

@@ -42,6 +42,19 @@ bool ConstNode::OnDrawSettingsImpl() noexcept {
     return changed;
 }
 
+CylindersNode::CylindersNode()
+    : BaseNoiseNode(this, "Cylinders") {
+    AddOutPin(new BasePin(PinType::Noise, 0));
+}
+
+bool CylindersNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
+
+    return changed;
+}
+
 PerlinNode::PerlinNode()
     : BaseNoiseNode(this, "Perlin") {
     AddOutPin(new BasePin(PinType::Noise, 0));

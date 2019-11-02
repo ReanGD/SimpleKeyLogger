@@ -51,7 +51,7 @@ add_compile_options(
 set(STB_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-cast-qual -Wno-cast-align -Wno-implicit-int-conversion -Wno-unused-parameter")
 set_source_files_properties(${STB_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${STB_ERROR_COMPILE_FLAGS})
 
-set(NOISE_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-shorten-64-to-32 -Wno-non-virtual-dtor -Wno-implicit-float-conversion -Wno-sign-conversion -Wno-float-equal")
+set(NOISE_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-shorten-64-to-32 -Wno-implicit-float-conversion -Wno-sign-conversion -Wno-float-equal")
 set_source_files_properties(${NOISE_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${NOISE_ERROR_COMPILE_FLAGS})
 
 set(PHYSICS_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-float-equal -Wno-implicit-float-conversion -Wno-unused-parameter -Wno-cast-align")

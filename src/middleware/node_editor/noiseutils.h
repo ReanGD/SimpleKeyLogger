@@ -655,7 +655,7 @@ namespace noise
 
     class Shape {
     public:
-      Shape() = default;
+      virtual ~Shape() = default;
 
       virtual double GetValue(double x, double y) const = 0;
       virtual void SetSourceModule (const module::Module& sourceModule) = 0;
@@ -663,13 +663,11 @@ namespace noise
 
     class PlaneShape: public Shape {
     public:
-      PlaneShape() = default;
-
       double GetValue(double u, double v) const override {
         return m_planeModel.GetValue(u, v);
       }
 
-      void SetSourceModule (const module::Module& sourceModule) override {
+      void SetSourceModule(const module::Module& sourceModule) override {
         m_planeModel.SetModule(sourceModule);
       }
 
@@ -679,13 +677,11 @@ namespace noise
 
     class SphereShape: public Shape {
     public:
-      SphereShape() = default;
-
       double GetValue(double u, double v) const override {
         return m_sphereModel.GetValue(v, u);
       }
 
-      void SetSourceModule (const module::Module& sourceModule) override {
+      void SetSourceModule(const module::Module& sourceModule) override {
         m_sphereModel.SetModule(sourceModule);
       }
 
@@ -695,13 +691,11 @@ namespace noise
 
     class CylinderShape: public Shape {
     public:
-      CylinderShape() = default;
-
       double GetValue(double u, double v) const override {
         return m_cylinderModel.GetValue(u, v);
       }
 
-      void SetSourceModule (const module::Module& sourceModule) override {
+      void SetSourceModule(const module::Module& sourceModule) override {
         m_cylinderModel.SetModule(sourceModule);
       }
 
