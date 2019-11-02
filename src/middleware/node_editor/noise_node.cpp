@@ -62,35 +62,21 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
     utils::PlaneShape planeShape;
     planeShape.SetSourceModule(*m_module);
 
-    utils::Image image;
+    // Need cache image
     utils::RendererImage renderer;
     renderer.SetSourceModule(planeShape);
-    renderer.SetDestImage(image);
     renderer.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
     renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
-    renderer.Render();
+    auto view = renderer.Render();
 
-    auto header = m_imagePreview.view.header;
-    bool needRecreate = ((header.height != m_previewSize) || (header.width != m_previewSize));
-    if (needRecreate) {
-        m_imagePreview.Create(ImageHeader(m_previewSize, m_previewSize, PixelFormat::R8G8B8A8));
-    }
-
-    size_t cntPixel = image.GetMemUsed();
-    auto* inPtr = image.GetSlabPtr();
-    auto* outPtr = static_cast<uint32_t*>(m_imagePreview.view.data);
-    for (size_t i=0 ; i!=cntPixel; ++i) {
-        const auto color = *inPtr++;
-        *outPtr++ = color.value;
-    }
-
-    if (!m_texturePreview || needRecreate) {
-        m_texturePreview = TextureManager::Get().Create(m_imagePreview.view, error);
+    if (!m_texturePreview || (m_texSize != m_previewSize)) {
+        m_texSize = m_previewSize;
+        m_texturePreview = TextureManager::Get().Create(view, error);
         if (!m_texturePreview) {
             return false;
         }
     } else {
-        if (!m_texturePreview->Update(m_imagePreview.view, error)) {
+        if (!m_texturePreview->Update(view, error)) {
             return false;
         }
     }

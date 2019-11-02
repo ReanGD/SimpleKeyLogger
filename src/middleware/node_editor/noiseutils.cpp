@@ -193,171 +193,6 @@ void GradientColor::InsertAtPos (int insertionPos, double gradientPos,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Image class
-
-Image::Image ()
-{
-  InitObj ();
-}
-
-Image::Image (int width, int height)
-{
-  InitObj ();
-  SetSize (width, height);
-}
-
-Image::Image (const Image& rhs)
-{
-  InitObj ();
-  CopyImage (rhs);
-}
-
-Image::~Image ()
-{
-  delete[] m_pImage;
-}
-
-Image& Image::operator= (const Image& rhs)
-{
-  CopyImage (rhs);
-
-  return *this;
-}
-
-void Image::Clear (const math::Color& value)
-{
-  if (m_pImage != NULL) {
-    for (int y = 0; y < m_height; y++) {
-      math::Color* pDest = GetSlabPtr (0, y);
-      for (int x = 0; x < m_width; x++) {
-        *pDest++ = value;
-      }
-    }
-  }
-}
-
-void Image::CopyImage (const Image& source)
-{
-  // Resize the image buffer, then copy the slabs from the source image
-  // buffer to this image buffer.
-  SetSize (source.GetWidth (), source.GetHeight ());
-  for (int y = 0; y < source.GetHeight (); y++) {
-    const math::Color* pSource = source.GetConstSlabPtr (0, y);
-    math::Color* pDest = GetSlabPtr (0, y);
-    memcpy (pDest, pSource, (size_t)source.GetWidth () * sizeof (float));
-  }
-
-  // Copy the border value as well.
-  m_borderValue = source.m_borderValue;
-}
-
-void Image::DeleteImageAndReset ()
-{
-  delete[] m_pImage;
-  InitObj ();
-}
-
-math::Color Image::GetValue (int x, int y) const
-{
-  if (m_pImage != NULL) {
-    if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
-      return *(GetConstSlabPtr (x, y));
-    }
-  }
-  // The coordinates specified are outside the image.  Return the border
-  // value.
-  return m_borderValue;
-}
-
-void Image::InitObj ()
-{
-  m_pImage  = NULL;
-  m_height  = 0;
-  m_width   = 0;
-  m_stride  = 0;
-  m_memUsed = 0;
-  m_borderValue = math::Color (0, 0, 0, 0);
-}
-
-void Image::ReclaimMem ()
-{
-  size_t newMemUsage = CalcMinMemUsage (m_width, m_height);
-  if (m_memUsed > newMemUsage) {
-    // There is wasted memory.  Create the smallest buffer that can fit the
-    // data and copy the data to it.
-    math::Color* pNewImage = NULL;
-    try {
-      pNewImage = new math::Color[newMemUsage];
-    }
-    catch (...) {
-      throw noise::ExceptionOutOfMemory ();
-    }
-    memcpy (pNewImage, m_pImage, newMemUsage * sizeof (float));
-    delete[] m_pImage;
-    m_pImage = pNewImage;
-    m_memUsed = newMemUsage;
-  }
-}
-
-void Image::SetSize (int width, int height)
-{
-  if (width < 0 || height < 0
-    || width > RASTER_MAX_WIDTH || height > RASTER_MAX_HEIGHT) {
-    // Invalid width or height.
-    throw noise::ExceptionInvalidParam ();
-  } else if (width == 0 || height == 0) {
-    // An empty image was specified.  Delete it and zero out the size member
-    // variables.
-    DeleteImageAndReset ();
-  } else {
-    // A new image size was specified.  Allocate a new image buffer unless
-    // the current buffer is large enough for the new image (we don't want
-    // costly reallocations going on.)
-    size_t newMemUsage = CalcMinMemUsage (width, height);
-    if (m_memUsed < newMemUsage) {
-      // The new size is too big for the current image buffer.  We need to
-      // reallocate.
-      DeleteImageAndReset ();
-      try {
-        m_pImage = new math::Color[newMemUsage];
-      }
-      catch (...) {
-        throw noise::ExceptionOutOfMemory ();
-      }
-      m_memUsed = newMemUsage;
-    }
-    m_stride = (int)CalcStride (width);
-    m_width  = width;
-    m_height = height;
-  }
-}
-
-void Image::SetValue (int x, int y, const math::Color& value)
-{
-  if (m_pImage != NULL) {
-    if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
-      *(GetSlabPtr (x, y)) = value;
-    }
-  }
-}
-
-void Image::TakeOwnership (Image& source)
-{
-  // Copy the values and the image buffer from the source image to this image.
-  // Now this image pwnz the source buffer.
-  delete[] m_pImage;
-  m_memUsed = source.m_memUsed;
-  m_height  = source.m_height;
-  m_pImage  = source.m_pImage;
-  m_stride  = source.m_stride;
-  m_width   = source.m_width;
-
-  // Now that the source buffer is assigned to this image, reset the source
-  // image object.
-  source.InitObj ();
-}
-
-//////////////////////////////////////////////////////////////////////////////
 // RendererImage class
 
 RendererImage::RendererImage() {
@@ -457,9 +292,8 @@ void RendererImage::ClearGradient () {
   m_gradient.Clear();
 }
 
-void RendererImage::Render() {
+ImageView RendererImage::Render() {
   if ( m_sourceModule == NULL
-    || m_pDestImage == NULL
     || m_upperUBound <= m_lowerUBound
     || m_upperVBound <= m_lowerVBound
     || m_destWidth <= 0
@@ -468,9 +302,10 @@ void RendererImage::Render() {
     throw noise::ExceptionInvalidParam ();
   }
 
-  int width  = m_destWidth;
-  int height = m_destWidth;
-  m_pDestImage->SetSize (width, height);
+  auto header = m_destImage.view.header;
+  if ((header.height != m_destHeight) || (header.width != m_destWidth)) {
+      m_destImage.Create(ImageHeader(m_destWidth, m_destHeight, PixelFormat::R8G8B8A8));
+  }
 
   double uExtent = m_upperUBound - m_lowerUBound;
   double vExtent = m_upperVBound - m_lowerVBound;
@@ -479,10 +314,10 @@ void RendererImage::Render() {
   double scaledU = m_lowerUBound;
   double scaledV = m_lowerVBound;
 
-  for (int y = 0; y < height; y++) {
-    math::Color* pDest = m_pDestImage->GetSlabPtr(y);
+  uint32_t* pDest = reinterpret_cast<uint32_t*>(m_destImage.view.data);
+  for (uint32_t y=0; y!=m_destHeight; ++y) {
     scaledU = m_lowerUBound;
-    for (int x = 0; x < width; x++) {
+    for (uint32_t x=0; x!=m_destWidth; ++x) {
 
       double sourceValue = m_sourceModule->GetValue(scaledU, scaledV);
       // Get the color based on the value at the current point in the noise
@@ -508,18 +343,18 @@ void RendererImage::Render() {
         double nu = m_sourceModule->GetValue(scaledU, scaledV + yUpOffset * vDelta);
 
         // Now we can calculate the lighting intensity.
-        lightIntensity = CalcLightIntensity (nc, nl, nr, nd, nu);
+        lightIntensity = CalcLightIntensity(nc, nl, nr, nd, nu);
         lightIntensity *= m_lightBrightness;
 
       } else {
         // These values will apply no lighting to the destination image.
-        lightIntensity = 1.0;
+        lightIntensity = 1;
       }
 
       // Blend the destination color, background color, and the light
       // intensity together, then update the destination image with that
       // color.
-      *pDest = CalcDestColor(destColor, lightIntensity);
+      *pDest = CalcDestColor(destColor, lightIntensity).value;
 
       // Go to the next point.
       ++pDest;
@@ -527,6 +362,8 @@ void RendererImage::Render() {
     }
     scaledV += vDelta;
   }
+
+  return m_destImage.view;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -553,9 +390,8 @@ math::Color RendererNormalMap::CalcNormalColor (double nc, double nr, double nu,
   return math::Color (xc, yc, zc);
 }
 
-void RendererNormalMap::Render () {
+ImageView RendererNormalMap::Render() {
   if ( m_sourceModule == NULL
-    || m_pDestImage == NULL
     || m_upperUBound <= m_lowerUBound
     || m_upperVBound <= m_lowerVBound
     || m_destWidth <= 0
@@ -563,9 +399,10 @@ void RendererNormalMap::Render () {
     throw noise::ExceptionInvalidParam ();
   }
 
-  int width  = m_destWidth;
-  int height = m_destWidth;
-  m_pDestImage->SetSize (width, height);
+  auto header = m_destImage.view.header;
+  if ((header.height != m_destHeight) || (header.width != m_destWidth)) {
+      m_destImage.Create(ImageHeader(m_destWidth, m_destHeight, PixelFormat::R8G8B8A8));
+  }
 
   double uExtent = m_upperUBound - m_lowerUBound;
   double vExtent = m_upperVBound - m_lowerVBound;
@@ -574,10 +411,10 @@ void RendererNormalMap::Render () {
   double scaledU = m_lowerUBound;
   double scaledV = m_lowerVBound;
 
-  for (int y = 0; y < height; y++) {
-    math::Color* pDest = m_pDestImage->GetSlabPtr (y);
+  uint32_t* pDest = reinterpret_cast<uint32_t*>(m_destImage.view.data);
+  for (uint32_t y=0; y!=m_destHeight; ++y) {
     scaledU = m_lowerUBound;
-    for (int x = 0; x < width; x++) {
+    for (uint32_t x=0; x!=m_destWidth; ++x) {
 
       // Calculate the positions of the current point's right and up neighbors.
       int xRightOffset = 1;
@@ -590,7 +427,7 @@ void RendererNormalMap::Render () {
       double nu = m_sourceModule->GetValue(scaledU, scaledV + yUpOffset * vDelta);
 
       // Calculate the normal product.
-      *pDest = CalcNormalColor (nc, nr, nu, m_bumpHeight);
+      *pDest = CalcNormalColor (nc, nr, nu, m_bumpHeight).value;
 
       // Go to the next point.
       ++pDest;
@@ -598,4 +435,6 @@ void RendererNormalMap::Render () {
     }
     scaledV += vDelta;
   }
+
+  return m_destImage.view;
 }

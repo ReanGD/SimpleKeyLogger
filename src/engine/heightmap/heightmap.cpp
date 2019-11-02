@@ -8,6 +8,7 @@
 #include "middleware/node_editor/noiseutils.h"
 
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
+static utils::RendererImage renderer;
 
 static noise::NoiseQuality ToNoiseType(const Heightmap::Quality value) {
     switch (value) {
@@ -117,10 +118,7 @@ ImageView Heightmap::Generate() const noexcept {
     utils::PlaneShape planeShape;
     planeShape.SetSourceModule(finalTerrain);
 
-    utils::Image image;
-    utils::RendererImage renderer;
     renderer.SetSourceModule(planeShape);
-    renderer.SetDestImage(image);
     renderer.SetDestSize(256, 256);
     renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
     renderer.Render();
@@ -138,17 +136,7 @@ ImageView Heightmap::Generate() const noexcept {
     renderer.SetLightContrast(3.0);
     renderer.SetLightBrightness(2.0);
 
-    renderer.Render();
-
-    size_t cntPixel = image.GetMemUsed();
-    math::Color* colors = image.GetSlabPtr();
-    uint32_t* texData = new uint32_t[cntPixel];
-    for (size_t i=0 ; i!=cntPixel; ++i) {
-        texData[i] = colors[i].value;
-    }
-
-    ImageHeader header(256, 256, PixelFormat::R8G8B8A8);
-    return ImageView(header, 1, texData);
+    return renderer.Render();
 }
 
 void Heightmap::DrawSettings() {
