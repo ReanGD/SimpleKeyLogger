@@ -69,6 +69,13 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class SpheresNode : public BaseNoiseNode, private noise::module::Spheres {
+public:
+    SpheresNode();
+    bool OnDrawSettingsImpl() noexcept override;
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class AbsNode : public BaseNoiseNode, private noise::module::Abs {
 public:
     AbsNode();

@@ -122,6 +122,8 @@ void UINodeEditor::Draw() {
                 node = std::make_shared<PerlinNode>();
             } else if (ImGui::MenuItem("RidgedMulti")) {
                 node = std::make_shared<RidgedMultiNode>();
+            } else if (ImGui::MenuItem("Spheres")) {
+                node = std::make_shared<SpheresNode>();
             }
             ImGui::EndMenu();
         }

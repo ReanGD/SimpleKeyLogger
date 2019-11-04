@@ -92,3 +92,16 @@ bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
 
     return changed;
 }
+
+SpheresNode::SpheresNode()
+    : BaseNoiseNode(this, "Spheres") {
+    AddOutPin(new BasePin(PinType::Noise, 0));
+}
+
+bool SpheresNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
+
+    return changed;
+}
