@@ -10,24 +10,9 @@
 #include "engine/api/gl.h"
 
 
-static bool ReadFile(const char* filepath, std::string& data, std::string& error) {
-    std::ifstream ifs(filepath, std::ifstream::in);
-    if(!ifs) {
-        error = fmt::format("couldn't open file '{}', error: {}", filepath, strerror(errno));
-        return false;
-    }
-
-    ifs.seekg(0, std::ios::end);
-    data.reserve(static_cast<size_t>(ifs.tellg()));
-    ifs.seekg(0, std::ios::beg);
-
-    data.assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-
-    return true;
-}
-
 enum class ShaderType : uint8_t {
     Vertex = 0,
+    Geometry,
     Fragment,
     Unknown
 };
@@ -61,24 +46,71 @@ public:
     MaterialParser() = default;
     ~MaterialParser() = default;
 
-    bool Parse(const std::string& data, std::string& error) {
+    bool Parse(const std::filesystem::path& path, std::string& error) {
         m_shaderType = ShaderType::Unknown;
         m_funcName.clear();
         m_funcData.clear();
         m_uniforms.clear();
-        auto cfg = ucl::Ucl::parse(data, error, UCL_DUPLICATE_ERROR);
-        if (!cfg) {
+
+        if (!std::filesystem::exists(path)) {
+            error = fmt::format("the material of the path '{}' was not found", path.c_str());
             return false;
         }
 
-        for (const auto &it :cfg) {
+        std::string data;
+        if (!ReadFile(path.c_str(), data, error)) {
+            error = fmt::format("the material of the path '{}' was not read: {}", path.c_str(), error);
+            return false;
+        }
+
+        auto root = ucl::Ucl::parse(data, error, UCL_DUPLICATE_ERROR);
+        if (!root) {
+            error = fmt::format("the material of the path '{}' was not parse: {}", path.c_str(), error);
+            return false;
+        }
+
+        if (!ParseRoot(root, error)) {
+            error = fmt::format("the material of the path '{}' was not parse: {}", path.c_str(), error);
+            return false;
+        }
+
+        return true;
+    }
+private:
+    bool ReadFile(const char* filepath, std::string& data, std::string& error) {
+        std::ifstream ifs(filepath, std::ifstream::in);
+        if(!ifs) {
+            error = fmt::format("couldn't open file '{}', error: {}", filepath, strerror(errno));
+            return false;
+        }
+
+        ifs.seekg(0, std::ios::end);
+        data.reserve(static_cast<size_t>(ifs.tellg()));
+        ifs.seekg(0, std::ios::beg);
+
+        data.assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+
+        return true;
+    }
+
+    bool ParseRoot(const ucl::Ucl& section, std::string& error) {
+        for (const auto &it :section) {
             if (it.key() == "material") {
                 if (!ParseMaterial(it, error)) {
                     return false;
                 }
+            } else if (it.key() == "vertex") {
+                m_shaderType = ShaderType::Vertex;
+                m_funcData = it.string_value();
+            } else if (it.key() == "geometry") {
+                m_shaderType = ShaderType::Geometry;
+                m_funcData = it.string_value();
             } else if (it.key() == "fragment") {
                 m_shaderType = ShaderType::Fragment;
                 m_funcData = it.string_value();
+            } else {
+                error = fmt::format("unknown section: {} with data: {}", it.key(), it.dump());
+                return false;
             }
         }
 
@@ -93,7 +125,7 @@ public:
 
         return true;
     }
-private:
+
     bool ParseMaterial(const ucl::Ucl& section, std::string& error) {
         for (const auto& it: section) {
             if (it.key() == "func") {
@@ -110,6 +142,7 @@ private:
 
         return true;
     }
+
     bool ParseUniforms(const ucl::Ucl& section, std::string& error) {
         for (const auto& uniformIt: section) {
             UniformInfo uniform;
@@ -146,6 +179,7 @@ private:
 
         return true;
     }
+
 private:
     ShaderType m_shaderType = ShaderType::Unknown;
     std::string m_funcName;
@@ -153,59 +187,16 @@ private:
     std::map<std::string, UniformInfo> m_uniforms;
 };
 
-// static bool ParseFile(const std::string& data, std::string& shaderSrc, std::string& error) {
-//     auto cfg = ucl::Ucl::parse(data, error, UCL_DUPLICATE_ERROR);
-//     if (!cfg) {
-//         return false;
-//     }
-
-//     shaderSrc = "qwe";
-
-//     for (const auto &it :cfg) {
-//         if (it.key() == "material") {
-//             for (const auto& itt: it) {
-//                 spdlog::info("{}-{}", itt.key(), itt.dump());
-//             }
-//             return true;
-//         }
-//     //     if ((it.key() == "geometry") || (it.key() == "vertex") || (it.key() == "fragment")) {
-//     //         shaderSrc = it.string_value();
-//     //         if (shaderSrc.empty()) {
-//     //             error = fmt::format("empty shader section");
-//     //             return false;
-//     //         }
-//     //         return true;
-//     //     }
-//     }
-
-//     error = fmt::format("not found shader section");
-//     return false;
-// }
-
-static bool LoadMaterial(const std::string& name, std::string& error) {
-    const auto path = std::filesystem::current_path() / "materials" / name;
-    if (!std::filesystem::exists(path)) {
-        error = fmt::format("the material of the path '{}' was not found", path.c_str());
-        return false;
-    }
-
-    std::string data;
-    if (!ReadFile(path.c_str(), data, error)) {
-        error = fmt::format("the material of the path '{}' was not read: {}", path.c_str(), error);
-        return false;
-    }
-
-    MaterialParser parser;
-    if (!parser.Parse(data, error)) {
-        error = fmt::format("the material of the path '{}' was not parse: {}", path.c_str(), error);
-        return false;
-    }
-
-    return true;
-}
-
 bool ShaderManager::Init(std::string& error) {
-    if (!LoadMaterial("frag_base_clr_mat.mat", error)) {
+    const auto base = std::filesystem::current_path() / "materials";
+
+    MaterialParser parser1;
+    if (!parser1.Parse(base / "frag_base_clr_mat.mat", error)) {
+        return false;
+    }
+
+    MaterialParser parser2;
+    if (!parser2.Parse(base / "frag_light_none.mat", error)) {
         return false;
     }
 
