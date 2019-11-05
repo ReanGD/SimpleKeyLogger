@@ -76,6 +76,13 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class VoronoiNode : public BaseNoiseNode, private noise::module::Voronoi {
+public:
+    VoronoiNode();
+    bool OnDrawSettingsImpl() noexcept override;
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class AbsNode : public BaseNoiseNode, private noise::module::Abs {
 public:
     AbsNode();

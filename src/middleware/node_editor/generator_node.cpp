@@ -105,3 +105,19 @@ bool SpheresNode::OnDrawSettingsImpl() noexcept {
 
     return changed;
 }
+
+VoronoiNode::VoronoiNode()
+    : BaseNoiseNode(this, "Voronoi") {
+    AddOutPin(new BasePin(PinType::Noise, 0));
+}
+
+bool VoronoiNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Displacement", m_displacement, gui::Step(0.1, 1.0), "%.1f");
+    changed |= gui::Checkbox("Enable distance", m_enableDistance);
+    changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
+    changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
+
+    return changed;
+}

@@ -141,6 +141,8 @@ void UINodeEditor::Draw() {
                 node = std::make_shared<RidgedMultiNode>();
             } else if (ImGui::MenuItem("Spheres")) {
                 node = std::make_shared<SpheresNode>();
+            } else if (ImGui::MenuItem("Voronoi")) {
+                node = std::make_shared<VoronoiNode>();
             }
             ImGui::EndMenu();
         }

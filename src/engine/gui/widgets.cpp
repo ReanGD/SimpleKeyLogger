@@ -256,6 +256,10 @@ void DrawNodeIcon(ImDrawList* drawList, math::Rect rect, gui::IconType type, boo
 
 } // end namespace gui::detail
 
+bool Checkbox(const char* label, bool& value) {
+    return ImGui::Checkbox(label, &value);
+}
+
 void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color, math::Color innerColor) {
     const ImVec2 imSize(size.w, size.h);
     if (ImGui::IsRectVisible(imSize)) {
