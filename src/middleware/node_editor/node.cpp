@@ -61,41 +61,35 @@ void BaseNode::AddOutPin(BasePin* pin) {
     m_outPins.push_back(pin);
 }
 
-bool BaseNode::AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
-    if (dst->IsConnected()) {
+bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept {
+    if (dstPin->IsConnected()) {
         return false;
     }
 
-    bool result = OnAddIncomingLink(src, dst, checkOnly);
+    bool result = OnSetSourceNode(srcNode, dstPin, checkOnly);
     if (!checkOnly) {
-        src->AddLink();
-        dst->AddLink();
-
-        m_LinkedSrcNodes.insert(src->GetNode());
+        m_LinkedSrcNodes.insert(srcNode);
         CheckIsFull();
     }
 
     return result;
 }
 
-void BaseNode::DelIncomingLink(BasePin* src, BasePin* dst) noexcept {
-    OnDelIncomingLink(src, dst);
-    src->DelLink();
-    dst->DelLink();
-    m_LinkedSrcNodes.erase(src->GetNode());
+void BaseNode::DelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept {
+    OnDelSourceNode(srcNode, dstPin);
+    m_LinkedSrcNodes.erase(srcNode);
     CheckIsFull();
 }
 
-void BaseNode::AddOutgoingLink(BaseNode* dst) noexcept {
-    m_LinkedDstNodes.insert(dst);
+void BaseNode::AddDestNode(BaseNode* dstNode) noexcept {
+    m_LinkedDstNodes.insert(dstNode);
 }
 
-void BaseNode::DelOutgoingLink(BaseNode* dst) noexcept {
-    m_LinkedDstNodes.erase(dst);
+void BaseNode::DelDestNode(BaseNode* dstNode) noexcept {
+    m_LinkedDstNodes.erase(dstNode);
 }
 
 void BaseNode::SetNeedUpdate() noexcept {
-
     m_needUpdate = true;
     for (auto& node: m_LinkedDstNodes) {
         node->SetNeedUpdate();

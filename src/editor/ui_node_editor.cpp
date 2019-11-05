@@ -49,15 +49,26 @@ void UINodeEditor::Draw() {
                 BasePin* pin1 = inputPinId.AsPointer<BasePin>();
                 BasePin* pin2 = outputPinId.AsPointer<BasePin>();
 
-                if ((pin1->IsInput() != pin2->IsInput()) && (pin1->GetNode() != pin2->GetNode()) && (pin1->GetPinType() == pin2->GetPinType())) {
+                if ((pin1->IsInput() != pin2->IsInput()) &&
+                    (pin1->GetNode() != pin2->GetNode()) &&
+                    (pin1->GetNode() != nullptr) &&
+                    (pin2->GetNode() != nullptr) &&
+                    (pin1->GetPinType() == pin2->GetPinType())) {
+
                     auto* src = pin1->IsInput() ? pin2 : pin1;
+                    auto* srcNode = src->GetNode();
+
                     auto* dst = pin1->IsInput() ? pin1 : pin2;
+                    auto* dstNode = dst->GetNode();
+
                     bool checkOnly = true;
-                    if (dst->GetNode()->AddIncomingLink(src, dst, checkOnly)) {
+                    if (dstNode->SetSourceNode(srcNode, dst, checkOnly)) {
                         if (ne::AcceptNewItem()) {
                             checkOnly = false;
-                            dst->GetNode()->AddIncomingLink(src, dst, checkOnly);
-                            src->GetNode()->AddOutgoingLink(dst->GetNode());
+                            dstNode->SetSourceNode(srcNode, dst, checkOnly);
+                            srcNode->AddDestNode(dstNode);
+                            src->AddLink();
+                            dst->AddLink();
 
                             auto linkId = ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++));
                             g_links[linkId] = LinkInfo{ne::PinId(src), ne::PinId(dst)};
@@ -84,9 +95,15 @@ void UINodeEditor::Draw() {
                 ne::RejectDeletedItem();
             } else  if (ne::AcceptDeletedItem()) {
                 auto* src = it->second.srcPin.AsPointer<BasePin>();
+                auto* srcNode = src->GetNode();
+                src->DelLink();
+
                 auto* dst = it->second.dstPin.AsPointer<BasePin>();
-                dst->GetNode()->DelIncomingLink(src, dst);
-                src->GetNode()->DelOutgoingLink(dst->GetNode());
+                auto* dstNode = dst->GetNode();
+                dst->DelLink();
+
+                dstNode->DelSourceNode(srcNode, dst);
+                srcNode->DelDestNode(dstNode);
 
                 g_links.erase(it);
             }

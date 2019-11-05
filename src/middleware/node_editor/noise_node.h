@@ -12,8 +12,8 @@ protected:
     BaseNoiseNode(noise::module::Module* module, const std::string& name);
 
 protected:
-    bool OnAddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept override;
-    void OnDelIncomingLink(BasePin* src, BasePin* dst) noexcept override;
+    bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept override;
+    void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept override;
     bool Update(std::string& error) noexcept override;
     bool CheckIsConsistency() noexcept override;
     bool OnDrawSettings() noexcept override;

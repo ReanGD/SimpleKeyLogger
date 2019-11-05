@@ -52,22 +52,22 @@ public:
     void AddInPin(BasePin* pin);
     void AddOutPin(BasePin* pin);
 
-    // src -> dst (this)
-    bool AddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept;
-    // src -> dst (this)
-    void DelIncomingLink(BasePin* src, BasePin* dst) noexcept;
-    // this -> dst
-    void AddOutgoingLink(BaseNode* dst) noexcept;
-    // this -> dst
-    void DelOutgoingLink(BaseNode* dst) noexcept;
+    // srcNode -> this (dstPin)
+    bool SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept;
+    // srcNode -> this (dstPin)
+    void DelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept;
+    // this -> dstNode
+    void AddDestNode(BaseNode* dstNode) noexcept;
+    // this -> dstNode
+    void DelDestNode(BaseNode* dstNode) noexcept;
     void SetNeedUpdate() noexcept;
     void CheckIsFull() noexcept;
     void SetIsFull(bool value) noexcept;
     bool GetIsFull() const noexcept { return m_isFull; }
     void Draw() noexcept;
 
-    virtual bool OnAddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept = 0;
-    virtual void OnDelIncomingLink(BasePin* src, BasePin* dst) noexcept = 0;
+    virtual bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept = 0;
+    virtual void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept = 0;
     virtual bool Update(std::string& error) noexcept = 0;
     virtual bool CheckIsConsistency() noexcept = 0;
     virtual bool OnDrawSettings() noexcept = 0;

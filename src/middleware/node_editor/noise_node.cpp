@@ -15,12 +15,12 @@ BaseNoiseNode::BaseNoiseNode(noise::module::Module* module, const std::string& n
     , m_module(module) {
 }
 
-bool BaseNoiseNode::OnAddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly) noexcept {
-    auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
-    if (!srcNode) {
+bool BaseNoiseNode::OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept {
+    auto* srcNoiseNode = dynamic_cast<BaseNoiseNode*>(srcNode);
+    if (!srcNoiseNode) {
         return false;
     }
-    auto index = static_cast<int>(dst->GetUserIndex());
+    auto index = static_cast<int>(dstPin->GetUserIndex());
     if ((index >= m_module->GetSourceModuleCount()) || (index < 0)) {
         return false;
     }
@@ -31,18 +31,18 @@ bool BaseNoiseNode::OnAddIncomingLink(BasePin* src, BasePin* dst, bool checkOnly
     }
 
     if (!checkOnly) {
-        sourceModules[index] = srcNode->m_module;
+        sourceModules[index] = srcNoiseNode->m_module;
     }
 
     return true;
 }
 
-void BaseNoiseNode::OnDelIncomingLink(BasePin* src, BasePin* dst) noexcept {
-    auto* srcNode = dynamic_cast<BaseNoiseNode*>(src->GetNode());
-    if (!srcNode) {
+void BaseNoiseNode::OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept {
+    auto* srcNoiseNode = dynamic_cast<BaseNoiseNode*>(srcNode);
+    if (!srcNoiseNode) {
         return;
     }
-    auto index = static_cast<int>(dst->GetUserIndex());
+    auto index = static_cast<int>(dstPin->GetUserIndex());
     if ((index >= m_module->GetSourceModuleCount()) || (index < 0)) {
         return;
     }
