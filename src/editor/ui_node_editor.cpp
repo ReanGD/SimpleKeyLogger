@@ -152,6 +152,8 @@ void UINodeEditor::Draw() {
                 node = std::make_shared<AbsNode>();
             } else if (ImGui::MenuItem("Clamp")) {
                 node = std::make_shared<ClampNode>();
+            } else if (ImGui::MenuItem("Exponent")) {
+                node = std::make_shared<ExponentNode>();
             } else if (ImGui::MenuItem("ScaleBias")) {
                 node = std::make_shared<ScaleBiasNode>();
             }

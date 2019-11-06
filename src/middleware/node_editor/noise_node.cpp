@@ -152,6 +152,21 @@ bool ClampNode::OnDrawSettingsImpl() noexcept {
     return changed;
 }
 
+ExponentNode::ExponentNode()
+    : BaseNoiseNode(this, "Exponent") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
+bool ExponentNode::OnDrawSettingsImpl() noexcept {
+    bool changed = false;
+
+    changed |= gui::InputScalar("Exponent", m_exponent, gui::Step(0.01, 0.1), "%.2f");
+
+    return changed;
+}
+
 ScaleBiasNode::ScaleBiasNode()
     : BaseNoiseNode(this, "ScaleBias") {
     AddInPin(new BasePin(PinType::Noise, 0));
