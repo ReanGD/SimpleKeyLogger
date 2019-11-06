@@ -19,7 +19,7 @@ set(ENGINE_DIR "${CMAKE_SOURCE_DIR}/src/engine")
 
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 set(STB_ERROR_SOURCE_FILES "${ENGINE_DIR}/material/image_loader.cpp")
-set(NOISE_ERROR_SOURCE_FILES "${ENGINE_DIR}/heightmap/heightmap.cpp" "${CMAKE_SOURCE_DIR}/src/middleware/node_editor/noise_node.cpp" "${CMAKE_SOURCE_DIR}/src/middleware/node_editor/noiseutils.cpp")
+set(NOISE_ERROR_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/middleware/node_editor/noiseutils.cpp")
 set(PHYSICS_ERROR_SOURCE_FILES "${ENGINE_DIR}/physics/physics.cpp")
 set(PHYSICS2_ERROR_SOURCE_FILES "${ENGINE_DIR}/physics/physical_node.cpp")
 set(IMGUI_ERROR_SOURCE_FILES "${CONAN_SRC_DIRS_IMGUI}/bindings/imgui_impl_opengl3.cpp")
@@ -51,7 +51,7 @@ add_compile_options(
 set(STB_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-cast-qual -Wno-cast-align -Wno-implicit-int-conversion -Wno-unused-parameter")
 set_source_files_properties(${STB_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${STB_ERROR_COMPILE_FLAGS})
 
-set(NOISE_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-float-equal")
+set(NOISE_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-float-equal")
 set_source_files_properties(${NOISE_ERROR_SOURCE_FILES} PROPERTIES COMPILE_FLAGS ${NOISE_ERROR_COMPILE_FLAGS})
 
 set(PHYSICS_ERROR_COMPILE_FLAGS "-Wno-old-style-cast -Wno-sign-conversion -Wno-float-equal -Wno-implicit-float-conversion -Wno-unused-parameter -Wno-cast-align")

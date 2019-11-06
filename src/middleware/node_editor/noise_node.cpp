@@ -65,7 +65,7 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
     // Need cache image
     utils::RendererImage renderer;
     renderer.SetSourceModule(planeShape);
-    renderer.SetDestSize(static_cast<int>(m_previewSize), static_cast<int>(m_previewSize));
+    renderer.SetDestSize(m_previewSize, m_previewSize);
     renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
     auto view = renderer.Render();
 
