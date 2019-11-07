@@ -98,6 +98,12 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class InvertNode : public BaseNoiseNode, private noise::module::Invert {
+public:
+    InvertNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class ScaleBiasNode : public BaseNoiseNode, private noise::module::ScaleBias {
 public:
     ScaleBiasNode();

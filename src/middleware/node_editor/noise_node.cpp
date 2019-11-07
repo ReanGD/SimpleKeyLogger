@@ -151,6 +151,13 @@ bool ExponentNode::OnDrawSettingsImpl() noexcept {
     return changed;
 }
 
+InvertNode::InvertNode()
+    : BaseNoiseNode(this, "Invert") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
 ScaleBiasNode::ScaleBiasNode()
     : BaseNoiseNode(this, "ScaleBias") {
     AddInPin(new BasePin(PinType::Noise, 0));
