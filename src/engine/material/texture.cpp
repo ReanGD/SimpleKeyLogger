@@ -1,37 +1,35 @@
 #include "engine/material/texture.h"
 
-#include <fmt/format.h>
 #include "engine/api/gl.h"
+#include "engine/common/exception.h"
 
-Texture::Texture(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept
+
+Texture::Texture(const ImageView& image, bool generateMipLevelsIfNeed, const PrivateArg&)
     : m_header(image.header) {
     glGenTextures(1, &m_handle);
-    isSuccess.value = Create(image, generateMipLevelsIfNeed, error);
+    Create(image, generateMipLevelsIfNeed);
 }
 
 Texture::~Texture() noexcept {
     Destroy();
 }
 
-bool Texture::Update(const ImageView& image, std::string& error) noexcept {
-    return Update(image, true, error);
+void Texture::Update(const ImageView& image) {
+    Update(image, true);
 }
 
-bool Texture::Update(const ImageView& image, bool generateMipLevels, std::string& error) noexcept {
+void Texture::Update(const ImageView& image, bool generateMipLevels) {
     if (image.data == nullptr) {
-        error = "Texture update data are not filled in";
-        return false;
+        throw EngineError("texture update data are not filled in");
     }
 
     if (image.header != m_header) {
-        error = "To update the texture, the new data formats must match the old ones";
-        return false;
+        throw EngineError("To update the texture, the new data formats must match the old ones");
     }
 
     GLenum internalFormat, format, type;
     if (!image.header.GetOpenGLFormat(internalFormat, format, type)) {
-        error = fmt::format("unsupported texture format: {}", ToStr(image.header.format));
-        return false;
+        throw EngineError("unsupported texture format: {}", ToStr(image.header.format));
     }
 
     glBindTexture(GL_TEXTURE_2D, m_handle);
@@ -55,8 +53,6 @@ bool Texture::Update(const ImageView& image, bool generateMipLevels, std::string
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    return true;
 }
 
 void Texture::Bind(uint unit) const noexcept {
@@ -69,17 +65,15 @@ void Texture::Unbind(uint unit) const noexcept {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-bool Texture::Create(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error) noexcept {
+void Texture::Create(const ImageView& image, bool generateMipLevelsIfNeed) {
     const auto textureFormat = image.header.format;
     if ((!GLApi::IsDXTSupported) && (textureFormat >= PixelFormat::FIRST_COMPRESSED)) {
-        error = fmt::format("DXT compressed texture format ({}) not supported", ToStr(textureFormat));
-        return false;
+        throw EngineError("DXT compressed texture format ({}) not supported", ToStr(textureFormat));
     }
 
     GLenum internalFormat, format, type;
     if (!image.header.GetOpenGLFormat(internalFormat, format, type)) {
-        error = fmt::format("unsupported texture format: {}", ToStr(textureFormat));
-        return false;
+        throw EngineError("unsupported texture format: {}", ToStr(textureFormat));
     }
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -114,8 +108,6 @@ bool Texture::Create(const ImageView& image, bool generateMipLevelsIfNeed, std::
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    return true;
 }
 
 void Texture::Destroy() noexcept {

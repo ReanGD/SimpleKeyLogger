@@ -1,68 +1,62 @@
 #include "engine/material/texture_manager.h"
 
-#include <fmt/format.h>
+#include "engine/common/exception.h"
 
 
 void TextureManager::AddFindPath(const std::filesystem::path& path) {
     m_basePaths.push_back(path);
 }
 
-bool TextureManager::GetFullPath(const std::filesystem::path& inPath, std::filesystem::path& outPath, std::string& error) const noexcept {
-    outPath = inPath;
-    if (std::filesystem::exists(outPath)) {
-        return true;
+std::filesystem::path TextureManager::GetFullPath(const std::filesystem::path& path) const {
+    if (std::filesystem::exists(path)) {
+        return path;
     }
 
+    std::filesystem::path result;
     for (const auto& base: m_basePaths) {
-        outPath = base / inPath;
-        if (std::filesystem::exists(outPath)) {
-            return true;
+        result = base / path;
+        if (std::filesystem::exists(result)) {
+            return result;
         }
     }
 
-    error = fmt::format("the texture of the path '{}' was not found", inPath.c_str());
-    return false;
+    throw EngineError("the texture of the path '{}' was not found", path.c_str());
 }
 
-std::shared_ptr<Texture> TextureManager::Create(const ImageHeader& header, std::string& error) noexcept {
-    Texture::Result isSuccess;
+bool TextureManager::GetFullPath(const std::filesystem::path& inPath, std::filesystem::path& outPath, std::string& error) const noexcept {
+    try {
+        outPath = GetFullPath(inPath);
+        return true;
+    } catch(const std::exception& e) {
+        error = e.what();
+        return false;
+    }
+}
+
+std::shared_ptr<Texture> TextureManager::Create(const ImageHeader& header) {
     const bool generateMipLevelsIfNeed = false;
-    auto texture = std::make_shared<Texture>(ImageView(header, 0, nullptr), generateMipLevelsIfNeed, error, isSuccess);
-
-    return isSuccess.value ? texture : nullptr;
+    return std::make_shared<Texture>(ImageView(header, 0, nullptr), generateMipLevelsIfNeed, Texture::PrivateArg{});
 }
 
-std::shared_ptr<Texture> TextureManager::Create(const ImageView& image, std::string& error) noexcept {
-    return Create(image, true, error);
+std::shared_ptr<Texture> TextureManager::Create(const ImageView& image) {
+    return Create(image, true);
 }
 
-std::shared_ptr<Texture> TextureManager::Create(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error) noexcept {
-    Texture::Result isSuccess;
-    auto texture = std::make_shared<Texture>(image, generateMipLevelsIfNeed, error, isSuccess);
-
-    return isSuccess.value ? texture : nullptr;
+std::shared_ptr<Texture> TextureManager::Create(const ImageView& image, bool generateMipLevelsIfNeed) {
+    return std::make_shared<Texture>(image, generateMipLevelsIfNeed, Texture::PrivateArg{});
 }
 
-std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path, std::string& error) noexcept {
-    return Load(path, true, error);
+std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path) {
+    return Load(path, true);
 }
 
-std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed, std::string& error) noexcept {
-    std::filesystem::path fullPath;
-    if (!GetFullPath(path, fullPath, error)) {
-        return nullptr;
+std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed) {
+    auto fullPath = path;
+    try {
+        fullPath = GetFullPath(path);
+        Image image(fullPath.c_str(), true);
+        return std::make_shared<Texture>(image.view, generateMipLevelsIfNeed, Texture::PrivateArg{});
+    } catch(const std::exception& e) {
+        throw EngineError("failed to create texture from file '{}', error: {}", fullPath.c_str(), e.what());
     }
-
-    Image image;
-    if(!image.Load(fullPath.c_str(), true, error)) {
-        return nullptr;
-    }
-
-    Texture::Result isSuccess;
-    auto texture = std::make_shared<Texture>(image.view, generateMipLevelsIfNeed, error, isSuccess);
-    if (!isSuccess.value) {
-        error = fmt::format("failed to create texture from file '{}', error: {}", fullPath.c_str(), error);
-    }
-
-    return isSuccess.value ? texture : nullptr;
 }

@@ -10,27 +10,25 @@ namespace gui {
     }
 }
 class Texture : Noncopyable {
-    struct Result {
-        bool value;
-    };
+    struct PrivateArg{};
     friend class Framebuffer;
     friend class TextureManager;
     friend struct gui::detail::TextureGetter;
 
 public:
     Texture() = delete;
-    Texture(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error, Result& isSuccess) noexcept;
+    Texture(const ImageView& image, bool generateMipLevelsIfNeed, const PrivateArg&);
     ~Texture() noexcept;
 
     // auto generate mip levels
-    bool Update(const ImageView& image, std::string& error) noexcept;
-    bool Update(const ImageView& image, bool generateMipLevels, std::string& error) noexcept;
+    void Update(const ImageView& image);
+    void Update(const ImageView& image, bool generateMipLevels);
 
     void Bind(uint unit) const noexcept;
     void Unbind(uint unit) const noexcept;
 
 private:
-    bool Create(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error) noexcept;
+    void Create(const ImageView& image, bool generateMipLevelsIfNeed);
     void Destroy() noexcept;
 
 private:

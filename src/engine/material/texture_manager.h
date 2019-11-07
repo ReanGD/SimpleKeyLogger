@@ -17,17 +17,18 @@ public:
     }
 
     void AddFindPath(const std::filesystem::path& path);
+    std::filesystem::path GetFullPath(const std::filesystem::path& path) const;
     bool GetFullPath(const std::filesystem::path& inPath, std::filesystem::path& outPath, std::string& error) const noexcept;
 
-    std::shared_ptr<Texture> Create(const ImageHeader& header, std::string& error) noexcept;
+    std::shared_ptr<Texture> Create(const ImageHeader& header);
 
     // auto generate mip levels if Need
-    std::shared_ptr<Texture> Create(const ImageView& image, std::string& error) noexcept;
-    std::shared_ptr<Texture> Create(const ImageView& image, bool generateMipLevelsIfNeed, std::string& error) noexcept;
+    std::shared_ptr<Texture> Create(const ImageView& image);
+    std::shared_ptr<Texture> Create(const ImageView& image, bool generateMipLevelsIfNeed);
 
     // auto generate mip levels if Need
-    std::shared_ptr<Texture> Load(const std::filesystem::path& path, std::string& error) noexcept;
-    std::shared_ptr<Texture> Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed, std::string& error) noexcept;
+    std::shared_ptr<Texture> Load(const std::filesystem::path& path);
+    std::shared_ptr<Texture> Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed);
 
 private:
     std::vector<std::filesystem::path> m_basePaths;
