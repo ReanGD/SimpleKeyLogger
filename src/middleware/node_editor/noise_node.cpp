@@ -4,14 +4,13 @@
 #include <imgui_internal.h>
 
 #include "engine/gui/widgets.h"
-#include "engine/material/texture_manager.h"
 #include "middleware/node_editor/noiseutils.h"
 
 
 namespace ne = ax::NodeEditor;
 
 BaseNoiseNode::BaseNoiseNode(noise::module::Module* module, const std::string& name)
-    : BaseNode(name)
+    : PreviewNode(name)
     , m_module(module) {
 }
 
@@ -65,20 +64,12 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
     // Need cache image
     utils::RendererImage renderer;
     renderer.SetSourceModule(planeShape);
-    renderer.SetDestSize(m_previewSize, m_previewSize);
+    renderer.SetDestSize(GetPreviewSize(), GetPreviewSize());
     renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
     auto view = renderer.Render();
 
-    if (!m_texturePreview || (m_texSize != m_previewSize)) {
-        m_texSize = m_previewSize;
-        m_texturePreview = TextureManager::Get().Create(view, error);
-        if (!m_texturePreview) {
-            return false;
-        }
-    } else {
-        if (!m_texturePreview->Update(view, error)) {
-            return false;
-        }
+    if (!UpdatePreview(view, error)) {
+        return false;
     }
 
     return true;
@@ -99,7 +90,7 @@ bool BaseNoiseNode::CheckIsConsistency() noexcept {
     return true;
 }
 
-bool BaseNoiseNode::OnDrawSettings() noexcept {
+bool BaseNoiseNode::DrawSettings() noexcept {
     ImGui::SameLine();
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
     ImGui::SameLine();
@@ -116,13 +107,6 @@ bool BaseNoiseNode::OnDrawSettings() noexcept {
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
 
     return changed;
-}
-
-void BaseNoiseNode::OnDrawPreview() noexcept {
-    if (GetIsFull()) {
-        ImGui::SameLine();
-        gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
-    }
 }
 
 AbsNode::AbsNode()

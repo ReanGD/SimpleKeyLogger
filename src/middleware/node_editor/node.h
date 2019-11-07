@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "engine/gui/math.h"
+#include "engine/material/image.h"
 #include "engine/common/noncopyable.h"
 
 
@@ -70,8 +71,8 @@ public:
     virtual void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept = 0;
     virtual bool Update(std::string& error) noexcept = 0;
     virtual bool CheckIsConsistency() noexcept = 0;
-    virtual bool OnDrawSettings() noexcept = 0;
-    virtual void OnDrawPreview() noexcept = 0;
+    virtual bool DrawSettings() noexcept = 0;
+    virtual void DrawPreview() noexcept = 0;
 
 private:
     std::string m_name;
@@ -85,4 +86,19 @@ private:
     bool m_needUpdate = true;
     bool m_isFull = true;
     bool m_drawSettings = false;
+};
+
+class Texture;
+class PreviewNode : public BaseNode {
+protected:
+    PreviewNode(const std::string& name);
+
+    uint32_t GetPreviewSize() const noexcept { return m_previewSize; }
+    bool UpdatePreview(ImageView& view, std::string& error) noexcept;
+    void DrawPreview() noexcept final;
+
+private:
+    uint32_t m_texSize = 128;
+    uint32_t m_previewSize = 128;
+    std::shared_ptr<Texture> m_texturePreview = nullptr;
 };

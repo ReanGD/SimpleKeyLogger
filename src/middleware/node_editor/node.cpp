@@ -4,6 +4,7 @@
 #include <imgui_node_editor.h>
 
 #include "engine/gui/widgets.h"
+#include "engine/material/texture_manager.h"
 
 
 namespace ne = ax::NodeEditor;
@@ -155,11 +156,11 @@ void BaseNode::Draw() noexcept {
         }
 
         if (m_drawSettings) {
-            if (OnDrawSettings()) {
+            if (DrawSettings()) {
                 SetNeedUpdate();
             }
         } else {
-            OnDrawPreview();
+            DrawPreview();
         }
         ImGui::SameLine();
 
@@ -170,4 +171,42 @@ void BaseNode::Draw() noexcept {
         ImGui::EndGroup();
 
     ne::EndNode();
+}
+
+PreviewNode::PreviewNode(const std::string& name)
+    : BaseNode(name) {
+
+}
+
+bool PreviewNode::UpdatePreview(ImageView& view, std::string& error) noexcept {
+    if (view.header.width != m_previewSize) {
+        error = fmt::format("the width={} of the image for preview should be equal previewSize={}", view.header.width, m_previewSize);
+        return false;
+    }
+
+    if (view.header.height != m_previewSize) {
+        error = fmt::format("the height={} of the image for preview should be equal previewSize={}", view.header.height, m_previewSize);
+        return false;
+    }
+
+    if (!m_texturePreview || (m_texSize != m_previewSize)) {
+        m_texturePreview = TextureManager::Get().Create(view, error);
+        if (!m_texturePreview) {
+            return false;
+        }
+        m_texSize = m_previewSize;
+    } else {
+        if (!m_texturePreview->Update(view, error)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void PreviewNode::DrawPreview() noexcept {
+    if (GetIsFull()) {
+        ImGui::SameLine();
+        gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
+    }
 }

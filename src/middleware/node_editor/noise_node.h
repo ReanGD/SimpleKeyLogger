@@ -2,12 +2,10 @@
 
 #include <noise.h>
 
-#include "engine/material/image.h"
 #include "middleware/node_editor/node.h"
 
 
-class Texture;
-class BaseNoiseNode : public BaseNode {
+class BaseNoiseNode : public PreviewNode {
 protected:
     BaseNoiseNode(noise::module::Module* module, const std::string& name);
 
@@ -16,15 +14,11 @@ protected:
     void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept override;
     bool Update(std::string& error) noexcept override;
     bool CheckIsConsistency() noexcept override;
-    bool OnDrawSettings() noexcept override;
-    void OnDrawPreview() noexcept override;
+    bool DrawSettings() noexcept override;
 
     virtual bool OnDrawSettingsImpl() noexcept { return false; }
     virtual const noise::module::Module** GetSourceModules() noexcept = 0;
 
-    uint32_t m_previewSize = 128;
-    uint32_t m_texSize = 128;
-    std::shared_ptr<Texture> m_texturePreview = nullptr;
     noise::module::Module* m_module = nullptr;
 };
 
