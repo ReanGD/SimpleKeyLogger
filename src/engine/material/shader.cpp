@@ -3,8 +3,9 @@
 #include <ucl++.h>
 #include <fstream>
 #include <filesystem>
-#include <fmt/format.h>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "engine/common/exception.h"
 #include "engine/api/gl.h"
 
 
@@ -76,7 +77,7 @@ static GLuint LoadShader(std::filesystem::path&& filepath, GLenum shaderType, st
     return shader;
 }
 
-Shader::Shader(const privateArg&, uint handle)
+Shader::Shader(const PrivateArg&, uint handle)
     : m_handle(handle) {
 
 }
@@ -85,17 +86,18 @@ Shader::~Shader() {
     Destroy();
 }
 
-std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName, std::string& error) {
+std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, const std::string& fragmentShaderName) {
     const auto root = std::filesystem::current_path() / "materials";
 
+    std::string error;
     auto vertexShader = LoadShader(root / (vertexShaderName + ".mat"), GL_VERTEX_SHADER, error);
     if (vertexShader == 0) {
-        return nullptr;
+        throw EngineError(error);
     }
     auto fragmentShader = LoadShader(root / (fragmentShaderName + ".mat"), GL_FRAGMENT_SHADER, error);
     if (fragmentShader == 0) {
         glDeleteShader(vertexShader);
-        return nullptr;
+        throw EngineError(error);
     }
 
     GLuint shaderProgram = glCreateProgram();
@@ -110,36 +112,35 @@ std::shared_ptr<Shader> Shader::Create(const std::string& vertexShaderName, cons
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
-        error = fmt::format("couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
+        throw EngineError("couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
             vertexShaderName, fragmentShaderName, infoLog);
-        return nullptr;
     }
 
-    return std::make_shared<Shader>(Shader::privateArg{}, shaderProgram);
+    return std::make_shared<Shader>(Shader::PrivateArg{}, shaderProgram);
 }
 
 std::shared_ptr<Shader> Shader::Create(
     const std::string& vertexShaderName,
     const std::string& geometryShaderName,
-    const std::string& fragmentShaderName,
-    std::string& error) {
+    const std::string& fragmentShaderName) {
 
     const auto root = std::filesystem::current_path() / "materials";
 
+    std::string error;
     auto vertexShader = LoadShader(root / (vertexShaderName + ".mat"), GL_VERTEX_SHADER, error);
     if (vertexShader == 0) {
-        return nullptr;
+        throw EngineError(error);
     }
     auto geometryShader = LoadShader(root / (geometryShaderName + ".mat"), GL_GEOMETRY_SHADER, error);
     if (geometryShader == 0) {
         glDeleteShader(vertexShader);
-        return nullptr;
+        throw EngineError(error);
     }
     auto fragmentShader = LoadShader(root / (fragmentShaderName + ".mat"), GL_FRAGMENT_SHADER, error);
     if (fragmentShader == 0) {
         glDeleteShader(geometryShader);
         glDeleteShader(vertexShader);
-        return nullptr;
+        throw EngineError(error);
     }
 
     GLuint shaderProgram = glCreateProgram();
@@ -156,12 +157,11 @@ std::shared_ptr<Shader> Shader::Create(
     if (!success) {
         GLchar infoLog[1024];
         glGetShaderInfoLog(shaderProgram, 1024, NULL, infoLog);
-        error = fmt::format("couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
+        throw EngineError("couldn't compile the shader program from vertex shader '{}' and fragment '{}', error: '{}'",
             vertexShaderName, fragmentShaderName, infoLog);
-        return nullptr;
     }
 
-    return std::make_shared<Shader>(Shader::privateArg{}, shaderProgram);
+    return std::make_shared<Shader>(Shader::PrivateArg{}, shaderProgram);
 }
 
 void Shader::Bind() const {

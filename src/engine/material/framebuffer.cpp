@@ -1,8 +1,9 @@
 #include "engine/material/framebuffer.h"
 
-#include <fmt/format.h>
 #include "engine/api/gl.h"
+#include "engine/common/exception.h"
 #include "engine/material/texture_manager.h"
+
 
 static std::string FramebufferStatusResultToString(GLenum value) {
     switch (value) {
@@ -29,18 +30,12 @@ Framebuffer::~Framebuffer() {
     Destroy();
 }
 
-bool Framebuffer::Create(uint32_t width, uint32_t height, std::string& error) noexcept {
-    bool result = true;
-
+void Framebuffer::Create(uint32_t width, uint32_t height) {
     glBindRenderbuffer(GL_RENDERBUFFER, m_renderbufferHandle);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-    m_colorBuffer = TextureManager::Get().Create(ImageHeader(width, height, PixelFormat::R8G8B8), error);
-    if(!m_colorBuffer) {
-        error = fmt::format("Can't create colorbuffer for framebuffer: {}", error);
-        return false;
-    }
+    m_colorBuffer = TextureManager::Get().Create(ImageHeader(width, height, PixelFormat::R8G8B8));
 
     Bind();
 
@@ -49,14 +44,11 @@ bool Framebuffer::Create(uint32_t width, uint32_t height, std::string& error) no
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbufferHandle);
 
     auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (err != GL_FRAMEBUFFER_COMPLETE) {
-        result = false;
-        error = fmt::format("framebuffer is not complete: {}", FramebufferStatusResultToString(err));
-    }
-
     Unbind();
 
-    return result;
+    if (err != GL_FRAMEBUFFER_COMPLETE) {
+        throw EngineError("framebuffer is not complete: {}", FramebufferStatusResultToString(err));
+    }
 }
 
 void Framebuffer::Bind() const {

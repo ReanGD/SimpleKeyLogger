@@ -49,7 +49,7 @@ std::string ToStr(PixelFormat value);
 
 struct ImageHeader {
     ImageHeader() = default;
-    ImageHeader(uint32_t width, uint32_t height, PixelFormat format);
+    ImageHeader(uint32_t width, uint32_t height, PixelFormat format) noexcept;
 
     bool operator==(const ImageHeader& other) const noexcept;
     bool operator!=(const ImageHeader& other) const noexcept;
@@ -64,7 +64,7 @@ struct ImageHeader {
 
 struct ImageView {
     ImageView() = default;
-    ImageView(const ImageHeader& header, uint32_t mipCount, void* data);
+    ImageView(const ImageHeader& header, uint32_t mipCount, void* data) noexcept;
     ~ImageView() = default;
 
     bool GetNextMiplevel(ImageView& image) const noexcept;
@@ -79,12 +79,13 @@ struct Image : Noncopyable {
     static void Free(void* data);
 
     Image() = default;
-    Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter);
+    Image(const char *filename, bool verticallyFlip);
+    Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter) noexcept;
     ~Image();
 
     // With memory allocation and without mip livels
     void Create(const ImageHeader& header);
-    bool Load(const char *filename, bool verticallyFlip, std::string& error);
+    void Load(const char *filename, bool verticallyFlip);
     void Destroy();
 
     ImageView view;

@@ -7,21 +7,19 @@
 
 
 class Shader : Noncopyable {
-    struct privateArg{};
+    struct PrivateArg{};
 
 public:
     Shader() = delete;
-    Shader(const privateArg&, uint handle);
+    Shader(const PrivateArg&, uint handle);
     ~Shader();
     static std::shared_ptr<Shader> Create(
         const std::string& vertexShaderName,
-        const std::string& fragmentShaderName,
-        std::string& error);
+        const std::string& fragmentShaderName);
     static std::shared_ptr<Shader> Create(
         const std::string& geometryShaderName,
         const std::string& vertexShaderName,
-        const std::string& fragmentShaderName,
-        std::string& error);
+        const std::string& fragmentShaderName);
 
     // TODO: remove it
     uint GetHandle() const noexcept {

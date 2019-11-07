@@ -34,7 +34,7 @@ std::string ToStr(PixelFormat value) {
     }
 }
 
-ImageHeader::ImageHeader(uint32_t width, uint32_t height, PixelFormat format)
+ImageHeader::ImageHeader(uint32_t width, uint32_t height, PixelFormat format) noexcept
     : width(width)
     , height(height)
     , format(format) {
@@ -125,7 +125,7 @@ size_t ImageHeader::GetSize() const noexcept {
     return size;
 }
 
-ImageView::ImageView(const ImageHeader& header, uint32_t mipCount, void* data)
+ImageView::ImageView(const ImageHeader& header, uint32_t mipCount, void* data) noexcept
     : header(header)
     , mipCount(mipCount)
     , data(data) {
@@ -159,7 +159,11 @@ void Image::Free(void* data) {
     }
 }
 
-Image::Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter)
+Image::Image(const char *filename, bool verticallyFlip) {
+    Load(filename, verticallyFlip);
+}
+
+Image::Image(const ImageHeader& header, uint32_t mipCount, void* data, Deleter deleter) noexcept
     : view(header, mipCount, data)
     , deleter(deleter) {
 

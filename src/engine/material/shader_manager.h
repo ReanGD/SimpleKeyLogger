@@ -14,6 +14,6 @@ public:
         return instance;
     }
 
-    bool Init(std::string& error);
+    void Init();
 private:
 };

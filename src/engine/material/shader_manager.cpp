@@ -4,10 +4,10 @@
 #include <fstream>
 #include <ucl++.h>
 #include <filesystem>
-#include <fmt/format.h>
-#include <spdlog/spdlog.h>
 #include <glm/gtc/type_ptr.hpp>
+
 #include "engine/api/gl.h"
+#include "engine/common/exception.h"
 
 
 enum class ShaderType : uint8_t {
@@ -46,42 +46,40 @@ public:
     MaterialParser() = default;
     ~MaterialParser() = default;
 
-    bool Parse(const std::filesystem::path& path, std::string& error) {
+    void Parse(const std::filesystem::path& path) {
         m_shaderType = ShaderType::Unknown;
         m_funcName.clear();
         m_funcData.clear();
         m_uniforms.clear();
 
         if (!std::filesystem::exists(path)) {
-            error = fmt::format("the material of the path '{}' was not found", path.c_str());
-            return false;
+            throw EngineError("the material of the path '{}' was not found", path.c_str());
         }
 
         std::string data;
-        if (!ReadFile(path.c_str(), data, error)) {
-            error = fmt::format("the material of the path '{}' was not read: {}", path.c_str(), error);
-            return false;
+        try {
+            ReadFile(path.c_str(), data);
+        } catch(const std::exception& e) {
+            throw EngineError("the material of the path '{}' was not read: {}", path.c_str(), e.what());
         }
 
+        std::string error;
         auto root = ucl::Ucl::parse(data, error, UCL_DUPLICATE_ERROR);
         if (!root) {
-            error = fmt::format("the material of the path '{}' was not parse: {}", path.c_str(), error);
-            return false;
+            throw EngineError("the material of the path '{}' was not parse: {}", path.c_str(), error);
         }
 
-        if (!ParseRoot(root, error)) {
-            error = fmt::format("the material of the path '{}' was not parse: {}", path.c_str(), error);
-            return false;
+        try {
+            ParseRoot(root);
+        } catch(const std::exception& e) {
+            throw EngineError("the material of the path '{}' was not parse: {}", path.c_str(), e.what());
         }
-
-        return true;
     }
 private:
-    bool ReadFile(const char* filepath, std::string& data, std::string& error) {
+    void ReadFile(const char* filepath, std::string& data) {
         std::ifstream ifs(filepath, std::ifstream::in);
         if(!ifs) {
-            error = fmt::format("couldn't open file '{}', error: {}", filepath, strerror(errno));
-            return false;
+            throw EngineError("couldn't open file '{}', error: {}", filepath, strerror(errno));
         }
 
         ifs.seekg(0, std::ios::end);
@@ -89,16 +87,12 @@ private:
         ifs.seekg(0, std::ios::beg);
 
         data.assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-
-        return true;
     }
 
-    bool ParseRoot(const ucl::Ucl& section, std::string& error) {
+    void ParseRoot(const ucl::Ucl& section) {
         for (const auto &it :section) {
             if (it.key() == "material") {
-                if (!ParseMaterial(it, error)) {
-                    return false;
-                }
+                ParseMaterial(it);
             } else if (it.key() == "vertex") {
                 m_shaderType = ShaderType::Vertex;
                 m_funcData = it.string_value();
@@ -109,75 +103,58 @@ private:
                 m_shaderType = ShaderType::Fragment;
                 m_funcData = it.string_value();
             } else {
-                error = fmt::format("unknown section: {} with data: {}", it.key(), it.dump());
-                return false;
+                throw EngineError("unknown section: {} with data: {}", it.key(), it.dump());
             }
         }
 
         if (m_funcName.empty()) {
-            error = "not found function name";
-            return false;
+            throw EngineError("not found function name");
         }
         if (m_funcData.empty()) {
-            error = "not found function data";
-            return false;
+            throw EngineError("not found function data");
         }
-
-        return true;
     }
 
-    bool ParseMaterial(const ucl::Ucl& section, std::string& error) {
+    void ParseMaterial(const ucl::Ucl& section) {
         for (const auto& it: section) {
             if (it.key() == "func") {
                 m_funcName = it.string_value();
             } else if (it.key() == "uniforms") {
-                if (!ParseUniforms(it, error)) {
-                    return false;
-                }
+                ParseUniforms(it);
             } else {
-                error = fmt::format("unknown section: {} with data: {}", it.key(), it.dump());
-                return false;
+                throw EngineError("unknown section: {} with data: {}", it.key(), it.dump());
             }
         }
-
-        return true;
     }
 
-    bool ParseUniforms(const ucl::Ucl& section, std::string& error) {
+    void ParseUniforms(const ucl::Ucl& section) {
         for (const auto& uniformIt: section) {
             UniformInfo uniform;
             std::string desc = uniformIt.key();
             if (desc.empty()) {
-                error = "empty uniform description";
-                return false;
+                throw EngineError("empty uniform description");
             }
             for (const auto& it: uniformIt) {
                 if (it.key() == "type") {
                     uniform.type = FromString(it.string_value());
                     if (uniform.type == UniformType::Unknown) {
-                        error = fmt::format("unknown uniform type: {} in uniform:{}", it.string_value(), desc);
-                        return false;
+                        throw EngineError("unknown uniform type: {} in uniform:{}", it.string_value(), desc);
                     }
                 } else if (it.key() == "name") {
                     uniform.name = it.string_value();
                 } else {
-                    error = fmt::format("unknown section in uniform:{}: key={}, value={}", desc, it.key(), it.dump());
-                    return false;
+                    throw EngineError("unknown section in uniform:{}: key={}, value={}", desc, it.key(), it.dump());
                 }
             }
 
             if (uniform.name.empty()) {
-                error = fmt::format("not found name for uniform:{}", desc);
-                return false;
+                throw EngineError("not found name for uniform:{}", desc);
             }
             if (uniform.type == UniformType::Unknown) {
-                error = fmt::format("not found type for uniform:{}", desc);
-                return false;
+                throw EngineError("not found type for uniform:{}", desc);
             }
             m_uniforms[desc] = uniform;
         }
-
-        return true;
     }
 
 private:
@@ -187,18 +164,12 @@ private:
     std::map<std::string, UniformInfo> m_uniforms;
 };
 
-bool ShaderManager::Init(std::string& error) {
+void ShaderManager::Init() {
     const auto base = std::filesystem::current_path() / "materials";
 
     MaterialParser parser1;
-    if (!parser1.Parse(base / "frag_base_clr_mat.mat", error)) {
-        return false;
-    }
+    parser1.Parse(base / "frag_base_clr_mat.mat");
 
     MaterialParser parser2;
-    if (!parser2.Parse(base / "frag_light_none.mat", error)) {
-        return false;
-    }
-
-    return true;
+    parser1.Parse(base / "frag_light_none.mat");
 }

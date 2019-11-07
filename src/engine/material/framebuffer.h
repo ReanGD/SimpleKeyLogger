@@ -9,7 +9,7 @@ public:
     Framebuffer();
     ~Framebuffer();
 
-    bool Create(uint32_t width, uint32_t height, std::string& error) noexcept;
+    void Create(uint32_t width, uint32_t height);
 
     void Bind() const;
     void Unbind() const;

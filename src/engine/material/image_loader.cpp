@@ -5,17 +5,17 @@
 #define STBI_NO_PNM
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include <fmt/format.h>
+
+#include "engine/common/exception.h"
 
 
-bool Image::Load(const char *filename, bool verticallyFlip, std::string& error) {
+void Image::Load(const char *filename, bool verticallyFlip) {
     Destroy();
 
     stbi_set_flip_vertically_on_load(true);
     FILE *f = stbi__fopen(filename, "rb");
     if (f == nullptr) {
-        error = fmt::format("failed to open a image file '{}'", filename);
-        return false;
+        throw EngineError("failed to open a image file '{}'", filename);
     }
 
     stbi__context s;
@@ -34,13 +34,11 @@ bool Image::Load(const char *filename, bool verticallyFlip, std::string& error) 
     fclose(f);
 
     if (data == nullptr) {
-        error = fmt::format("failed to load a image from file '{}', error: '{}'", filename, stbi_failure_reason());
-        return false;
+        throw EngineError("failed to load a image from file '{}', error: '{}'", filename, stbi_failure_reason());
     }
 
     if ((ri.bits_per_channel != 16) && (ri.bits_per_channel != 8)) {
-        error = fmt::format("failed to load a image from file '{}', error: unknown bits per channel value = {}", filename, ri.bits_per_channel);
-        return false;
+        throw EngineError("failed to load a image from file '{}', error: unknown bits per channel value = {}", filename, ri.bits_per_channel);
     }
 
     bool is16bit = (ri.bits_per_channel == 16);
@@ -52,9 +50,8 @@ bool Image::Load(const char *filename, bool verticallyFlip, std::string& error) 
         case 3: format = is16bit ? PixelFormat::RGB16 : PixelFormat::RGB8; break;
         case 4: format = is16bit ? PixelFormat::RGBA16 : PixelFormat::RGBA8; break;
         default:
-            error = fmt::format("failed to parse a image file '{}', error: wrong value of 'channels' = {}", filename, channels);
             stbi_image_free(data);
-            return false;
+            throw EngineError("failed to parse a image file '{}', error: wrong value of 'channels' = {}", filename, channels);
     }
 
     ImageHeader header(static_cast<uint32_t>(width), static_cast<uint32_t>(height), format);
@@ -64,6 +61,4 @@ bool Image::Load(const char *filename, bool verticallyFlip, std::string& error) 
             stbi_image_free(data);
         }
     };
-
-    return true;
 }
