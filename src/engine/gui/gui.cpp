@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include "engine/material/texture.h"
+#include "engine/common/exception.h"
 
 
 static void UpdateMouseCursor(Window& window, ImGuiIO& io) {
@@ -51,12 +52,11 @@ Gui::~Gui() {
     }
 }
 
-bool Gui::Init(std::string& error) {
+void Gui::Init() {
     IMGUI_CHECKVERSION();
     m_context = ImGui::CreateContext();
     if (m_context == nullptr) {
-        error = "Failed to create ImGui context";
-        return false;
+        throw EngineError("Failed to create ImGui context");
     }
 
     ImGuiIO& io = ImGui::GetIO();
@@ -96,8 +96,6 @@ bool Gui::Init(std::string& error) {
 
     ImGui::StyleColorsDark();
     ImGui_ImplOpenGL3_Init("#version 330 core");
-
-    return true;
 }
 
 void Gui::EnableInput(bool value) {

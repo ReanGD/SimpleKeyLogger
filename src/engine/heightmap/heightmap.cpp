@@ -1,9 +1,9 @@
 #include "engine/heightmap/heightmap.h"
 
 #include <noise.h>
-#include <fmt/format.h>
 
 #include "engine/gui/widgets.h"
+#include "engine/common/exception.h"
 #include "engine/material/texture_manager.h"
 #include "middleware/node_editor/noiseutils.h"
 
@@ -19,40 +19,24 @@ static noise::NoiseQuality ToNoiseType(const Heightmap::Quality value) {
     }
 }
 
-bool Heightmap::Create(std::string& error) noexcept {
+void Heightmap::Create() {
     auto image = Generate();
-    m_previewTex = TextureManager::Get().Create(image, error);
-    uint8* texData = reinterpret_cast<uint8*>(image.data);
-    delete []texData;
-    if (!m_previewTex) {
-        return false;
-    }
-
-    return true;
+    m_previewTex = TextureManager::Get().Create(image);
 }
 
-std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path, std::string& error) noexcept {
-    std::filesystem::path fullPath;
-    if (!TextureManager::Get().GetFullPath(path, fullPath, error)) {
-        return nullptr;
-    }
-
-    Image image;
-    if(!image.Load(fullPath.c_str(), true, error)) {
-        return nullptr;
-    }
+std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path) {
+    auto fullPath = TextureManager::Get().GetFullPath(path);
+    Image image(fullPath.c_str(), true);
 
     auto header = image.view.header;
     if (header.format != PixelFormat::R8G8B8) {
-        error = fmt::format("wrong image ({}) format for heightmap, expected: {}, actual: '{}'",
+        throw EngineError("wrong image ({}) format for heightmap, expected: {}, actual: '{}'",
             fullPath.c_str(), ToStr(PixelFormat::R8G8B8), ToStr(header.format));
-        return nullptr;
     }
 
     if (header.width != header.height) {
-        error = fmt::format("wrong image ({}) size for heightmap, expected: width == height, actual: width = {}, height = {}",
+        throw EngineError("wrong image ({}) size for heightmap, expected: width == height, actual: width = {}, height = {}",
             fullPath.c_str(), header.width, header.height);
-        return nullptr;
     }
 
     uint8_t* data = reinterpret_cast<uint8_t*>(image.view.data);
@@ -89,7 +73,7 @@ std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path,
     return std::make_shared<PhysicalTerrain>(gridSize, rawHeightfieldData, heightScale, minHeight, maxHeight, 0.5f * (minHeight + maxHeight));
 }
 
-ImageView Heightmap::Generate() const noexcept {
+ImageView Heightmap::Generate() const {
     module::Perlin perlinModule;
     perlinModule.SetFrequency(m_frequency);
     perlinModule.SetLacunarity(m_lacunarity);
@@ -152,12 +136,6 @@ void Heightmap::DrawSettings() {
     changed |= gui::InputScalar("Seed", m_seed, gui::Step(1, 1));
 
     if (changed) {
-        std::string error;
-        auto image = Generate();
-        if (!m_previewTex->Update(image, error)) {
-            // spdlog::error(error);
-        }
-        uint32_t* texData = reinterpret_cast<uint32_t*>(image.data);
-        delete []texData;
+        m_previewTex->Update(Generate());
     }
 }

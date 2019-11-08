@@ -11,7 +11,7 @@ public:
     ~Gui();
 
 public:
-    bool Init(std::string& error);
+    void Init();
     void EnableInput(bool value);
     void Update(Window& window, float deltaTime);
 

@@ -1,8 +1,9 @@
 #include "engine/window/window.h"
 
 #include <GLFW/glfw3.h>
-#include <fmt/format.h>
 #include <spdlog/spdlog.h>
+
+#include "engine/common/exception.h"
 
 
 static void GLFWErrorCallback(int error, const char* description) {
@@ -21,7 +22,7 @@ static void centerWindow(GLFWmonitor *monitor, const GLFWvidmode* mode, GLFWwind
 	glfwSetWindowPos(window, xpos, ypos);
 }
 
-static GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, bool isFullscreen, float windowMultiplier, std::string& error) {
+static GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, bool isFullscreen, float windowMultiplier) {
     int width = mode->width;
     int height = mode->height;
     auto windowMonitor = monitor;
@@ -33,8 +34,7 @@ static GLFWwindow* createWindow(GLFWmonitor* monitor, const GLFWvidmode* mode, b
 
     GLFWwindow* window = glfwCreateWindow(width, height, "RTGE", windowMonitor, nullptr);
     if (window == nullptr) {
-        error = "Failed to create window";
-        return window;
+        throw EngineError("Failed to create window");
     }
 
     if (!isFullscreen) {
@@ -286,7 +286,7 @@ Window::~Window() {
     }
 }
 
-bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
+void Window::Init(bool isFullscreen, float windowMultiplier) {
     m_fullscreen = isFullscreen;
     m_windowMultiplier = windowMultiplier;
 
@@ -294,20 +294,17 @@ bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error)
 
     int initResult = glfwInit();
     if (initResult != GLFW_TRUE) {
-        error = fmt::format("GLFW initialization error: {}", initResult);
-        return false;
+        throw EngineError("GLFW initialization error: {}", initResult);
     }
     m_isGLFWInit = true;
 
     m_monitor = glfwGetPrimaryMonitor();
     if (m_monitor == nullptr) {
-        error = "Failed to get primary monitor";
-        return false;
+        throw EngineError("Failed to get primary monitor");
     }
     m_mode = glfwGetVideoMode(m_monitor);
     if (m_mode == nullptr) {
-        error = "Failed to get monitor mode";
-        return false;
+        throw EngineError("Failed to get monitor mode");
     }
 
     // calculated
@@ -356,10 +353,7 @@ bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     glfwWindowHintString(GLFW_X11_CLASS_NAME, "");
     glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "");
 
-    m_window = createWindow(m_monitor, m_mode, m_fullscreen, m_windowMultiplier, error);
-    if (m_window == nullptr) {
-        return false;
-    }
+    m_window = createWindow(m_monitor, m_mode, m_fullscreen, m_windowMultiplier);
 
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1);
@@ -376,8 +370,6 @@ bool Window::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     GLFWCallbacks::Init(this, m_window);
     UpdateIO();
     m_io.OnFramebufferSizeEvent(0, 0);
-
-    return true;
 }
 
 void Window::SetFullscreen(bool value) {
@@ -400,10 +392,6 @@ void Window::SetFullscreen(bool value) {
 
         glfwSetWindowMonitor(m_window, nullptr, xpos, ypos, windowWidth, windowHeight, m_mode->refreshRate);
     }
-}
-
-bool Window::IsFullscreen() const noexcept {
-    return m_fullscreen;
 }
 
 void Window::Close() {
@@ -486,10 +474,6 @@ const char* Window::GetClipboardText(void*) {
 
 void Window::SetClipboardText(void*, const char* text) {
     GLFWCallbacks::SetClipboardText(text);
-}
-
-WindowInput& Window::GetIO() noexcept {
-    return m_io;
 }
 
 void Window::UpdateIO() {

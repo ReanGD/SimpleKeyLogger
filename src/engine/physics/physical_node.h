@@ -13,7 +13,7 @@ public:
     PhysicalNode(btCollisionShape* collisionShape, const glm::vec3& position, float bodyMass);
     ~PhysicalNode();
 
-    void GetMatrix(glm::mat4x4& matrix) const noexcept;
+    void GetMatrix(glm::mat4x4& matrix) const;
 
 private:
     btRigidBody* m_body;

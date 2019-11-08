@@ -45,7 +45,7 @@ PhysicalNode::~PhysicalNode() {
     // }
 }
 
-void PhysicalNode::GetMatrix(glm::mat4x4& matrix) const noexcept {
+void PhysicalNode::GetMatrix(glm::mat4x4& matrix) const {
     btTransform trans;
     m_body->getMotionState()->getWorldTransform(trans);
     trans.getOpenGLMatrix(glm::value_ptr(matrix));

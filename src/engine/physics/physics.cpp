@@ -33,7 +33,7 @@ static bool customMaterialCombinerCallback(btManifoldPoint& cp, const btCollisio
 */
 
 btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
-bool Physics::Init(std::string& /*error*/) {
+void Physics::Init() {
 	// see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=10224
 	// gContactAddedCallback = customMaterialCombinerCallback;
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -42,8 +42,6 @@ bool Physics::Init(std::string& /*error*/) {
     m_solver = new btSequentialImpulseConstraintSolver;
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_solver, m_collisionConfiguration);
 	m_dynamicsWorld->setGravity(btVector3(0, -19.8, 0));
-
-    return true;
 }
 
 void Physics::AddNode(const std::shared_ptr<PhysicalNode>& node) {

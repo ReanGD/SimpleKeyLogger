@@ -1,6 +1,7 @@
 #include "engine/mesh/geometry_generator.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include "engine/common/exception.h"
 
 
 std::shared_ptr<Lines> GeometryGenerator::CreateLine(const glm::vec3& from, const glm::vec3& to) {
@@ -9,7 +10,7 @@ std::shared_ptr<Lines> GeometryGenerator::CreateLine(const glm::vec3& from, cons
     vb[0].Position	= from;
     vb[1].Position	= to;
     if (!vertexBuffer.Unlock()) {
-        throw std::runtime_error("Can't unlock vertex buffer in GeometryGenerator::CreateLine");
+        throw EngineError("can't unlock vertex buffer in GeometryGenerator::CreateLine");
     }
 
     return std::make_shared<Lines>(VertexP::vDecl, vertexBuffer);

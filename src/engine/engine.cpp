@@ -4,23 +4,13 @@
 #include "engine/api/gl.h"
 
 
-bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error) {
+void Engine::Init(bool isFullscreen, float windowMultiplier) {
     m_timeDeltas.fill(1.0f / 60.0f);
-    if (!m_window.Init(isFullscreen, windowMultiplier, error)) {
-        return false;
-    }
 
-    if (!GLApi::Init(error)) {
-        return false;
-    }
-
-    if (!m_gui.Init(error)) {
-        return false;
-    }
-
-    if (!m_physics.Init(error)) {
-        return false;
-    }
+    m_window.Init(isFullscreen, windowMultiplier);
+    GLApi::Init();
+    m_gui.Init();
+    m_physics.Init();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -28,8 +18,6 @@ bool Engine::Init(bool isFullscreen, float windowMultiplier, std::string& error)
     glFrontFace(GL_CCW);
     glLineWidth(2.0f);
     SetFillPoligone(m_fillPoligone);
-
-    return true;
 }
 
 void Engine::Run(const std::function<void ()>& callback) {

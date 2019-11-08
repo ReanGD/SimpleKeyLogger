@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <memory>
 
 #include "engine/common/noncopyable.h"
@@ -18,7 +17,7 @@ public:
     Physics() = default;
     ~Physics();
 
-    bool Init(std::string& error);
+    void Init();
     void AddNode(const std::shared_ptr<PhysicalNode>& node);
     bool RayTest(const glm::vec3& from, const glm::vec3& to, glm::vec3& result);
 

@@ -11,5 +11,5 @@ struct GLApi {
 
     static std::string EnumToString(const GLint value);
 
-    static bool Init(std::string& error);
+    static void Init();
 };

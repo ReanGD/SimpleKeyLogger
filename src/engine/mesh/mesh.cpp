@@ -6,7 +6,7 @@
 #include "engine/physics/physical_node.h"
 
 
-void Mesh::Add(const std::shared_ptr<Geometry>& geometry, const Material& material) noexcept {
+void Mesh::Add(const std::shared_ptr<Geometry>& geometry, const Material& material) {
     m_objects.push_back(std::make_pair(geometry, material));
 }
 

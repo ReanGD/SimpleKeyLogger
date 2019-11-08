@@ -20,10 +20,10 @@ public:
     Heightmap() = default;
     ~Heightmap() = default;
 
-    bool Create(std::string& error) noexcept;
-    std::shared_ptr<PhysicalNode> Load(const std::filesystem::path& path, std::string& error) noexcept;
+    void Create();
+    std::shared_ptr<PhysicalNode> Load(const std::filesystem::path& path);
 
-    ImageView Generate() const noexcept;
+    ImageView Generate() const;
     void DrawSettings();
 
     std::shared_ptr<Texture> GetPreview() const noexcept {

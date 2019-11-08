@@ -12,7 +12,7 @@ public:
     Mesh() = default;
     ~Mesh() = default;
 
-    void Add(const std::shared_ptr<Geometry>& geometry, const Material& material) noexcept;
+    void Add(const std::shared_ptr<Geometry>& geometry, const Material& material);
     void SetPhysicalNode(const std::shared_ptr<PhysicalNode>& node) noexcept;
     void SetModelMatrix(const glm::mat4& matrix) noexcept;
 

@@ -1,7 +1,7 @@
 #include "engine/api/gl.h"
 
-#include <fmt/format.h>
 #include <spdlog/spdlog.h>
+#include "engine/common/exception.h"
 
 
 bool GLApi::IsDXTSupported = false;
@@ -170,13 +170,12 @@ static void LogTextureFormatsInfo() {
 
 
 
-bool GLApi::Init(std::string& error) {
+void GLApi::Init() {
     glewExperimental = GL_TRUE;
 
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        error = fmt::format("Failed to initialize GLEW: {}", glewGetErrorString(err));
-        return false;
+        throw EngineError("Failed to initialize GLEW: {}", glewGetErrorString(err));
     }
 
     spdlog::debug("[GPU] Vendor:   {}", glGetString(GL_VENDOR));
@@ -208,6 +207,4 @@ bool GLApi::Init(std::string& error) {
 
     LogContextParams();
     LogTextureFormatsInfo();
-
-    return true;
 }

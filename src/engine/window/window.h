@@ -27,9 +27,9 @@ public:
     ~Window();
 
 public:
-    bool Init(bool isFullscreen, float windowMultiplier, std::string& error);
+    void Init(bool isFullscreen, float windowMultiplier);
     void SetFullscreen(bool value);
-    bool IsFullscreen() const noexcept;
+    bool IsFullscreen() const noexcept { return m_fullscreen; }
     void Close();
 
     bool StartFrame();
@@ -46,7 +46,7 @@ public:
     static const char* GetClipboardText(void*);
     static void SetClipboardText(void*, const char* text);
 
-    WindowInput& GetIO() noexcept;
+    WindowInput& GetIO() noexcept { return m_io; }
 
 private:
     void UpdateIO();
