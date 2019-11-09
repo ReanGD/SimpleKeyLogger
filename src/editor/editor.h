@@ -14,7 +14,7 @@ public:
     ~Editor() = default;
 
 
-    bool Init(std::string& error);
+    void Init();
     void Render();
     void Destroy();
 

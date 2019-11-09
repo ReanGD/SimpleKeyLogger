@@ -18,7 +18,7 @@ public:
     UIInterface(Engine& engine);
     ~UIInterface() = default;
 
-    bool Init(std::string& error);
+    void Init();
     void Render(bool editorMode);
     void Destroy();
 

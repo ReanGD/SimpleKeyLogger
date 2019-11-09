@@ -2,11 +2,11 @@
 
 #include <imgui.h>
 #include <filesystem>
-#include <fmt/format.h>
 
 #include "engine/gui/widgets.h"
 #include "editor/ui_node_editor.h"
 #include "engine/heightmap/heightmap.h"
+#include "engine/common/exception.h"
 
 
 static const ImGuiWindowFlags staticWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
@@ -24,32 +24,24 @@ UIInterface::UIInterface(Engine& engine)
 
 }
 
-bool UIInterface::Init(std::string& error) {
+void UIInterface::Init() {
     ImGuiIO& io = ImGui::GetIO();
     m_fontDefault = io.Fonts->AddFontDefault();
     if (m_fontDefault == nullptr) {
-        error = "Failed to load a default font";
-        return false;
+        throw EngineError("Failed to load a default font");
     }
 
     const auto monoFontPath = std::filesystem::current_path() / "data" / "fonts" / "NotoSans" / "NotoSans-Regular.ttf";
     m_fontMono = io.Fonts->AddFontFromFileTTF(monoFontPath.c_str(), 26, nullptr, io.Fonts->GetGlyphRangesCyrillic());
     if (m_fontMono == nullptr) {
-        error = fmt::format("Failed to load a font from file '{}'", monoFontPath.c_str());
-        return false;
+        throw EngineError("Failed to load a font from file '{}'", monoFontPath.c_str());
     }
 
     m_nodeEditor = std::make_shared<UINodeEditor>();
-    if (!m_nodeEditor->Create(error)) {
-        return false;
-    }
+    m_nodeEditor->Create();
 
     m_heightmap = std::make_shared<Heightmap>();
-    if (!m_heightmap->Create(error)) {
-        return false;
-    }
-
-    return true;
+    m_heightmap->Create();
 }
 
 void UIInterface::Render(bool editorMode) {

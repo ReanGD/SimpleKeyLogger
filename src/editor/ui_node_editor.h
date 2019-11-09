@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "engine/common/noncopyable.h"
@@ -19,7 +18,7 @@ public:
     UINodeEditor() = default;
     ~UINodeEditor() = default;
 
-    bool Create(std::string& error);
+    void Create();
     void Draw();
     void Destroy();
 

@@ -15,14 +15,17 @@ static bool run(bool isFullscreen, float windowMultiplier, spdlog::level::level_
         Engine engine;
         Editor editor(engine);
 
-        std::string error;
-        if(!engine.Init(isFullscreen, windowMultiplier, error)) {
-            spdlog::error("Engine initialization error: {}", error);
+        try {
+            engine.Init(isFullscreen, windowMultiplier);
+        } catch(const std::exception& e) {
+            spdlog::error("Engine initialization error: {}", e.what());
             return false;
         }
 
-        if(!editor.Init(error)) {
-            spdlog::error("Editor initialization error: {}", error);
+        try {
+            editor.Init();
+        } catch(const std::exception& e) {
+            spdlog::error("Editor initialization error: {}", e.what());
             return false;
         }
 

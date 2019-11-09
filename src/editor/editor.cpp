@@ -1,11 +1,11 @@
 #include "editor/editor.h"
 
-#include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/random.hpp>
 
 #include "engine/api/gl.h"
+#include "engine/common/exception.h"
 #include "engine/heightmap/heightmap.h"
 #include "engine/mesh/geometry_generator.h"
 #include "engine/material/texture_manager.h"
@@ -17,10 +17,8 @@ Editor::Editor(Engine& engine)
 
 }
 
-bool Editor::Init(std::string& error) {
-    if (!m_interface.Init(error)) {
-        return false;
-    }
+void Editor::Init() {
+    m_interface.Init();
     SetEditorMode(m_editorMode);
 
     auto& scene = m_engine.GetScene();
@@ -31,25 +29,13 @@ bool Editor::Init(std::string& error) {
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
     m_controller.AttachCamera(camera);
 
-    auto shaderTex = Shader::Create("vertex_old", "fragment_tex", error);
-    if (!shaderTex) {
-        return false;
-    }
-
-    auto shaderLandscape = Shader::Create("vertex_landscape", "fragment_tex", error);
-    if (!shaderTex) {
-        return false;
-    }
-
-    auto shaderTexLight = Shader::Create("vertex", "fragment_tex_light", error);
-    if (!shaderTexLight) {
-        return false;
-    }
+    auto shaderTex = Shader::Create("vertex_old", "fragment_tex");
+    auto shaderLandscape = Shader::Create("vertex_landscape", "fragment_tex");
+    auto shaderTexLight = Shader::Create("vertex", "fragment_tex_light");
 
     m_declCamera = shaderTexLight->GetUBDecl("ubCamera");
     if (!m_declCamera) {
-        error = fmt::format("Сouldn't found uniform block '{}' in shader", "ubCamera");
-        return false;
+        throw EngineError("Сouldn't found uniform block '{}' in shader", "ubCamera");
     }
 
     m_ubCamera = std::make_shared<UniformBuffer>(m_declCamera->GetSize());
@@ -61,38 +47,14 @@ bool Editor::Init(std::string& error) {
     glUniformBlockBinding(shaderTexLight->GetHandle(), m_declCamera->GetIndex(), index);
     m_ubCamera->Bind(index);
 
-    auto shaderClrLight = Shader::Create("vertex_old", "fragment_clr_light", error);
-    if (!shaderClrLight) {
-        return false;
-    }
+    auto shaderClrLight = Shader::Create("vertex_old", "fragment_clr_light");
+    auto shaderLine = Shader::Create("vertex_line", "fragment_clr");
+    auto shaderSprite = Shader::Create("vertex_sprite", "fragment_clr");
+    auto shaderNormals = Shader::Create("vertex_normals", "geometry_normals", "fragment_normals");
 
-    auto shaderLine = Shader::Create("vertex_line", "fragment_clr", error);
-    if (!shaderLine) {
-        return false;
-    }
-
-    auto shaderSprite = Shader::Create("vertex_sprite", "fragment_clr", error);
-    if (!shaderSprite) {
-        return false;
-    }
-
-    auto shaderNormals = Shader::Create("vertex_normals", "geometry_normals", "fragment_normals", error);
-    if (!shaderNormals) {
-        return false;
-    }
-
-    auto texture = texManager.Load("brice.jpg", error);
-    if(!texture) {
-        return false;
-    }
-    auto groundTex = texManager.Load("ground.jpg", error);
-    if(!groundTex) {
-        return false;
-    }
-    auto heightmapTex = texManager.Load("heightmap2.jpg", error);
-    if(!heightmapTex) {
-        return false;
-    }
+    auto texture = texManager.Load("brice.jpg");
+    auto groundTex = texManager.Load("ground.jpg");
+    auto heightmapTex = texManager.Load("heightmap2.jpg");
 
     // auto heightmapBody = Heightmap().Load("heightmap2.jpg", error);
     // if (!heightmapBody) {
@@ -162,11 +124,7 @@ bool Editor::Init(std::string& error) {
     }
 
     m_fbo = std::make_shared<Framebuffer>();
-    if (!m_fbo->Create(2000, 2000, error)) {
-        return false;
-    }
-
-    return true;
+    m_fbo->Create(2000, 2000);
 }
 
 void Editor::Render() {

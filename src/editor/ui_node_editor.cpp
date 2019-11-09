@@ -24,10 +24,9 @@ static std::unordered_map<ne::LinkId, LinkInfo>  g_links;
 static int                  g_NextLinkId = 100;
 
 
-bool UINodeEditor::Create(std::string& /*error*/) {
+void UINodeEditor::Create() {
     Destroy();
     m_context = ne::CreateEditor();
-    return true;
 }
 
 void UINodeEditor::Draw() {
