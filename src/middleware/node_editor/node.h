@@ -33,7 +33,7 @@ public:
     void DelLink() noexcept;
     bool IsConnected() const noexcept { return m_linkCount > 0; }
 
-    void Draw(uint8_t alpha) const noexcept;
+    void Draw(uint8_t alpha) const;
 
 protected:
     bool m_isInput = true;
@@ -54,25 +54,25 @@ public:
     void AddOutPin(BasePin* pin);
 
     // srcNode -> this (dstPin)
-    bool SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept;
+    bool SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly);
     // srcNode -> this (dstPin)
-    void DelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept;
+    void DelSourceNode(BaseNode* srcNode, BasePin* dstPin);
     // this -> dstNode
-    void AddDestNode(BaseNode* dstNode) noexcept;
+    void AddDestNode(BaseNode* dstNode);
     // this -> dstNode
-    void DelDestNode(BaseNode* dstNode) noexcept;
+    void DelDestNode(BaseNode* dstNode);
     void SetNeedUpdate() noexcept;
     void CheckIsFull() noexcept;
     void SetIsFull(bool value) noexcept;
     bool GetIsFull() const noexcept { return m_isFull; }
-    void Draw() noexcept;
+    void Draw();
 
-    virtual bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept = 0;
-    virtual void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept = 0;
-    virtual bool Update(std::string& error) noexcept = 0;
+    virtual bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) = 0;
+    virtual void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) = 0;
+    virtual void Update() = 0;
     virtual bool CheckIsConsistency() noexcept = 0;
-    virtual bool DrawSettings() noexcept = 0;
-    virtual void DrawPreview() noexcept = 0;
+    virtual bool DrawSettings() = 0;
+    virtual void DrawPreview() = 0;
 
 private:
     std::string m_name;
@@ -82,7 +82,6 @@ private:
     std::set<BaseNode*> m_LinkedDstNodes;
     // m_LinkedSrcNodes -> this
     std::set<BaseNode*> m_LinkedSrcNodes;
-    bool m_wrongNode = false;
     bool m_needUpdate = true;
     bool m_isFull = true;
     bool m_drawSettings = false;
@@ -94,8 +93,8 @@ protected:
     PreviewNode(const std::string& name);
 
     uint32_t GetPreviewSize() const noexcept { return m_previewSize; }
-    bool UpdatePreview(ImageView& view, std::string& error) noexcept;
-    void DrawPreview() noexcept final;
+    void UpdatePreview(ImageView& view);
+    void DrawPreview() final;
 
 private:
     uint32_t m_texSize = 128;

@@ -11,7 +11,7 @@ BillowNode::BillowNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool BillowNode::OnDrawSettingsImpl() noexcept {
+bool BillowNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -34,7 +34,7 @@ ConstNode::ConstNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool ConstNode::OnDrawSettingsImpl() noexcept {
+bool ConstNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Value", m_constValue, gui::Step(0.01, 0.1), gui::Range(-1.001, 1.001), "%.2f");
@@ -47,7 +47,7 @@ CylindersNode::CylindersNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool CylindersNode::OnDrawSettingsImpl() noexcept {
+bool CylindersNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
@@ -60,7 +60,7 @@ PerlinNode::PerlinNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool PerlinNode::OnDrawSettingsImpl() noexcept {
+bool PerlinNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -78,7 +78,7 @@ RidgedMultiNode::RidgedMultiNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool RidgedMultiNode::OnDrawSettingsImpl() noexcept {
+bool RidgedMultiNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::Combo("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -98,7 +98,7 @@ SpheresNode::SpheresNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool SpheresNode::OnDrawSettingsImpl() noexcept {
+bool SpheresNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
@@ -111,7 +111,7 @@ VoronoiNode::VoronoiNode()
     AddOutPin(new BasePin(PinType::Noise, 0));
 }
 
-bool VoronoiNode::OnDrawSettingsImpl() noexcept {
+bool VoronoiNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Displacement", m_displacement, gui::Step(0.1, 1.0), "%.1f");

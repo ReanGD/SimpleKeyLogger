@@ -10,13 +10,13 @@ protected:
     BaseNoiseNode(noise::module::Module* module, const std::string& name);
 
 protected:
-    bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept override;
-    void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept override;
-    bool Update(std::string& error) noexcept override;
+    bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) override;
+    void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) override;
+    void Update() override;
     bool CheckIsConsistency() noexcept override;
-    bool DrawSettings() noexcept override;
+    bool DrawSettings() override;
 
-    virtual bool OnDrawSettingsImpl() noexcept { return false; }
+    virtual bool OnDrawSettingsImpl() { return false; }
     virtual const noise::module::Module** GetSourceModules() noexcept = 0;
 
     noise::module::Module* m_module = nullptr;
@@ -25,7 +25,7 @@ protected:
 class BillowNode : public BaseNoiseNode, private noise::module::Billow {
 public:
     BillowNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
@@ -38,42 +38,42 @@ public:
 class ConstNode : public BaseNoiseNode, private noise::module::Const {
 public:
     ConstNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
 class CylindersNode : public BaseNoiseNode, private noise::module::Cylinders {
 public:
     CylindersNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
 class PerlinNode : public BaseNoiseNode, private noise::module::Perlin {
 public:
     PerlinNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
 class RidgedMultiNode : public BaseNoiseNode, private noise::module::RidgedMulti {
 public:
     RidgedMultiNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
 class SpheresNode : public BaseNoiseNode, private noise::module::Spheres {
 public:
     SpheresNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
 class VoronoiNode : public BaseNoiseNode, private noise::module::Voronoi {
 public:
     VoronoiNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
@@ -86,7 +86,7 @@ public:
 class ClampNode : public BaseNoiseNode, private noise::module::Clamp {
 public:
     ClampNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
@@ -94,7 +94,7 @@ public:
 class ExponentNode : public BaseNoiseNode, private noise::module::Exponent {
 public:
     ExponentNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
@@ -107,13 +107,13 @@ public:
 class ScaleBiasNode : public BaseNoiseNode, private noise::module::ScaleBias {
 public:
     ScaleBiasNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
 class SelectNode : public BaseNoiseNode, private noise::module::Select {
 public:
     SelectNode();
-    bool OnDrawSettingsImpl() noexcept override;
+    bool OnDrawSettingsImpl() override;
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };

@@ -1,9 +1,9 @@
 #include "middleware/node_editor/node.h"
 
-#include <spdlog/spdlog.h>
 #include <imgui_node_editor.h>
 
 #include "engine/gui/widgets.h"
+#include "engine/common/exception.h"
 #include "engine/material/texture_manager.h"
 
 
@@ -22,7 +22,7 @@ void BasePin::DelLink() noexcept {
     }
 }
 
-void BasePin::Draw(uint8_t alpha) const noexcept {
+void BasePin::Draw(uint8_t alpha) const {
     ne::BeginPin(ne::PinId(this), m_isInput ? ne::PinKind::Input : ne::PinKind::Output);
         math::Color color = m_color;
         color.alpha = alpha;
@@ -62,7 +62,7 @@ void BaseNode::AddOutPin(BasePin* pin) {
     m_outPins.push_back(pin);
 }
 
-bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept {
+bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) {
     if (dstPin->IsConnected()) {
         return false;
     }
@@ -76,17 +76,17 @@ bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly)
     return result;
 }
 
-void BaseNode::DelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept {
+void BaseNode::DelSourceNode(BaseNode* srcNode, BasePin* dstPin) {
     OnDelSourceNode(srcNode, dstPin);
     m_LinkedSrcNodes.erase(srcNode);
     CheckIsFull();
 }
 
-void BaseNode::AddDestNode(BaseNode* dstNode) noexcept {
+void BaseNode::AddDestNode(BaseNode* dstNode) {
     m_LinkedDstNodes.insert(dstNode);
 }
 
-void BaseNode::DelDestNode(BaseNode* dstNode) noexcept {
+void BaseNode::DelDestNode(BaseNode* dstNode) {
     m_LinkedDstNodes.erase(dstNode);
 }
 
@@ -125,11 +125,7 @@ void BaseNode::SetIsFull(bool value) noexcept {
     }
 }
 
-void BaseNode::Draw() noexcept {
-    if (m_wrongNode) {
-        return;
-    }
-
+void BaseNode::Draw() {
     auto alpha = static_cast<uint8_t>(ImGui::GetStyle().Alpha * 255.0f);
     ne::NodeId id(this);
     ne::BeginNode(id);
@@ -146,13 +142,8 @@ void BaseNode::Draw() noexcept {
         ImGui::EndGroup();
 
         if (m_needUpdate) {
-            std::string error;
-            if (Update(error)) {
-                m_needUpdate = false;
-            } else {
-                m_wrongNode = true;
-                spdlog::error("Can't update node: {}", error);
-            }
+            Update();
+            m_needUpdate = false;
         }
 
         if (m_drawSettings) {
@@ -178,33 +169,24 @@ PreviewNode::PreviewNode(const std::string& name)
 
 }
 
-bool PreviewNode::UpdatePreview(ImageView& view, std::string& error) noexcept {
+void PreviewNode::UpdatePreview(ImageView& view) {
     if (view.header.width != m_previewSize) {
-        error = fmt::format("the width={} of the image for preview should be equal previewSize={}", view.header.width, m_previewSize);
-        return false;
+        throw EngineError("the width={} of the image for preview should be equal previewSize={}", view.header.width, m_previewSize);
     }
 
     if (view.header.height != m_previewSize) {
-        error = fmt::format("the height={} of the image for preview should be equal previewSize={}", view.header.height, m_previewSize);
-        return false;
+        throw EngineError("the height={} of the image for preview should be equal previewSize={}", view.header.height, m_previewSize);
     }
 
     if (!m_texturePreview || (m_texSize != m_previewSize)) {
-        m_texturePreview = TextureManager::Get().Create(view, error);
-        if (!m_texturePreview) {
-            return false;
-        }
+        m_texturePreview = TextureManager::Get().Create(view);
         m_texSize = m_previewSize;
     } else {
-        if (!m_texturePreview->Update(view, error)) {
-            return false;
-        }
+        m_texturePreview->Update(view);
     }
-
-    return true;
 }
 
-void PreviewNode::DrawPreview() noexcept {
+void PreviewNode::DrawPreview() {
     if (GetIsFull()) {
         ImGui::SameLine();
         gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));

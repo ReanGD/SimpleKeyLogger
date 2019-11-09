@@ -14,7 +14,7 @@ BaseNoiseNode::BaseNoiseNode(noise::module::Module* module, const std::string& n
     , m_module(module) {
 }
 
-bool BaseNoiseNode::OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) noexcept {
+bool BaseNoiseNode::OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) {
     auto* srcNoiseNode = dynamic_cast<BaseNoiseNode*>(srcNode);
     if (!srcNoiseNode) {
         return false;
@@ -36,7 +36,7 @@ bool BaseNoiseNode::OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool che
     return true;
 }
 
-void BaseNoiseNode::OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept {
+void BaseNoiseNode::OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) {
     auto* srcNoiseNode = dynamic_cast<BaseNoiseNode*>(srcNode);
     if (!srcNoiseNode) {
         return;
@@ -53,9 +53,9 @@ void BaseNoiseNode::OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) noexcept
     sourceModules[index] = nullptr;
 }
 
-bool BaseNoiseNode::Update(std::string& error) noexcept {
+void BaseNoiseNode::Update() {
     if (!GetIsFull()) {
-        return true;
+        return;
     }
 
     utils::PlaneShape planeShape;
@@ -68,11 +68,7 @@ bool BaseNoiseNode::Update(std::string& error) noexcept {
     renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
     auto view = renderer.Render();
 
-    if (!UpdatePreview(view, error)) {
-        return false;
-    }
-
-    return true;
+    UpdatePreview(view);
 }
 
 bool BaseNoiseNode::CheckIsConsistency() noexcept {
@@ -90,7 +86,7 @@ bool BaseNoiseNode::CheckIsConsistency() noexcept {
     return true;
 }
 
-bool BaseNoiseNode::DrawSettings() noexcept {
+bool BaseNoiseNode::DrawSettings() {
     ImGui::SameLine();
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
     ImGui::SameLine();
@@ -123,7 +119,7 @@ ClampNode::ClampNode()
     SetIsFull(false);
 }
 
-bool ClampNode::OnDrawSettingsImpl() noexcept {
+bool ClampNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Lower bound", m_lowerBound, gui::Step(0.01, 0.1), gui::Range(-1.0, m_upperBound - 0.01), "%.2f");
@@ -143,7 +139,7 @@ ExponentNode::ExponentNode()
     SetIsFull(false);
 }
 
-bool ExponentNode::OnDrawSettingsImpl() noexcept {
+bool ExponentNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Exponent", m_exponent, gui::Step(0.01, 0.1), "%.2f");
@@ -165,7 +161,7 @@ ScaleBiasNode::ScaleBiasNode()
     SetIsFull(false);
 }
 
-bool ScaleBiasNode::OnDrawSettingsImpl() noexcept {
+bool ScaleBiasNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Bias", m_bias, gui::Step(0.1, 1.0), "%.1f");
@@ -183,7 +179,7 @@ SelectNode::SelectNode()
     SetIsFull(false);
 }
 
-bool SelectNode::OnDrawSettingsImpl() noexcept {
+bool SelectNode::OnDrawSettingsImpl() {
     bool changed = false;
 
     changed |= gui::InputScalar("Edge falloff", m_edgeFalloff, gui::Step(0.01, 0.1), "%.2f");
