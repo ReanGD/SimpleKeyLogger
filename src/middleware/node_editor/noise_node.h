@@ -111,6 +111,14 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+// TODO: Terrace
+
+class AddNode : public BaseNoiseNode, private noise::module::Add {
+public:
+    AddNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class SelectNode : public BaseNoiseNode, private noise::module::Select {
 public:
     SelectNode();

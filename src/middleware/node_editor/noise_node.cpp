@@ -170,6 +170,14 @@ bool ScaleBiasNode::OnDrawSettingsImpl() {
     return changed;
 }
 
+AddNode::AddNode()
+    : BaseNoiseNode(this, "Add") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddInPin(new BasePin(PinType::Noise, 1));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
 SelectNode::SelectNode()
     : BaseNoiseNode(this, "Select") {
     AddInPin(new BasePin(PinType::Noise, 0));

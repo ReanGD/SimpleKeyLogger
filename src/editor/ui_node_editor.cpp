@@ -161,6 +161,13 @@ void UINodeEditor::Draw() {
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("Combiner")) {
+            if (ImGui::MenuItem("Add")) {
+                node = std::make_shared<AddNode>();
+            }
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Selector")) {
             if (ImGui::MenuItem("Select")) {
                 node = std::make_shared<SelectNode>();
