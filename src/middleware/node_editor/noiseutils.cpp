@@ -1,6 +1,6 @@
 #include "middleware/node_editor/noiseutils.h"
 
-#include <interp.h>
+#include <algorithm>
 #include <mathconsts.h>
 
 
@@ -14,29 +14,17 @@ using namespace noise::module;
 namespace noise {
     namespace utils {
         // Performs linear interpolation between two 8-bit channel values.
-        inline noise::uint8 BlendChannel (const uint8 channel0, const uint8 channel1, float alpha) {
-            float c0 = (float)channel0 / 255.0f;
-            float c1 = (float)channel1 / 255.0f;
-            return (noise::uint8)(((c1 * alpha) + (c0 * (1.0f - alpha))) * 255.0f);
+        inline uint8_t BlendChannel(const uint8 channel0, const uint8 channel1, double alpha) {
+            return static_cast<uint8_t>((static_cast<double>(channel1) * alpha) + (static_cast<double>(channel0) * (1.0f - alpha)));
         }
 
         // Performs linear interpolation between two colors and stores the result
         // in out.
-        inline void LinearInterpColor(const math::Color& color0, const math::Color& color1, float alpha, math::Color& out) {
+        inline void LinearInterpColor(const math::Color& color0, const math::Color& color1, double alpha, math::Color& out) {
             out.alpha = BlendChannel(color0.alpha, color1.alpha, alpha);
             out.blue  = BlendChannel(color0.blue , color1.blue , alpha);
             out.green = BlendChannel(color0.green, color1.green, alpha);
             out.red   = BlendChannel(color0.red  , color1.red  , alpha);
-        }
-
-        inline uint32_t ClampValue(uint32_t value, uint32_t lowerBound, uint32_t upperBound) {
-            if (value < lowerBound) {
-                return lowerBound;
-            } else if (value > upperBound) {
-                return upperBound;
-            } else {
-                return value;
-            }
         }
     }
 }
@@ -92,27 +80,21 @@ const math::Color& GradientColor::GetColor(double gradientPos) const {
 
     // Find the first element in the gradient point array that has a gradient
     // position larger than the gradient position passed to this method.
-    uint32_t indexPos;
-    for (indexPos=0; indexPos!=m_gradientPointCount; ++indexPos) {
+    uint32_t indexPos = 0;
+    for (;indexPos!=m_gradientPointCount; ++indexPos) {
         if (gradientPos < m_pGradientPoints[indexPos].pos) {
             break;
         }
     }
 
-    // Find the two nearest gradient points so that we can perform linear
-    // interpolation on the color.
-    uint32_t index0 = ClampValue(indexPos - 1, 0, m_gradientPointCount - 1);
-    uint32_t index1 = ClampValue(indexPos    , 0, m_gradientPointCount - 1);
-
-    // If some gradient points are missing (which occurs if the gradient
-    // position passed to this method is greater than the largest gradient
-    // position or less than the smallest gradient position in the array), get
-    // the corresponding gradient color of the nearest gradient point and exit
-    // now.
-    if (index0 == index1) {
-        m_workingColor = m_pGradientPoints[index1].color;
-        return m_workingColor;
+    if (indexPos == 0) {
+        return m_pGradientPoints[0].color;
+    } else if (indexPos >= m_gradientPointCount) {
+        return m_pGradientPoints[m_gradientPointCount - 1].color;
     }
+
+    uint32_t index0 = indexPos - 1;
+    uint32_t index1 = indexPos;
 
     // Compute the alpha value used for linear interpolation.
     double input0 = m_pGradientPoints[index0].pos;
@@ -122,7 +104,7 @@ const math::Color& GradientColor::GetColor(double gradientPos) const {
     // Now perform the linear interpolation given the alpha value.
     const math::Color& color0 = m_pGradientPoints[index0].color;
     const math::Color& color1 = m_pGradientPoints[index1].color;
-    LinearInterpColor(color0, color1, (float)alpha, m_workingColor);
+    LinearInterpColor(color0, color1, alpha, m_workingColor);
     return m_workingColor;
 }
 
@@ -159,21 +141,17 @@ RendererImage::RendererImage() {
     BuildGrayscaleGradient();
 }
 
-void RendererImage::AddGradientPoint (double gradientPos,
-    const math::Color& gradientColor)
-{
+void RendererImage::AddGradientPoint(double gradientPos, const math::Color& gradientColor) {
     m_gradient.AddGradientPoint (gradientPos, gradientColor);
 }
 
-void RendererImage::BuildGrayscaleGradient ()
-{
+void RendererImage::BuildGrayscaleGradient() {
     ClearGradient ();
     m_gradient.AddGradientPoint (-1.0, math::Color (  0,   0,   0, 255));
     m_gradient.AddGradientPoint ( 1.0, math::Color (255, 255, 255, 255));
 }
 
-void RendererImage::BuildTerrainGradient ()
-{
+void RendererImage::BuildTerrainGradient() {
     ClearGradient ();
     m_gradient.AddGradientPoint (-1.00, math::Color (  0,   0, 128, 255));
     m_gradient.AddGradientPoint (-0.20, math::Color ( 32,  64, 128, 255));
@@ -187,42 +165,19 @@ void RendererImage::BuildTerrainGradient ()
 }
 
 math::Color RendererImage::CalcDestColor(const math::Color& sourceColor, double lightValue) const {
-    double red   = (double)sourceColor.red   / 255.0;
-    double green = (double)sourceColor.green / 255.0;
-    double blue  = (double)sourceColor.blue  / 255.0;
+    // color = color * (lightValue * lightColor / 255)
+    int red   = static_cast<int>(static_cast<double>(sourceColor.red)   * lightValue * static_cast<double>(m_lightColor.red) / 255.0);
+    int green = static_cast<int>(static_cast<double>(sourceColor.green) * lightValue * static_cast<double>(m_lightColor.green) / 255.0);
+    int blue  = static_cast<int>(static_cast<double>(sourceColor.blue)  * lightValue * static_cast<double>(m_lightColor.blue) / 255.0);
 
-    if (m_isLightEnabled) {
-        // Now calculate the light color.
-        double lightRed   = lightValue * (double)m_lightColor.red   / 255.0;
-        double lightGreen = lightValue * (double)m_lightColor.green / 255.0;
-        double lightBlue  = lightValue * (double)m_lightColor.blue  / 255.0;
-
-        // Apply the light color to the new color.
-        red   *= lightRed  ;
-        green *= lightGreen;
-        blue  *= lightBlue ;
-    }
-
-    // Clamp the color channels to the (0..1) range.
-    red   = (red   < 0.0)? 0.0: red  ;
-    red   = (red   > 1.0)? 1.0: red  ;
-    green = (green < 0.0)? 0.0: green;
-    green = (green > 1.0)? 1.0: green;
-    blue  = (blue  < 0.0)? 0.0: blue ;
-    blue  = (blue  > 1.0)? 1.0: blue ;
-
-    // Rescale the color channels to the noise::uint8 (0..255) range and return
-    // the new color.
-    math::Color newColor (
-        (noise::uint8)((noise::uint)(red   * 255.0) & 0xff),
-        (noise::uint8)((noise::uint)(green * 255.0) & 0xff),
-        (noise::uint8)((noise::uint)(blue  * 255.0) & 0xff));
-    return newColor;
+    return math::Color(
+        static_cast<uint8_t>(std::max(std::min(red, 255), 0)),
+        static_cast<uint8_t>(std::max(std::min(green, 255), 0)),
+        static_cast<uint8_t>(std::max(std::min(blue, 255), 0))
+        );
 }
 
-double RendererImage::CalcLightIntensity (double /* center */, double left,
-    double right, double down, double up) const
-{
+double RendererImage::CalcLightIntensity(double /* center */, double left, double right, double down, double up) const {
     // Recalculate the sine and cosine of the various light values if
     // necessary so it does not have to be calculated each time this method is
     // called.
@@ -237,10 +192,8 @@ double RendererImage::CalcLightIntensity (double /* center */, double left,
     // Now do the lighting calculations.
     const double I_MAX = 1.0;
     double io = I_MAX * SQRT_2 * m_sinElev / 2.0;
-    double ix = (I_MAX - io) * m_lightContrast * SQRT_2 * m_cosElev
-        * m_cosAzimuth;
-    double iy = (I_MAX - io) * m_lightContrast * SQRT_2 * m_cosElev
-        * m_sinAzimuth;
+    double ix = (I_MAX - io) * m_lightContrast * SQRT_2 * m_cosElev * m_cosAzimuth;
+    double iy = (I_MAX - io) * m_lightContrast * SQRT_2 * m_cosElev * m_sinAzimuth;
     double intensity = (ix * (left - right) + iy * (down - up) + io);
     if (intensity < 0.0) {
         intensity = 0.0;
@@ -248,7 +201,7 @@ double RendererImage::CalcLightIntensity (double /* center */, double left,
     return intensity;
 }
 
-void RendererImage::ClearGradient () {
+void RendererImage::ClearGradient() {
     m_gradient.Clear();
 }
 
@@ -267,10 +220,8 @@ ImageView RendererImage::Render() {
             m_destImage.Create(ImageHeader(m_destWidth, m_destHeight, PixelFormat::R8G8B8A8));
     }
 
-    double uExtent = m_upperUBound - m_lowerUBound;
-    double vExtent = m_upperVBound - m_lowerVBound;
-    double uDelta  = uExtent / (double)m_destWidth;
-    double vDelta  = vExtent / (double)m_destHeight;
+    double uDelta  = (m_upperUBound - m_lowerUBound) / static_cast<double>(m_destWidth);
+    double vDelta  = (m_upperVBound - m_lowerVBound) / static_cast<double>(m_destHeight);
     double scaledU = m_lowerUBound;
     double scaledV = m_lowerVBound;
 
@@ -286,7 +237,6 @@ ImageView RendererImage::Render() {
 
             // If lighting is enabled, calculate the light intensity based on the
             // rate of change at the current point in the noise map.
-            double lightIntensity;
             if (m_isLightEnabled) {
                 // Calculate the positions of the current point's four-neighbors.
                 int xLeftOffset = -1;
@@ -303,18 +253,12 @@ ImageView RendererImage::Render() {
                 double nu = m_sourceModule->GetValue(scaledU, scaledV + yUpOffset * vDelta);
 
                 // Now we can calculate the lighting intensity.
-                lightIntensity = CalcLightIntensity(nc, nl, nr, nd, nu);
+                double lightIntensity = CalcLightIntensity(nc, nl, nr, nd, nu);
                 lightIntensity *= m_lightBrightness;
-
+                *pDest = CalcDestColor(destColor, lightIntensity).value;
             } else {
-                // These values will apply no lighting to the destination image.
-                lightIntensity = 1;
+                *pDest = destColor.value;
             }
-
-            // Blend the destination color, background color, and the light
-            // intensity together, then update the destination image with that
-            // color.
-            *pDest = CalcDestColor(destColor, lightIntensity).value;
 
             // Go to the next point.
             ++pDest;
@@ -329,7 +273,7 @@ ImageView RendererImage::Render() {
 //////////////////////////////////////////////////////////////////////////////
 // RendererNormalMap class
 
-math::Color RendererNormalMap::CalcNormalColor (double nc, double nr, double nu, double bumpHeight) const {
+math::Color RendererNormalMap::CalcNormalColor(double nc, double nr, double nu, double bumpHeight) const {
     // Calculate the surface normal.
     nc *= bumpHeight;
     nr *= bumpHeight;
@@ -342,12 +286,10 @@ math::Color RendererNormalMap::CalcNormalColor (double nc, double nr, double nu,
     double vzc = 1.0 / d;
 
     // Map the normal range from the (-1.0 .. +1.0) range to the (0 .. 255) range.
-    noise::uint8 xc, yc, zc;
-    xc = (noise::uint8)((noise::uint)((floor)((vxc + 1.0) * 127.5)) & 0xff);
-    yc = (noise::uint8)((noise::uint)((floor)((vyc + 1.0) * 127.5)) & 0xff);
-    zc = (noise::uint8)((noise::uint)((floor)((vzc + 1.0) * 127.5)) & 0xff);
-
-    return math::Color (xc, yc, zc);
+    return math::Color(
+        static_cast<uint8_t>(static_cast<uint>((floor)((vxc + 1.0) * 127.5)) & 0xff),
+        static_cast<uint8_t>(static_cast<uint>((floor)((vyc + 1.0) * 127.5)) & 0xff),
+        static_cast<uint8_t>(static_cast<uint>((floor)((vzc + 1.0) * 127.5)) & 0xff));
 }
 
 ImageView RendererNormalMap::Render() {
@@ -364,10 +306,8 @@ ImageView RendererNormalMap::Render() {
             m_destImage.Create(ImageHeader(m_destWidth, m_destHeight, PixelFormat::R8G8B8A8));
     }
 
-    double uExtent = m_upperUBound - m_lowerUBound;
-    double vExtent = m_upperVBound - m_lowerVBound;
-    double uDelta  = uExtent / (double)m_destWidth;
-    double vDelta  = vExtent / (double)m_destHeight;
+    double uDelta  = (m_upperUBound - m_lowerUBound) / static_cast<double>(m_destWidth);
+    double vDelta  = (m_upperVBound - m_lowerVBound) / static_cast<double>(m_destHeight);
     double scaledU = m_lowerUBound;
     double scaledV = m_lowerVBound;
 

@@ -248,8 +248,7 @@ namespace noise {
                 /// towards the calculated color, and if the alpha value is low, this
                 /// object weighs the blend towards the color from the corresponding
                 /// pixel in the background image.
-                void AddGradientPoint (double gradientPos,
-                    const math::Color& gradientColor);
+                void AddGradientPoint(double gradientPos, const math::Color& gradientColor);
 
                 /// Builds a grayscale gradient.
                 ///
@@ -259,7 +258,7 @@ namespace noise {
                 /// This color gradient contains the following gradient points:
                 /// - -1.0 maps to black
                 /// - 1.0 maps to white
-                void BuildGrayscaleGradient ();
+                void BuildGrayscaleGradient();
 
                 /// Builds a color gradient suitable for terrain.
                 ///
@@ -269,13 +268,13 @@ namespace noise {
                 /// This gradient color at position 0.0 is the "sea level".  Above
                 /// that value, the gradient contains greens, browns, and whites.
                 /// Below that value, the gradient contains various shades of blue.
-                void BuildTerrainGradient ();
+                void BuildTerrainGradient();
 
                 /// Clears the color gradient.
                 ///
                 /// Before calling the Render() method, the application must specify a
                 /// new color gradient with at least two gradient points.
-                void ClearGradient ();
+                void ClearGradient();
 
                 /// Enables or disables the light source.
                 ///
@@ -283,8 +282,7 @@ namespace noise {
                 ///
                 /// If the light source is enabled, this object will interpret the
                 /// noise map as a bump map.
-                void EnableLight (bool enable = true)
-                {
+                void EnableLight(bool enable = true) {
                     m_isLightEnabled = enable;
                 }
 
@@ -298,24 +296,21 @@ namespace noise {
                 /// - 90.0 degrees is north.
                 /// - 180.0 degrees is west.
                 /// - 270.0 degrees is south.
-                double GetLightAzimuth () const
-                {
+                double GetLightAzimuth() const {
                     return m_lightAzimuth;
                 }
 
                 /// Returns the brightness of the light source.
                 ///
                 /// @returns The brightness of the light source.
-                double GetLightBrightness () const
-                {
+                double GetLightBrightness() const {
                     return m_lightBrightness;
                 }
 
                 /// Returns the color of the light source.
                 ///
                 /// @returns The color of the light source.
-                math::Color GetLightColor () const
-                {
+                math::Color GetLightColor() const {
                     return m_lightColor;
                 }
 
@@ -332,8 +327,7 @@ namespace noise {
                 /// map as a height map that has a spatial resolution of @a h meters
                 /// and an elevation resolution of 1 meter, a good contrast amount to
                 /// use is ( 1.0 / @a h ).
-                double GetLightContrast () const
-                {
+                double GetLightContrast() const {
                     return m_lightContrast;
                 }
 
@@ -344,16 +338,14 @@ namespace noise {
                 /// The elevation is the angle above the horizon:
                 /// - 0 degrees is on the horizon.
                 /// - 90 degrees is straight up.
-                double GetLightElev () const
-                {
+                double GetLightElev() const {
                     return m_lightElev;
                 }
 
                 /// Returns the intensity of the light source.
                 ///
                 /// @returns The intensity of the light source.
-                double GetLightIntensity () const
-                {
+                double GetLightIntensity() const {
                     return m_lightIntensity;
                 }
 
@@ -362,8 +354,7 @@ namespace noise {
                 /// @returns
                 /// - @a true if the light source is enabled.
                 /// - @a false if the light source is disabled.
-                bool IsLightEnabled () const
-                {
+                bool IsLightEnabled() const {
                     return m_isLightEnabled;
                 }
 
@@ -414,8 +405,7 @@ namespace noise {
                 ///
                 /// Make sure the light source is enabled via a call to the
                 /// EnableLight() method before calling the Render() method.
-                void SetLightAzimuth (double lightAzimuth)
-                {
+                void SetLightAzimuth(double lightAzimuth) {
                     m_lightAzimuth = lightAzimuth;
                     m_recalcLightValues = true;
                 }
@@ -426,8 +416,7 @@ namespace noise {
                 ///
                 /// Make sure the light source is enabled via a call to the
                 /// EnableLight() method before calling the Render() method.
-                void SetLightBrightness (double lightBrightness)
-                {
+                void SetLightBrightness(double lightBrightness) {
                     m_lightBrightness = lightBrightness;
                     m_recalcLightValues = true;
                 }
@@ -438,8 +427,7 @@ namespace noise {
                 ///
                 /// Make sure the light source is enabled via a call to the
                 /// EnableLight() method before calling the Render() method.
-                void SetLightColor (const math::Color& lightColor)
-                {
+                void SetLightColor(const math::Color& lightColor) {
                     m_lightColor = lightColor;
                 }
 
@@ -463,8 +451,7 @@ namespace noise {
                 ///
                 /// Make sure the light source is enabled via a call to the
                 /// EnableLight() method before calling the Render() method.
-                void SetLightContrast (double lightContrast)
-                {
+                void SetLightContrast(double lightContrast) {
                     if (lightContrast <= 0.0) {
                         throw noise::ExceptionInvalidParam ();
                     }
@@ -483,8 +470,7 @@ namespace noise {
                 ///
                 /// Make sure the light source is enabled via a call to the
                 /// EnableLight() method before calling the Render() method.
-                void SetLightElev (double lightElev)
-                {
+                void SetLightElev(double lightElev) {
                     m_lightElev = lightElev;
                     m_recalcLightValues = true;
                 }
@@ -497,8 +483,7 @@ namespace noise {
                 ///
                 /// Make sure the light source is enabled via a call to the
                 /// EnableLight() method before calling the Render() method.
-                void SetLightIntensity (double lightIntensity)
-                {
+                void SetLightIntensity(double lightIntensity) {
                     if (lightIntensity < 0.0) {
                         throw noise::ExceptionInvalidParam ();
                     }
@@ -507,8 +492,7 @@ namespace noise {
                     m_recalcLightValues = true;
                 }
 
-                void SetSourceModule (const Shape& sourceModule)
-                {
+                void SetSourceModule(const Shape& sourceModule) {
                     m_sourceModule = &sourceModule;
                 }
 
@@ -521,7 +505,7 @@ namespace noise {
                 /// @param lightValue The intensity of the light at that position.
                 ///
                 /// @returns The destination color.
-                math::Color CalcDestColor (const math::Color& sourceColor, double lightValue) const;
+                math::Color CalcDestColor(const math::Color& sourceColor, double lightValue) const;
 
                 /// Calculates the intensity of the light given some elevation values.
                 ///
@@ -535,8 +519,7 @@ namespace noise {
                 /// @param up Elevation of the point directly above the center point.
                 ///
                 /// These values come directly from the noise map.
-                double CalcLightIntensity (double center, double left, double right,
-                    double down, double up) const;
+                double CalcLightIntensity(double center, double left, double right, double down, double up) const;
 
                 /// The cosine of the azimuth of the light source.
                 mutable double m_cosAzimuth;
@@ -612,7 +595,6 @@ namespace noise {
 
                 /// The sine of the elevation of the light source.
                 mutable double m_sinElev;
-
         };
 
         /// Renders a normal map from a noise map.
@@ -643,7 +625,6 @@ namespace noise {
         class RendererNormalMap {
             public:
                 RendererNormalMap () = default;
-
 
                 /// Returns the bump height.
                 ///
@@ -680,8 +661,7 @@ namespace noise {
                 ///
                 /// The spatial resolution and elevation resolution are determined by
                 /// the application.
-                void SetBumpHeight (double bumpHeight)
-                {
+                void SetBumpHeight(double bumpHeight) {
                     m_bumpHeight = bumpHeight;
                 }
 
@@ -701,7 +681,7 @@ namespace noise {
                     m_destHeight = destHeight;
                 }
 
-                void SetSourceModule (const Shape& sourceModule) {
+                void SetSourceModule(const Shape& sourceModule) {
                     m_sourceModule = &sourceModule;
                 }
 
@@ -765,5 +745,4 @@ namespace noise {
                 const Shape* m_sourceModule = nullptr;
         };
     }
-
 }
