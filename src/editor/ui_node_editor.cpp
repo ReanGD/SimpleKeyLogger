@@ -164,6 +164,10 @@ void UINodeEditor::Draw() {
         if (ImGui::BeginMenu("Combiner")) {
             if (ImGui::MenuItem("Add")) {
                 node = std::make_shared<AddNode>();
+            } else if (ImGui::MenuItem("Max")) {
+                node = std::make_shared<MaxNode>();
+            } else if (ImGui::MenuItem("Min")) {
+                node = std::make_shared<MinNode>();
             }
             ImGui::EndMenu();
         }

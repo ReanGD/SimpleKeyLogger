@@ -119,6 +119,18 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class MaxNode : public BaseNoiseNode, private noise::module::Max {
+public:
+    MaxNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
+class MinNode : public BaseNoiseNode, private noise::module::Min {
+public:
+    MinNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class SelectNode : public BaseNoiseNode, private noise::module::Select {
 public:
     SelectNode();

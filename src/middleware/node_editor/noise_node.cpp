@@ -168,6 +168,22 @@ AddNode::AddNode()
     SetIsFull(false);
 }
 
+MaxNode::MaxNode()
+    : BaseNoiseNode(this, "Max") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddInPin(new BasePin(PinType::Noise, 1));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
+MinNode::MinNode()
+    : BaseNoiseNode(this, "Min") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddInPin(new BasePin(PinType::Noise, 1));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
 SelectNode::SelectNode()
     : BaseNoiseNode(this, "Select") {
     AddInPin(new BasePin(PinType::Noise, 0));
