@@ -4,7 +4,6 @@
 
 #include "engine/gui/widgets.h"
 #include "engine/common/exception.h"
-#include "engine/material/texture_manager.h"
 
 
 namespace ne = ax::NodeEditor;
@@ -162,33 +161,4 @@ void BaseNode::Draw() {
         ImGui::EndGroup();
 
     ne::EndNode();
-}
-
-PreviewNode::PreviewNode(const std::string& name)
-    : BaseNode(name) {
-
-}
-
-void PreviewNode::UpdatePreview(ImageView& view) {
-    if (view.header.width != m_previewSize) {
-        throw EngineError("the width={} of the image for preview should be equal previewSize={}", view.header.width, m_previewSize);
-    }
-
-    if (view.header.height != m_previewSize) {
-        throw EngineError("the height={} of the image for preview should be equal previewSize={}", view.header.height, m_previewSize);
-    }
-
-    if (!m_texturePreview || (m_texSize != m_previewSize)) {
-        m_texturePreview = TextureManager::Get().Create(view);
-        m_texSize = m_previewSize;
-    } else {
-        m_texturePreview->Update(view);
-    }
-}
-
-void PreviewNode::DrawPreview() {
-    if (GetIsFull()) {
-        ImGui::SameLine();
-        gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
-    }
 }

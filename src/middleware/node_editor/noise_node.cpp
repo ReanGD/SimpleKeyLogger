@@ -58,17 +58,7 @@ void BaseNoiseNode::Update() {
         return;
     }
 
-    utils::PlaneShape planeShape;
-    planeShape.SetSourceModule(*m_module);
-
-    // Need cache image
-    utils::RendererImage renderer;
-    renderer.SetSourceModule(planeShape);
-    renderer.SetDestSize(GetPreviewSize(), GetPreviewSize());
-    renderer.SetBounds(2.0, 6.0, 1.0, 5.0);
-    auto view = renderer.Render();
-
-    UpdatePreview(view);
+    UpdatePreview(m_module);
 }
 
 bool BaseNoiseNode::CheckIsConsistency() noexcept {

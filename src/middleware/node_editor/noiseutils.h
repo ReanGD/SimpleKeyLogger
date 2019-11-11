@@ -177,7 +177,7 @@ namespace noise {
             virtual ~Shape() = default;
 
             virtual double GetValue(double x, double y) const = 0;
-            virtual void SetSourceModule (const module::Module& sourceModule) = 0;
+            virtual void SetSourceModule (const module::Module* sourceModule) = 0;
         };
 
         class PlaneShape: public Shape {
@@ -186,8 +186,8 @@ namespace noise {
                 return m_planeModel.GetValue(u, v);
             }
 
-            void SetSourceModule(const module::Module& sourceModule) override {
-                m_planeModel.SetModule(sourceModule);
+            void SetSourceModule(const module::Module* sourceModule) override {
+                m_planeModel.SetModule(*sourceModule);
             }
 
         private:
@@ -200,8 +200,8 @@ namespace noise {
                 return m_sphereModel.GetValue(v, u);
             }
 
-            void SetSourceModule(const module::Module& sourceModule) override {
-                m_sphereModel.SetModule(sourceModule);
+            void SetSourceModule(const module::Module* sourceModule) override {
+                m_sphereModel.SetModule(*sourceModule);
             }
 
         private:
@@ -214,8 +214,8 @@ namespace noise {
                 return m_cylinderModel.GetValue(u, v);
             }
 
-            void SetSourceModule(const module::Module& sourceModule) override {
-                m_cylinderModel.SetModule(sourceModule);
+            void SetSourceModule(const module::Module* sourceModule) override {
+                m_cylinderModel.SetModule(*sourceModule);
             }
 
         private:
@@ -492,8 +492,8 @@ namespace noise {
                     m_recalcLightValues = true;
                 }
 
-                void SetSourceModule(const Shape& sourceModule) {
-                    m_sourceModule = &sourceModule;
+                void SetSourceModule(const Shape* sourceModule) {
+                    m_sourceModule = sourceModule;
                 }
 
             private:

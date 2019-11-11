@@ -39,9 +39,6 @@ void UIInterface::Init() {
 
     m_nodeEditor = std::make_shared<UINodeEditor>();
     m_nodeEditor->Create();
-
-    m_heightmap = std::make_shared<Heightmap>();
-    m_heightmap->Create();
 }
 
 void UIInterface::Render(bool editorMode) {
@@ -118,17 +115,12 @@ void UIInterface::DrawRightPanel(rect& rect) {
             }
         }
 
-        if (ImGui::CollapsingHeader("Heightmap", ImGuiTreeNodeFlags_DefaultOpen)) {
-            m_heightmap->DrawSettings();
-        }
-
         ImGui::End();
     }
 }
 
 void UIInterface::DrawViewer(rect& rect) {
     if (BeginWindow("viewer", rect)) {
-        gui::Image(m_heightmap->GetPreview(), math::Size(1024,1024), math::Pointf(0,1), math::Pointf(1,0));
         ImGui::End();
     }
 }

@@ -32,5 +32,4 @@ private:
     std::shared_ptr<UINodeEditor> m_nodeEditor = nullptr;
     ImFont* m_fontDefault = nullptr;
     ImFont* m_fontMono = nullptr;
-    std::shared_ptr<Heightmap> m_heightmap;
 };

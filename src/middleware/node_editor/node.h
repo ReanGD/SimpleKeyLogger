@@ -1,12 +1,10 @@
 #pragma once
 
 #include <set>
-#include <memory>
 #include <string>
 #include <vector>
 
 #include "engine/gui/math.h"
-#include "engine/material/image.h"
 #include "engine/common/noncopyable.h"
 
 
@@ -61,10 +59,13 @@ public:
     void AddDestNode(BaseNode* dstNode);
     // this -> dstNode
     void DelDestNode(BaseNode* dstNode);
+
     void SetNeedUpdate() noexcept;
+
     void CheckIsFull() noexcept;
     void SetIsFull(bool value) noexcept;
     bool GetIsFull() const noexcept { return m_isFull; }
+
     void Draw();
 
     virtual bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) = 0;
@@ -85,19 +86,4 @@ private:
     bool m_needUpdate = true;
     bool m_isFull = true;
     bool m_drawSettings = false;
-};
-
-class Texture;
-class PreviewNode : public BaseNode {
-protected:
-    PreviewNode(const std::string& name);
-
-    uint32_t GetPreviewSize() const noexcept { return m_previewSize; }
-    void UpdatePreview(ImageView& view);
-    void DrawPreview() final;
-
-private:
-    uint32_t m_texSize = 128;
-    uint32_t m_previewSize = 128;
-    std::shared_ptr<Texture> m_texturePreview = nullptr;
 };

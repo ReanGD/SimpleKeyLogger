@@ -2,7 +2,7 @@
 
 #include <noise.h>
 
-#include "middleware/node_editor/node.h"
+#include "middleware/node_editor/preview_node.h"
 
 
 class BaseNoiseNode : public PreviewNode {
