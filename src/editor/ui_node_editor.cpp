@@ -41,50 +41,7 @@ void UINodeEditor::Draw() {
         ne::Link(linkId, info.srcPin, info.dstPin);
     }
 
-    if (ne::BeginCreate()) {
-        ne::PinId inputPinId, outputPinId;
-        if (ne::QueryNewLink(&inputPinId, &outputPinId)) {
-            if ((inputPinId && outputPinId) && (inputPinId != outputPinId)) {
-                BasePin* pin1 = inputPinId.AsPointer<BasePin>();
-                BasePin* pin2 = outputPinId.AsPointer<BasePin>();
-
-                if ((pin1->IsInput() != pin2->IsInput()) &&
-                    (pin1->GetNode() != pin2->GetNode()) &&
-                    (pin1->GetNode() != nullptr) &&
-                    (pin2->GetNode() != nullptr) &&
-                    (pin1->GetPinType() == pin2->GetPinType())) {
-
-                    auto* src = pin1->IsInput() ? pin2 : pin1;
-                    auto* srcNode = src->GetNode();
-
-                    auto* dst = pin1->IsInput() ? pin1 : pin2;
-                    auto* dstNode = dst->GetNode();
-
-                    bool checkOnly = true;
-                    if (dstNode->SetSourceNode(srcNode, dst, checkOnly)) {
-                        if (ne::AcceptNewItem()) {
-                            checkOnly = false;
-                            dstNode->SetSourceNode(srcNode, dst, checkOnly);
-                            srcNode->AddDestNode(dstNode);
-                            src->AddLink();
-                            dst->AddLink();
-
-                            auto linkId = ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++));
-                            g_links[linkId] = LinkInfo{ne::PinId(src), ne::PinId(dst)};
-                            ne::Link(linkId, ne::PinId(src), ne::PinId(dst));
-                        }
-                    } else {
-                        ne::RejectNewItem();
-                    }
-                } else {
-                    ne::RejectNewItem();
-                }
-            } else {
-                ne::RejectNewItem();
-            }
-        }
-        ne::EndCreate();
-    }
+    CreateCheck();
 
     if (ne::BeginDelete()) {
         ne::LinkId deletedLinkId;
@@ -198,5 +155,52 @@ void UINodeEditor::Destroy() {
         m_nodes.clear();
         ne::DestroyEditor(m_context);
         m_context = nullptr;
+    }
+}
+
+void UINodeEditor::CreateCheck() {
+    if (ne::BeginCreate()) {
+        ne::PinId inputPinId, outputPinId;
+        if (ne::QueryNewLink(&inputPinId, &outputPinId)) {
+            if ((inputPinId && outputPinId) && (inputPinId != outputPinId)) {
+                BasePin* pin1 = inputPinId.AsPointer<BasePin>();
+                BasePin* pin2 = outputPinId.AsPointer<BasePin>();
+
+                if ((pin1->IsInput() != pin2->IsInput()) &&
+                    (pin1->GetNode() != pin2->GetNode()) &&
+                    (pin1->GetNode() != nullptr) &&
+                    (pin2->GetNode() != nullptr) &&
+                    (pin1->GetPinType() == pin2->GetPinType())) {
+
+                    auto* src = pin1->IsInput() ? pin2 : pin1;
+                    auto* srcNode = src->GetNode();
+
+                    auto* dst = pin1->IsInput() ? pin1 : pin2;
+                    auto* dstNode = dst->GetNode();
+
+                    bool checkOnly = true;
+                    if (dstNode->SetSourceNode(srcNode, dst, checkOnly)) {
+                        if (ne::AcceptNewItem()) {
+                            checkOnly = false;
+                            dstNode->SetSourceNode(srcNode, dst, checkOnly);
+                            srcNode->AddDestNode(dstNode);
+                            src->AddLink();
+                            dst->AddLink();
+
+                            auto linkId = ne::LinkId(static_cast<uintptr_t>(g_NextLinkId++));
+                            g_links[linkId] = LinkInfo{ne::PinId(src), ne::PinId(dst)};
+                            ne::Link(linkId, ne::PinId(src), ne::PinId(dst));
+                        }
+                    } else {
+                        ne::RejectNewItem();
+                    }
+                } else {
+                    ne::RejectNewItem();
+                }
+            } else {
+                ne::RejectNewItem();
+            }
+        }
+        ne::EndCreate();
     }
 }

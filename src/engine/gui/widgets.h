@@ -74,6 +74,7 @@ namespace detail {
     };
 
     bool DragScalar(const char* label, DataType dataType, void* value, float speed, const void* minValue, const void* maxValue, const char* format, float power = 1.0f);
+    bool SliderScalar(const char* label, DataType dataType, void* value, const void* minValue, const void* maxValue, const char* format, float power = 1.0f);
     bool InputScalar(const char* label, DataType dataType, void* value, const void* step, const void* stepFast, const char* format);
     bool Combo(const char* label, size_t& value, const char** items, const size_t count);
 
@@ -132,6 +133,20 @@ template<typename T, typename = typename detail::isSupportedType<T>::type>
                 value = tmpValue;
                 return true;
             }
+        }
+
+        return false;
+    }
+
+
+template<typename T>
+    bool SliderEnum(const char* label, T& value, const char** items, const T count) {
+        uint64_t minValue = 0;
+        uint64_t maxValue = static_cast<uint64_t>(count - 1);
+        uint64_t valueTmp = static_cast<uint64_t>(value);
+        if (detail::SliderScalar(label, detail::DataType::U64, &valueTmp, &minValue, &maxValue, items[valueTmp])) {
+            value = static_cast<T>(valueTmp);
+            return true;
         }
 
         return false;

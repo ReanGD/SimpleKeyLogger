@@ -23,6 +23,8 @@ public:
     void Destroy();
 
 private:
+    void CreateCheck();
+private:
     ax::NodeEditor::EditorContext* m_context = nullptr;
     std::vector<std::shared_ptr<BaseNode>> m_nodes;
 };

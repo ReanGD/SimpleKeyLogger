@@ -1,12 +1,11 @@
 #include "engine/gui/widgets.h"
 
 #include <imgui.h>
-#include <exception>
-#include <fmt/format.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 
+#include "engine/common/exception.h"
 #include "engine/material/texture.h"
 
 
@@ -35,7 +34,7 @@ static ImGuiDataType_ ToImGui(gui::detail::DataType value) {
         case gui::detail::DataType::Float: return ImGuiDataType_Float;
         case gui::detail::DataType::Double: return ImGuiDataType_Double;
         default:
-            throw std::runtime_error(fmt::format("unknown value of widget type: '{}'", static_cast<uint8_t>(value)).c_str());
+            throw EngineError("unknown value of widget type: '{}'", static_cast<uint8_t>(value));
     }
 }
 
@@ -50,6 +49,10 @@ struct TextureGetter {
 
 bool DragScalar(const char* label, DataType dataType, void* value, float speed, const void* minValue, const void* maxValue, const char* format, float power) {
     return ImGui::DragScalar(label, ToImGui(dataType), value, speed, minValue, maxValue, format, power);
+}
+
+bool SliderScalar(const char* label, DataType dataType, void* value, const void* minValue, const void* maxValue, const char* format, float power) {
+    return ImGui::SliderScalar(label, ToImGui(dataType), value, minValue, maxValue, format, power);
 }
 
 bool InputScalar(const char* label, DataType dataType, void* value, const void* step, const void* stepFast, const char* format) {
