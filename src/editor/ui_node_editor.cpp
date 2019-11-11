@@ -42,30 +42,7 @@ void UINodeEditor::Draw() {
     }
 
     CreateCheck();
-
-    if (ne::BeginDelete()) {
-        ne::LinkId deletedLinkId;
-        while (ne::QueryDeletedLink(&deletedLinkId)) {
-            const auto it = g_links.find(deletedLinkId);
-            if (it == g_links.cend()) {
-                ne::RejectDeletedItem();
-            } else  if (ne::AcceptDeletedItem()) {
-                auto* src = it->second.srcPin.AsPointer<BasePin>();
-                auto* srcNode = src->GetNode();
-                src->DelLink();
-
-                auto* dst = it->second.dstPin.AsPointer<BasePin>();
-                auto* dstNode = dst->GetNode();
-                dst->DelLink();
-
-                dstNode->DelSourceNode(srcNode, dst);
-                srcNode->DelDestNode(dstNode);
-
-                g_links.erase(it);
-            }
-        }
-        ne::EndDelete();
-    }
+    DeleteCheck();
 
     auto currentCursorPosition = ImGui::GetMousePos();
     static auto openPopupPosition = ImGui::GetMousePos();
@@ -202,5 +179,31 @@ void UINodeEditor::CreateCheck() {
             }
         }
         ne::EndCreate();
+    }
+}
+
+void UINodeEditor::DeleteCheck() {
+    if (ne::BeginDelete()) {
+        ne::LinkId deletedLinkId;
+        while (ne::QueryDeletedLink(&deletedLinkId)) {
+            const auto it = g_links.find(deletedLinkId);
+            if (it == g_links.cend()) {
+                ne::RejectDeletedItem();
+            } else  if (ne::AcceptDeletedItem()) {
+                auto* src = it->second.srcPin.AsPointer<BasePin>();
+                auto* srcNode = src->GetNode();
+                src->DelLink();
+
+                auto* dst = it->second.dstPin.AsPointer<BasePin>();
+                auto* dstNode = dst->GetNode();
+                dst->DelLink();
+
+                dstNode->DelSourceNode(srcNode, dst);
+                srcNode->DelDestNode(dstNode);
+
+                g_links.erase(it);
+            }
+        }
+        ne::EndDelete();
     }
 }

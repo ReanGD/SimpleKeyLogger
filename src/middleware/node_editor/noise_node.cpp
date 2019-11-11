@@ -1,7 +1,6 @@
 #include "middleware/node_editor/noise_node.h"
 
 #include <imgui_node_editor.h>
-#include <imgui_internal.h>
 
 #include "engine/gui/widgets.h"
 #include "middleware/node_editor/noiseutils.h"
@@ -77,20 +76,9 @@ bool BaseNoiseNode::CheckIsConsistency() noexcept {
 }
 
 bool BaseNoiseNode::DrawSettings() {
-    ImGui::SameLine();
-    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-    ImGui::SameLine();
-
-    ImGui::BeginGroup();
-    ImGui::PushItemWidth(180);
-
+    ImGui::PushItemWidth(128);
     bool changed = OnDrawSettingsImpl();
-
     ImGui::PopItemWidth();
-    ImGui::EndGroup();
-
-    ImGui::SameLine();
-    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
 
     return changed;
 }

@@ -24,6 +24,7 @@ public:
 
 private:
     void CreateCheck();
+    void DeleteCheck();
 private:
     ax::NodeEditor::EditorContext* m_context = nullptr;
     std::vector<std::shared_ptr<BaseNode>> m_nodes;

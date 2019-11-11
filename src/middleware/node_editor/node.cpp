@@ -1,6 +1,7 @@
 #include "middleware/node_editor/node.h"
 
 #include <imgui_node_editor.h>
+#include <imgui_internal.h>
 
 #include "engine/gui/widgets.h"
 #include "engine/common/exception.h"
@@ -145,15 +146,15 @@ void BaseNode::Draw() {
             m_needUpdate = false;
         }
 
-        if (m_drawSettings) {
-            if (DrawSettings()) {
-                SetNeedUpdate();
-            }
-        } else {
-            DrawPreview();
-        }
         ImGui::SameLine();
+        ImGui::BeginGroup();
+        DrawPreview();
+        if (m_drawSettings && DrawSettings()) {
+            SetNeedUpdate();
+        }
+        ImGui::EndGroup();
 
+        ImGui::SameLine();
         ImGui::BeginGroup();
         for (const auto* pin: m_outPins) {
             pin->Draw(alpha);
