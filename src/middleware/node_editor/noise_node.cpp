@@ -172,6 +172,22 @@ MinNode::MinNode()
     SetIsFull(false);
 }
 
+MultiplyNode::MultiplyNode()
+    : BaseNoiseNode(this, "Multiply") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddInPin(new BasePin(PinType::Noise, 1));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
+PowerNode::PowerNode()
+    : BaseNoiseNode(this, "Power") {
+    AddInPin(new BasePin(PinType::Noise, 0));
+    AddInPin(new BasePin(PinType::Noise, 1));
+    AddOutPin(new BasePin(PinType::Noise, 0));
+    SetIsFull(false);
+}
+
 SelectNode::SelectNode()
     : BaseNoiseNode(this, "Select") {
     AddInPin(new BasePin(PinType::Noise, 0));

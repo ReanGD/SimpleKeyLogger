@@ -131,6 +131,18 @@ public:
     const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
 };
 
+class MultiplyNode : public BaseNoiseNode, private noise::module::Multiply {
+public:
+    MultiplyNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
+class PowerNode : public BaseNoiseNode, private noise::module::Power {
+public:
+    PowerNode();
+    const noise::module::Module** GetSourceModules() noexcept override { return m_pSourceModule; }
+};
+
 class SelectNode : public BaseNoiseNode, private noise::module::Select {
 public:
     SelectNode();

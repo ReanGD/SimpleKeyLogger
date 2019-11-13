@@ -115,6 +115,10 @@ void NodeEditor::Draw() {
                 node = std::make_shared<MaxNode>();
             } else if (ImGui::MenuItem("Min")) {
                 node = std::make_shared<MinNode>();
+            } else if (ImGui::MenuItem("Multiply")) {
+                node = std::make_shared<MultiplyNode>();
+            } else if (ImGui::MenuItem("Power")) {
+                node = std::make_shared<PowerNode>();
             }
             ImGui::EndMenu();
         }
