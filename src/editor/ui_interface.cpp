@@ -4,7 +4,6 @@
 #include <filesystem>
 
 #include "engine/gui/widgets.h"
-#include "editor/ui_node_editor.h"
 #include "engine/heightmap/heightmap.h"
 #include "engine/common/exception.h"
 
@@ -20,7 +19,8 @@ static bool BeginWindow(const char* name, rect& rect, ImGuiWindowFlags flags = s
 }
 
 UIInterface::UIInterface(Engine& engine)
-    : m_engine(engine) {
+    : m_engine(engine)
+    , m_editor("Noise editor") {
 
 }
 
@@ -36,9 +36,6 @@ void UIInterface::Init() {
     if (m_fontMono == nullptr) {
         throw EngineError("Failed to load a font from file '{}'", monoFontPath.c_str());
     }
-
-    m_nodeEditor = std::make_shared<UINodeEditor>();
-    m_nodeEditor->Create();
 }
 
 void UIInterface::Render(bool editorMode) {
@@ -78,10 +75,6 @@ void UIInterface::Render(bool editorMode) {
 }
 
 void UIInterface::Destroy() {
-    if (m_nodeEditor) {
-        m_nodeEditor->Destroy();
-        m_nodeEditor.reset();
-    }
 }
 
 void UIInterface::DrawInfoBar(rect& rect) {
@@ -127,7 +120,7 @@ void UIInterface::DrawViewer(rect& rect) {
 
 void UIInterface::DrawNodeEditor(rect& rect) {
     if (BeginWindow("node_editor", rect)) {
-        m_nodeEditor->Draw();
+        m_editor.Draw();
         ImGui::End();
     }
 }

@@ -63,10 +63,6 @@ void BaseNode::AddOutPin(BasePin* pin) {
 }
 
 bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) {
-    if (dstPin->IsConnected()) {
-        return false;
-    }
-
     bool result = OnSetSourceNode(srcNode, dstPin, checkOnly);
     if (!checkOnly) {
         m_LinkedSrcNodes.insert(srcNode);

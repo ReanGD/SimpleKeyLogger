@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/engine.h"
+#include "middleware/node_editor/node_editor.h"
 
 struct rect {
     uint32_t posX = 0;
@@ -29,7 +30,7 @@ private:
     void DrawNodeEditor(rect& rect);
 private:
     Engine& m_engine;
-    std::shared_ptr<UINodeEditor> m_nodeEditor = nullptr;
+    NodeEditor m_editor;
     ImFont* m_fontDefault = nullptr;
     ImFont* m_fontMono = nullptr;
 };
