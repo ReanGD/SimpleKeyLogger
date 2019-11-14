@@ -37,12 +37,8 @@ bool NodeEditorStorage::AddLink(const ne::PinId pinIdFirst, const ne::PinId pinI
         return false;
     }
 
-    if (checkOnly && !dstNode->SetSourceNode(srcNode, dstPin, checkOnly)) {
-        return false;
-    }
-
     if (!checkOnly) {
-        dstNode->SetSourceNode(srcNode, dstPin, checkOnly);
+        dstNode->SetSourceNode(srcNode, dstPin);
         srcNode->AddDestNode(dstNode, srcPin);
 
         auto linkId = ne::LinkId(static_cast<uintptr_t>(m_nextId++));

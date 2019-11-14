@@ -9,8 +9,8 @@
 
 
 enum class PinType : uint8_t {
-    Noise,
-    NoiseMap,
+    Noise3D,
+    Noise2D,
     Image
 };
 
@@ -52,7 +52,7 @@ public:
     void AddOutPin(BasePin* pin);
 
     // srcNode -> this (dstPin)
-    bool SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly);
+    virtual void SetSourceNode(BaseNode* srcNode, BasePin* dstPin);
     // srcNode -> this (dstPin)
     void DelSourceNode(BaseNode* srcNode, BasePin* dstPin);
     // this (srcPin) -> dstNode
@@ -68,7 +68,6 @@ public:
 
     void Draw();
 
-    virtual bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) = 0;
     virtual void Update() = 0;
     virtual bool DrawSettings() = 0;
     virtual void DrawPreview() = 0;

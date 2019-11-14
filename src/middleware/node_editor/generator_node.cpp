@@ -6,11 +6,10 @@
 static const char* QualityItems[] = {"Fast", "Std", "Best"};
 
 BillowNode::BillowNode()
-    : BaseNoiseNode(this, "Billow") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Billow") {
 }
 
-bool BillowNode::OnDrawSettingsImpl() {
+bool BillowNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::SliderEnum("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -24,16 +23,14 @@ bool BillowNode::OnDrawSettingsImpl() {
 }
 
 CheckerboardNode::CheckerboardNode()
-    : BaseNoiseNode(this, "Checkerboard") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Checkerboard") {
 }
 
 ConstNode::ConstNode()
-    : BaseNoiseNode(this, "Const") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Const") {
 }
 
-bool ConstNode::OnDrawSettingsImpl() {
+bool ConstNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Value", m_constValue, gui::Step(0.01, 0.1), gui::Range(-1.001, 1.001), "%.2f");
@@ -42,11 +39,10 @@ bool ConstNode::OnDrawSettingsImpl() {
 }
 
 CylindersNode::CylindersNode()
-    : BaseNoiseNode(this, "Cylinders") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Cylinders") {
 }
 
-bool CylindersNode::OnDrawSettingsImpl() {
+bool CylindersNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
@@ -55,11 +51,10 @@ bool CylindersNode::OnDrawSettingsImpl() {
 }
 
 PerlinNode::PerlinNode()
-    : BaseNoiseNode(this, "Perlin") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Perlin") {
 }
 
-bool PerlinNode::OnDrawSettingsImpl() {
+bool PerlinNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::SliderEnum("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -73,11 +68,10 @@ bool PerlinNode::OnDrawSettingsImpl() {
 }
 
 RidgedMultiNode::RidgedMultiNode()
-    : BaseNoiseNode(this, "RidgedMulti") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "RidgedMulti") {
 }
 
-bool RidgedMultiNode::OnDrawSettingsImpl() {
+bool RidgedMultiNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::SliderEnum("Quality", m_noiseQuality, QualityItems, noise::NoiseQuality(noise::NoiseQuality::QUALITY_BEST + 1));
@@ -93,11 +87,10 @@ bool RidgedMultiNode::OnDrawSettingsImpl() {
 }
 
 SpheresNode::SpheresNode()
-    : BaseNoiseNode(this, "Spheres") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Spheres") {
 }
 
-bool SpheresNode::OnDrawSettingsImpl() {
+bool SpheresNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Frequency", m_frequency, gui::Step(0.1, 1.0), "%.1f");
@@ -106,11 +99,10 @@ bool SpheresNode::OnDrawSettingsImpl() {
 }
 
 VoronoiNode::VoronoiNode()
-    : BaseNoiseNode(this, "Voronoi") {
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Voronoi") {
 }
 
-bool VoronoiNode::OnDrawSettingsImpl() {
+bool VoronoiNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Displacement", m_displacement, gui::Step(0.1, 1.0), "%.1f");

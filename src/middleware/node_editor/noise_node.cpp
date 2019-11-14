@@ -3,39 +3,30 @@
 #include <imgui_node_editor.h>
 
 #include "engine/gui/widgets.h"
+#include "engine/common/exception.h"
 #include "middleware/node_editor/noiseutils.h"
 
 
 namespace ne = ax::NodeEditor;
 
-BaseNoiseNode::BaseNoiseNode(noise::module::Module* module, const std::string& name)
+BaseNoise3DNode::BaseNoise3DNode(noise::module::Module* module, const std::string& name)
     : PreviewNode(name)
     , m_module(module) {
+
+    AddOutPin(new BasePin(PinType::Noise3D, 0));
 }
 
-bool BaseNoiseNode::OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) {
-    auto* srcNoiseNode = dynamic_cast<BaseNoiseNode*>(srcNode);
+void BaseNoise3DNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
+    auto* srcNoiseNode = dynamic_cast<BaseNoise3DNode*>(srcNode);
     if (!srcNoiseNode) {
-        return false;
-    }
-    auto index = static_cast<int>(dstPin->GetUserIndex());
-    if ((index >= m_module->GetSourceModuleCount()) || (index < 0)) {
-        return false;
+        throw EngineError("BaseNoise3DNode incoming node is expected");
     }
 
-    const noise::module::Module** sourceModules = GetSourceModules();
-    if (sourceModules == nullptr) {
-        return false;
-    }
-
-    if (!checkOnly) {
-        sourceModules[index] = srcNoiseNode->m_module;
-    }
-
-    return true;
+    m_module->SetSourceModule(static_cast<int>(dstPin->GetUserIndex()), *srcNoiseNode->m_module);
+    BaseNode::SetSourceNode(srcNode, dstPin);
 }
 
-void BaseNoiseNode::Update() {
+void BaseNoise3DNode::Update() {
     if (!GetIsFull()) {
         return;
     }
@@ -43,29 +34,27 @@ void BaseNoiseNode::Update() {
     UpdatePreview(m_module);
 }
 
-bool BaseNoiseNode::DrawSettings() {
+bool BaseNoise3DNode::DrawSettings() {
     ImGui::PushItemWidth(128);
-    bool changed = OnDrawSettingsImpl();
+    bool changed = OnDrawSettings();
     ImGui::PopItemWidth();
 
     return changed;
 }
 
 AbsNode::AbsNode()
-    : BaseNoiseNode(this, "Abs") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Abs") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
     SetIsFull(false);
 }
 
 ClampNode::ClampNode()
-    : BaseNoiseNode(this, "Clamp") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Clamp") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
     SetIsFull(false);
 }
 
-bool ClampNode::OnDrawSettingsImpl() {
+bool ClampNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Lower bound", m_lowerBound, gui::Step(0.01, 0.1), gui::Range(-1.0, m_upperBound - 0.01), "%.2f");
@@ -79,13 +68,12 @@ bool ClampNode::OnDrawSettingsImpl() {
 }
 
 ExponentNode::ExponentNode()
-    : BaseNoiseNode(this, "Exponent") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Exponent") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
     SetIsFull(false);
 }
 
-bool ExponentNode::OnDrawSettingsImpl() {
+bool ExponentNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Exponent", m_exponent, gui::Step(0.01, 0.1), "%.2f");
@@ -94,20 +82,18 @@ bool ExponentNode::OnDrawSettingsImpl() {
 }
 
 InvertNode::InvertNode()
-    : BaseNoiseNode(this, "Invert") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Invert") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
     SetIsFull(false);
 }
 
 ScaleBiasNode::ScaleBiasNode()
-    : BaseNoiseNode(this, "ScaleBias") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "ScaleBias") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
     SetIsFull(false);
 }
 
-bool ScaleBiasNode::OnDrawSettingsImpl() {
+bool ScaleBiasNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Bias", m_bias, gui::Step(0.1, 1.0), "%.1f");
@@ -117,55 +103,49 @@ bool ScaleBiasNode::OnDrawSettingsImpl() {
 }
 
 AddNode::AddNode()
-    : BaseNoiseNode(this, "Add") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddInPin(new BasePin(PinType::Noise, 1));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Add") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
+    AddInPin(new BasePin(PinType::Noise3D, 1));
     SetIsFull(false);
 }
 
 MaxNode::MaxNode()
-    : BaseNoiseNode(this, "Max") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddInPin(new BasePin(PinType::Noise, 1));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Max") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
+    AddInPin(new BasePin(PinType::Noise3D, 1));
     SetIsFull(false);
 }
 
 MinNode::MinNode()
-    : BaseNoiseNode(this, "Min") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddInPin(new BasePin(PinType::Noise, 1));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Min") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
+    AddInPin(new BasePin(PinType::Noise3D, 1));
     SetIsFull(false);
 }
 
 MultiplyNode::MultiplyNode()
-    : BaseNoiseNode(this, "Multiply") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddInPin(new BasePin(PinType::Noise, 1));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Multiply") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
+    AddInPin(new BasePin(PinType::Noise3D, 1));
     SetIsFull(false);
 }
 
 PowerNode::PowerNode()
-    : BaseNoiseNode(this, "Power") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddInPin(new BasePin(PinType::Noise, 1));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Power") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
+    AddInPin(new BasePin(PinType::Noise3D, 1));
     SetIsFull(false);
 }
 
 SelectNode::SelectNode()
-    : BaseNoiseNode(this, "Select") {
-    AddInPin(new BasePin(PinType::Noise, 0));
-    AddInPin(new BasePin(PinType::Noise, 1));
-    AddInPin(new BasePin(PinType::Noise, 2, math::Color(220, 48, 48)));
-    AddOutPin(new BasePin(PinType::Noise, 0));
+    : BaseNoise3DNode(this, "Select") {
+    AddInPin(new BasePin(PinType::Noise3D, 0));
+    AddInPin(new BasePin(PinType::Noise3D, 1));
+    AddInPin(new BasePin(PinType::Noise3D, 2, math::Color(220, 48, 48)));
     SetIsFull(false);
 }
 
-bool SelectNode::OnDrawSettingsImpl() {
+bool SelectNode::OnDrawSettings() {
     bool changed = false;
 
     changed |= gui::InputScalar("Edge falloff", m_edgeFalloff, gui::Step(0.01, 0.1), "%.2f");

@@ -62,18 +62,10 @@ void BaseNode::AddOutPin(BasePin* pin) {
     m_outPins.push_back(pin);
 }
 
-bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) {
-    bool result = OnSetSourceNode(srcNode, dstPin, checkOnly);
-    if (!checkOnly) {
-        if (!result) {
-            throw EngineError("SetSourceNode wrong for (checkOnly = false)");
-        }
-        dstPin->AddLink();
-        m_LinkedSrcNodes.insert(srcNode);
-        CheckIsFull();
-    }
-
-    return result;
+void BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
+    dstPin->AddLink();
+    m_LinkedSrcNodes.insert(srcNode);
+    CheckIsFull();
 }
 
 void BaseNode::DelSourceNode(BaseNode* srcNode, BasePin* dstPin) {
