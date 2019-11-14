@@ -35,44 +35,12 @@ bool BaseNoiseNode::OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool che
     return true;
 }
 
-void BaseNoiseNode::OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) {
-    auto* srcNoiseNode = dynamic_cast<BaseNoiseNode*>(srcNode);
-    if (!srcNoiseNode) {
-        return;
-    }
-    auto index = static_cast<int>(dstPin->GetUserIndex());
-    if ((index >= m_module->GetSourceModuleCount()) || (index < 0)) {
-        return;
-    }
-
-    const noise::module::Module** sourceModules = GetSourceModules();
-    if (sourceModules == nullptr) {
-        return;
-    }
-    sourceModules[index] = nullptr;
-}
-
 void BaseNoiseNode::Update() {
     if (!GetIsFull()) {
         return;
     }
 
     UpdatePreview(m_module);
-}
-
-bool BaseNoiseNode::CheckIsConsistency() noexcept {
-    const noise::module::Module** sourceModules = GetSourceModules();
-    if (sourceModules == nullptr) {
-        return false;
-    }
-
-    for (auto i=0; i!=m_module->GetSourceModuleCount(); ++i) {
-        if (sourceModules[i] == nullptr) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 bool BaseNoiseNode::DrawSettings() {

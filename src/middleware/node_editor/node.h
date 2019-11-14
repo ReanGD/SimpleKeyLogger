@@ -55,10 +55,10 @@ public:
     bool SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly);
     // srcNode -> this (dstPin)
     void DelSourceNode(BaseNode* srcNode, BasePin* dstPin);
-    // this -> dstNode
-    void AddDestNode(BaseNode* dstNode);
-    // this -> dstNode
-    void DelDestNode(BaseNode* dstNode);
+    // this (srcPin) -> dstNode
+    void AddDestNode(BaseNode* dstNode, BasePin* srcPin);
+    // this (srcPin) -> dstNode
+    void DelDestNode(BaseNode* dstNode, BasePin* srcPin);
 
     void SetNeedUpdate() noexcept;
 
@@ -69,9 +69,7 @@ public:
     void Draw();
 
     virtual bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) = 0;
-    virtual void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) = 0;
     virtual void Update() = 0;
-    virtual bool CheckIsConsistency() noexcept = 0;
     virtual bool DrawSettings() = 0;
     virtual void DrawPreview() = 0;
 

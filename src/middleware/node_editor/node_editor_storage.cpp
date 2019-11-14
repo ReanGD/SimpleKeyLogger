@@ -43,9 +43,7 @@ bool NodeEditorStorage::AddLink(const ne::PinId pinIdFirst, const ne::PinId pinI
 
     if (!checkOnly) {
         dstNode->SetSourceNode(srcNode, dstPin, checkOnly);
-        srcNode->AddDestNode(dstNode);
-        srcPin->AddLink();
-        dstPin->AddLink();
+        srcNode->AddDestNode(dstNode, srcPin);
 
         auto linkId = ne::LinkId(static_cast<uintptr_t>(m_nextId++));
         m_links[linkId] = LinkInfo{ne::PinId(srcPin), ne::PinId(dstPin)};
@@ -62,16 +60,14 @@ bool NodeEditorStorage::DelLink(const ne::LinkId linkId, bool checkOnly) {
     }
 
     if (!checkOnly) {
-        auto* src = it->second.srcPin.AsPointer<BasePin>();
-        auto* srcNode = src->GetNode();
-        src->DelLink();
+        auto* srcPin = it->second.srcPin.AsPointer<BasePin>();
+        auto* srcNode = srcPin->GetNode();
 
-        auto* dst = it->second.dstPin.AsPointer<BasePin>();
-        auto* dstNode = dst->GetNode();
-        dst->DelLink();
+        auto* dstPin = it->second.dstPin.AsPointer<BasePin>();
+        auto* dstNode = dstPin->GetNode();
 
-        dstNode->DelSourceNode(srcNode, dst);
-        srcNode->DelDestNode(dstNode);
+        dstNode->DelSourceNode(srcNode, dstPin);
+        srcNode->DelDestNode(dstNode, srcPin);
 
         m_links.erase(it);
     }

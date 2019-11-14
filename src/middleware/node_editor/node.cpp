@@ -65,6 +65,10 @@ void BaseNode::AddOutPin(BasePin* pin) {
 bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) {
     bool result = OnSetSourceNode(srcNode, dstPin, checkOnly);
     if (!checkOnly) {
+        if (!result) {
+            throw EngineError("SetSourceNode wrong for (checkOnly = false)");
+        }
+        dstPin->AddLink();
         m_LinkedSrcNodes.insert(srcNode);
         CheckIsFull();
     }
@@ -73,16 +77,18 @@ bool BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly)
 }
 
 void BaseNode::DelSourceNode(BaseNode* srcNode, BasePin* dstPin) {
-    OnDelSourceNode(srcNode, dstPin);
+    dstPin->DelLink();
     m_LinkedSrcNodes.erase(srcNode);
     CheckIsFull();
 }
 
-void BaseNode::AddDestNode(BaseNode* dstNode) {
+void BaseNode::AddDestNode(BaseNode* dstNode, BasePin* srcPin) {
+    srcPin->AddLink();
     m_LinkedDstNodes.insert(dstNode);
 }
 
-void BaseNode::DelDestNode(BaseNode* dstNode) {
+void BaseNode::DelDestNode(BaseNode* dstNode, BasePin* srcPin) {
+    srcPin->DelLink();
     m_LinkedDstNodes.erase(dstNode);
 }
 
@@ -94,7 +100,14 @@ void BaseNode::SetNeedUpdate() noexcept {
 }
 
 void BaseNode::CheckIsFull() noexcept {
-    bool isFull = CheckIsConsistency();
+    bool isFull = true;
+    for(const auto& pin :m_inPins) {
+        if (!pin->IsConnected()) {
+            isFull = false;
+            break;
+        }
+    }
+
     if (isFull) {
         for(const auto& node : m_LinkedSrcNodes) {
             if (!node->GetIsFull()) {

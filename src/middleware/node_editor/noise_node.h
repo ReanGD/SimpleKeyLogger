@@ -11,9 +11,7 @@ protected:
 
 protected:
     bool OnSetSourceNode(BaseNode* srcNode, BasePin* dstPin, bool checkOnly) override;
-    void OnDelSourceNode(BaseNode* srcNode, BasePin* dstPin) override;
     void Update() override;
-    bool CheckIsConsistency() noexcept override;
     bool DrawSettings() override;
 
     virtual bool OnDrawSettingsImpl() { return false; }
