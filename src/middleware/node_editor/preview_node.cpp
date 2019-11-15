@@ -42,11 +42,10 @@ void PreviewNode::UpdatePreview(const ImageView& view) {
 void PreviewNode::UpdatePreview(const BaseNoise2DNode* sourceModule) {
     if (m_renderedPreview == nullptr) {
         m_renderedPreview = new noise::utils::RendererImage();
+        m_renderedPreview->SetSourceModule(sourceModule);
+        m_renderedPreview->SetDestSize(m_previewSize, m_previewSize);
+        m_renderedPreview->SetBounds(2.0, 6.0, 1.0, 5.0);
     }
-
-    m_renderedPreview->SetSourceModule(sourceModule);
-    m_renderedPreview->SetDestSize(m_previewSize, m_previewSize);
-    m_renderedPreview->SetBounds(2.0, 6.0, 1.0, 5.0);
 
     UpdatePreview(m_renderedPreview->Render());
 }
