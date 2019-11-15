@@ -1,4 +1,4 @@
-#include "middleware/node_editor/noise_node.h"
+#include "middleware/node_editor/noise_3d.h"
 
 #include "engine/gui/widgets.h"
 

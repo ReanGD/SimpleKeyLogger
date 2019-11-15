@@ -1,4 +1,4 @@
-#include "middleware/node_editor/noise_node.h"
+#include "middleware/node_editor/noise_3d.h"
 
 #include <imgui_node_editor.h>
 
@@ -22,7 +22,7 @@ void BaseNoise3DNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
         throw EngineError("BaseNoise3DNode incoming node is expected");
     }
 
-    m_module->SetSourceModule(static_cast<int>(dstPin->GetUserIndex()), *srcNoiseNode->m_module);
+    m_module->SetSourceModule(static_cast<int>(dstPin->GetUserIndex()), srcNoiseNode->GetModule());
     BaseNode::SetSourceNode(srcNode, dstPin);
 }
 
@@ -31,7 +31,7 @@ void BaseNoise3DNode::Update() {
         return;
     }
 
-    UpdatePreview(m_module);
+    UpdatePreview(this);
 }
 
 bool BaseNoise3DNode::DrawSettings() {

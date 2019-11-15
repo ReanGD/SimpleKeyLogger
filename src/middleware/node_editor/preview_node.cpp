@@ -5,6 +5,8 @@
 #include "engine/gui/widgets.h"
 #include "engine/common/exception.h"
 #include "engine/material/texture_manager.h"
+#include "middleware/node_editor/noise_2d.h"
+#include "middleware/node_editor/noise_3d.h"
 #include "middleware/node_editor/noiseutils.h"
 
 
@@ -18,9 +20,9 @@ PreviewNode::~PreviewNode() {
         delete m_renderedPreview;
         m_renderedPreview = nullptr;
     }
-    if (m_shapePreview != nullptr) {
-        delete m_shapePreview;
-        m_shapePreview = nullptr;
+    if (m_node2DPreview != nullptr) {
+        delete m_node2DPreview;
+        m_node2DPreview = nullptr;
     }
 }
 
@@ -41,7 +43,7 @@ void PreviewNode::UpdatePreview(const ImageView& view) {
     }
 }
 
-void PreviewNode::UpdatePreview(const noise::utils::Shape* sourceModule) {
+void PreviewNode::UpdatePreview(const BaseNoise2DNode* sourceModule) {
     if (m_renderedPreview == nullptr) {
         m_renderedPreview = new noise::utils::RendererImage();
     }
@@ -53,12 +55,14 @@ void PreviewNode::UpdatePreview(const noise::utils::Shape* sourceModule) {
     UpdatePreview(m_renderedPreview->Render());
 }
 
-void PreviewNode::UpdatePreview(const noise::module::Module* sourceModule) {
-    if (m_shapePreview == nullptr) {
-        m_shapePreview = new utils::PlaneShape();
+void PreviewNode::UpdatePreview(BaseNoise3DNode* sourceModule) {
+    if (m_node2DPreview == nullptr) {
+        m_node2DPreview = new PlaneNode();
+        BasePin dstPin(PinType::Noise2D, 0);
+        m_node2DPreview->SetSourceNode(sourceModule, &dstPin);
     }
-    m_shapePreview->SetSourceModule(sourceModule);
-    UpdatePreview(m_shapePreview);
+
+    UpdatePreview(m_node2DPreview);
 }
 
 void PreviewNode::DrawPreview() {

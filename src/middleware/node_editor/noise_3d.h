@@ -9,13 +9,17 @@ class BaseNoise3DNode : public PreviewNode {
 protected:
     BaseNoise3DNode(noise::module::Module* module, const std::string& name);
 
-protected:
+public:
     void SetSourceNode(BaseNode* srcNode, BasePin* dstPin) override;
+    const noise::module::Module& GetModule() const { return *m_module; }
+
+protected:
     void Update() override;
     bool DrawSettings() override;
 
     virtual bool OnDrawSettings() { return false; }
 
+private:
     noise::module::Module* m_module = nullptr;
 };
 

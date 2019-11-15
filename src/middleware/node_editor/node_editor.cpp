@@ -1,6 +1,7 @@
 #include "middleware/node_editor/node_editor.h"
 
-#include "middleware/node_editor/noise_node.h"
+#include "middleware/node_editor/noise_2d.h"
+#include "middleware/node_editor/noise_3d.h"
 #include "middleware/node_editor/node_editor_storage.h"
 
 
@@ -126,6 +127,17 @@ void NodeEditor::Draw() {
         if (ImGui::BeginMenu("Selector")) {
             if (ImGui::MenuItem("Select")) {
                 node = std::make_shared<SelectNode>();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Shape")) {
+            if (ImGui::MenuItem("Plane")) {
+                node = std::make_shared<PlaneNode>();
+            } else if (ImGui::MenuItem("Sphere")) {
+                node = std::make_shared<SphereNode>();
+            } else if (ImGui::MenuItem("Cylinder")) {
+                node = std::make_shared<CylinderNode>();
             }
             ImGui::EndMenu();
         }

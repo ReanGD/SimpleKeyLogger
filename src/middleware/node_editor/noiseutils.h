@@ -22,9 +22,9 @@
 //
 
 
-#include <noise.h>
 #include "engine/gui/math.h"
 #include "engine/material/image.h"
+#include "middleware/node_editor/noise_2d.h"
 
 using namespace noise;
 
@@ -170,56 +170,6 @@ namespace noise {
                 /// A color object that is used by a gradient object to store a
                 /// temporary value.
                 mutable math::Color m_workingColor;
-        };
-
-        class Shape {
-        public:
-            virtual ~Shape() = default;
-
-            virtual double GetValue(double x, double y) const = 0;
-            virtual void SetSourceModule (const module::Module* sourceModule) = 0;
-        };
-
-        class PlaneShape: public Shape {
-        public:
-            double GetValue(double u, double v) const override {
-                return m_planeModel.GetValue(u, v);
-            }
-
-            void SetSourceModule(const module::Module* sourceModule) override {
-                m_planeModel.SetModule(*sourceModule);
-            }
-
-        private:
-            model::Plane m_planeModel;
-        };
-
-        class SphereShape: public Shape {
-        public:
-            double GetValue(double u, double v) const override {
-                return m_sphereModel.GetValue(v, u);
-            }
-
-            void SetSourceModule(const module::Module* sourceModule) override {
-                m_sphereModel.SetModule(*sourceModule);
-            }
-
-        private:
-            model::Sphere m_sphereModel;
-        };
-
-        class CylinderShape: public Shape {
-        public:
-            double GetValue(double u, double v) const override {
-                return m_cylinderModel.GetValue(u, v);
-            }
-
-            void SetSourceModule(const module::Module* sourceModule) override {
-                m_cylinderModel.SetModule(*sourceModule);
-            }
-
-        private:
-            model::Cylinder m_cylinderModel;
         };
 
         class RendererImage {
@@ -492,7 +442,7 @@ namespace noise {
                     m_recalcLightValues = true;
                 }
 
-                void SetSourceModule(const Shape* sourceModule) {
+                void SetSourceModule(const BaseNoise2DNode* sourceModule) {
                     m_sourceModule = sourceModule;
                 }
 
@@ -580,7 +530,7 @@ namespace noise {
                 Image m_destImage;
 
                 /// A pointer to the source noise map.
-                const Shape* m_sourceModule = nullptr;
+                const BaseNoise2DNode* m_sourceModule = nullptr;
 
                 /// Used by the CalcLightIntensity() method to recalculate the light
                 /// values only if the light parameters change.
@@ -681,7 +631,7 @@ namespace noise {
                     m_destHeight = destHeight;
                 }
 
-                void SetSourceModule(const Shape& sourceModule) {
+                void SetSourceModule(const BaseNoise2DNode& sourceModule) {
                     m_sourceModule = &sourceModule;
                 }
 
@@ -742,7 +692,7 @@ namespace noise {
                 uint32_t m_destWidth = 0;
 
                 /// A pointer to the source noise map.
-                const Shape* m_sourceModule = nullptr;
+                const BaseNoise2DNode* m_sourceModule = nullptr;
         };
     }
 }
