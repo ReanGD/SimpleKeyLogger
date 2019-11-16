@@ -12,10 +12,6 @@ BaseNoise2DNode::BaseNoise2DNode(const std::string& name)
 }
 
 void BaseNoise2DNode::Update() {
-    if (!GetIsFull()) {
-        return;
-    }
-
     UpdatePreview(this);
 }
 

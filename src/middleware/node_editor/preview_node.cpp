@@ -20,10 +20,6 @@ PreviewNode::~PreviewNode() {
         delete m_renderedPreview;
         m_renderedPreview = nullptr;
     }
-    if (m_node2DPreview != nullptr) {
-        delete m_node2DPreview;
-        m_node2DPreview = nullptr;
-    }
 }
 
 void PreviewNode::UpdatePreview(const ImageView& view) {
@@ -55,19 +51,7 @@ void PreviewNode::UpdatePreview(const BaseNoise2DNode* sourceModule) {
     UpdatePreview(m_renderedPreview->Render());
 }
 
-void PreviewNode::UpdatePreview(BaseNoise3DNode* sourceModule) {
-    if (m_node2DPreview == nullptr) {
-        m_node2DPreview = new PlaneNode();
-        BasePin dstPin(PinType::Noise2D, 0);
-        m_node2DPreview->SetSourceNode(sourceModule, &dstPin);
-    }
-
-    UpdatePreview(m_node2DPreview);
-}
-
 void PreviewNode::DrawPreview() {
-    if (GetIsFull()) {
-        ImGui::SameLine();
-        gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
-    }
+    ImGui::SameLine();
+    gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
 }

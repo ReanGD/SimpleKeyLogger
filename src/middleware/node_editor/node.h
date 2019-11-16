@@ -43,14 +43,12 @@ protected:
 };
 
 class BaseNode : Noncopyable {
-public:
+protected:
     BaseNode() = delete;
     BaseNode(const std::string& name);
     virtual ~BaseNode();
 
-    void AddInPin(BasePin* pin);
-    void AddOutPin(BasePin* pin);
-
+public:
     // srcNode -> this (dstPin)
     virtual void SetSourceNode(BaseNode* srcNode, BasePin* dstPin);
     // srcNode -> this (dstPin)
@@ -60,15 +58,19 @@ public:
     // this (srcPin) -> dstNode
     void DelDestNode(BaseNode* dstNode, BasePin* srcPin);
 
+    virtual void Update() = 0;
+    void Draw();
+
+protected:
+    void AddInPin(BasePin* pin);
+    void AddOutPin(BasePin* pin);
+
     void SetNeedUpdate() noexcept;
 
     void CheckIsFull() noexcept;
     void SetIsFull(bool value) noexcept;
     bool GetIsFull() const noexcept { return m_isFull; }
 
-    void Draw();
-
-    virtual void Update() = 0;
     virtual bool DrawSettings() = 0;
     virtual void DrawPreview() = 0;
 

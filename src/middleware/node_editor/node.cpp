@@ -50,18 +50,6 @@ BaseNode::~BaseNode() {
     m_LinkedSrcNodes.clear();
 }
 
-void BaseNode::AddInPin(BasePin* pin) {
-    pin->m_isInput = true;
-    pin->m_node = this;
-    m_inPins.push_back(pin);
-}
-
-void BaseNode::AddOutPin(BasePin* pin) {
-    pin->m_isInput = false;
-    pin->m_node = this;
-    m_outPins.push_back(pin);
-}
-
 void BaseNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
     dstPin->AddLink();
     m_LinkedSrcNodes.insert(srcNode);
@@ -84,7 +72,63 @@ void BaseNode::DelDestNode(BaseNode* dstNode, BasePin* srcPin) {
     m_LinkedDstNodes.erase(dstNode);
 }
 
+void BaseNode::Draw() {
+    auto alpha = static_cast<uint8_t>(ImGui::GetStyle().Alpha * 255.0f);
+    ne::NodeId id(this);
+    ne::BeginNode(id);
+        if (ne::GetDoubleClickedNode() == id) {
+            m_drawSettings = !m_drawSettings;
+        }
+
+        ImGui::TextUnformatted(m_name.c_str());
+
+        ImGui::BeginGroup();
+        for (const auto* pin: m_inPins) {
+            pin->Draw(alpha);
+        }
+        ImGui::EndGroup();
+
+        if (m_needUpdate && m_isFull) {
+            Update();
+        }
+        m_needUpdate = false;
+
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        if (m_isFull) {
+            DrawPreview();
+        }
+        if (m_drawSettings && DrawSettings()) {
+            SetNeedUpdate();
+        }
+        ImGui::EndGroup();
+
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        for (const auto* pin: m_outPins) {
+            pin->Draw(alpha);
+        }
+        ImGui::EndGroup();
+
+    ne::EndNode();
+}
+
+void BaseNode::AddInPin(BasePin* pin) {
+    pin->m_isInput = true;
+    pin->m_node = this;
+    m_inPins.push_back(pin);
+}
+
+void BaseNode::AddOutPin(BasePin* pin) {
+    pin->m_isInput = false;
+    pin->m_node = this;
+    m_outPins.push_back(pin);
+}
+
 void BaseNode::SetNeedUpdate() noexcept {
+    if (m_needUpdate) {
+        return;
+    }
     m_needUpdate = true;
     for (auto& node: m_LinkedDstNodes) {
         node->SetNeedUpdate();
@@ -124,43 +168,4 @@ void BaseNode::SetIsFull(bool value) noexcept {
     for (auto& node: m_LinkedDstNodes) {
         node->CheckIsFull();
     }
-}
-
-void BaseNode::Draw() {
-    auto alpha = static_cast<uint8_t>(ImGui::GetStyle().Alpha * 255.0f);
-    ne::NodeId id(this);
-    ne::BeginNode(id);
-        if (ne::GetDoubleClickedNode() == id) {
-            m_drawSettings = !m_drawSettings;
-        }
-
-        ImGui::TextUnformatted(m_name.c_str());
-
-        ImGui::BeginGroup();
-        for (const auto* pin: m_inPins) {
-            pin->Draw(alpha);
-        }
-        ImGui::EndGroup();
-
-        if (m_needUpdate) {
-            Update();
-            m_needUpdate = false;
-        }
-
-        ImGui::SameLine();
-        ImGui::BeginGroup();
-        DrawPreview();
-        if (m_drawSettings && DrawSettings()) {
-            SetNeedUpdate();
-        }
-        ImGui::EndGroup();
-
-        ImGui::SameLine();
-        ImGui::BeginGroup();
-        for (const auto* pin: m_outPins) {
-            pin->Draw(alpha);
-        }
-        ImGui::EndGroup();
-
-    ne::EndNode();
 }

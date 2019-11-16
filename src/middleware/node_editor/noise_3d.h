@@ -5,22 +5,27 @@
 #include "middleware/node_editor/preview_node.h"
 
 
-class BaseNoise3DNode : public PreviewNode {
+class BaseNoise2DNode;
+class BaseNoise3DNode : public BaseNode {
 protected:
     BaseNoise3DNode(noise::module::Module* module, const std::string& name);
+    ~BaseNoise3DNode() override;
 
 public:
-    void SetSourceNode(BaseNode* srcNode, BasePin* dstPin) override;
+    void SetSourceNode(BaseNode* srcNode, BasePin* dstPin) final;
+    void Update() final;
+
     const noise::module::Module& GetModule() const { return *m_module; }
 
 protected:
-    void Update() override;
-    bool DrawSettings() override;
+    bool DrawSettings() final;
+    void DrawPreview() final;
 
     virtual bool OnDrawSettings() { return false; }
 
 private:
     noise::module::Module* m_module = nullptr;
+    BaseNoise2DNode* m_nodePreview = nullptr;
 };
 
 class BillowNode : public BaseNoise3DNode, private noise::module::Billow {

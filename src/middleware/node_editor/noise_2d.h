@@ -10,12 +10,11 @@ protected:
     BaseNoise2DNode(const std::string& name);
 
 public:
+    void Update() override;
     virtual double GetValue(double u, double v) const = 0;
 
 protected:
-    void Update() override;
     bool DrawSettings() override { return false; }
-
     virtual bool OnDrawSettings() { return false; }
 };
 
