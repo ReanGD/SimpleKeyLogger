@@ -11,10 +11,10 @@
 static const ImGuiWindowFlags staticWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoCollapse;
 
-static bool BeginWindow(const char* name, rect& rect, ImGuiWindowFlags flags = staticWindowFlags) {
+static bool BeginWindow(const char* name, const math::Rectf& rect, ImGuiWindowFlags flags = staticWindowFlags) {
     bool* pOpen = nullptr;
-    ImGui::SetNextWindowPos(ImVec2(rect.posX, rect.posY));
-    ImGui::SetNextWindowSize(ImVec2(rect.sizeX, rect.sizeY));
+    ImGui::SetNextWindowPos(ImVec2(rect.Left(), rect.Top()));
+    ImGui::SetNextWindowSize(ImVec2(rect.Width(), rect.Height()));
     return ImGui::Begin(name, pOpen, flags);
 }
 
@@ -45,30 +45,18 @@ void UIInterface::Render(bool editorMode) {
     wio.GetFramebufferSize(width, height);
 
     gui.NewFrame();
-    rect rect;
 
     if (editorMode) {
-        uint32_t widthRightPanel = 300;
-        rect.sizeX = widthRightPanel;
-        rect.sizeY = height;
-        rect.posX = width - rect.sizeX;
-        rect.posY = 0;
-        DrawRightPanel(rect);
+        math::Rectf rect(0, 0, width, height);
 
-        rect.sizeX = width - widthRightPanel;
-        rect.sizeY = height;
-        rect.posX = 0;
-        rect.posY = 0;
-        // DrawViewer(rect);
+        DrawRightPanel(rect.CutOffRight(300));
+        DrawViewer(rect.CutOffTop(height / 2));
         DrawNodeEditor(rect);
+
         // ImGui::ShowDemoWindow(nullptr);
         // ImGui::ShowStyleEditor();
     } else {
-        rect.posX = 0;
-        rect.posY = 0;
-        rect.sizeX = 500;
-        rect.sizeY = 50;
-        DrawInfoBar(rect);
+        DrawInfoBar(math::Rectf(0, 0, 500, 50));
     }
 
     gui.EndFrame();
@@ -77,7 +65,7 @@ void UIInterface::Render(bool editorMode) {
 void UIInterface::Destroy() {
 }
 
-void UIInterface::DrawInfoBar(rect& rect) {
+void UIInterface::DrawInfoBar(const math::Rectf& rect) {
     if (BeginWindow("infobar", rect)) {
         ImGui::PushFont(m_fontMono);
         auto pos = m_engine.GetScene().GetCamera()->GetPosition();
@@ -92,7 +80,7 @@ void UIInterface::DrawInfoBar(rect& rect) {
     }
 }
 
-void UIInterface::DrawRightPanel(rect& rect) {
+void UIInterface::DrawRightPanel(const math::Rectf& rect) {
     if (BeginWindow("right_panel", rect)) {
 
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_None)) {
@@ -112,13 +100,13 @@ void UIInterface::DrawRightPanel(rect& rect) {
     }
 }
 
-void UIInterface::DrawViewer(rect& rect) {
+void UIInterface::DrawViewer(const math::Rectf& rect) {
     if (BeginWindow("viewer", rect)) {
         ImGui::End();
     }
 }
 
-void UIInterface::DrawNodeEditor(rect& rect) {
+void UIInterface::DrawNodeEditor(const math::Rectf& rect) {
     if (BeginWindow("node_editor", rect)) {
         m_editor.Draw();
         ImGui::End();

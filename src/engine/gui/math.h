@@ -53,10 +53,24 @@ struct BasicRect {
     BasicRect(const point_t& pos1, const point_t& pos2) noexcept : x(pos1.x), y(pos1.y), w(pos2.x - pos1.x), h(pos2.y - pos1.y) {}
     BasicRect(T x, T y, T w, T h) noexcept : x(x), y(y), w(w), h(h) {}
 
-    T Left() const noexcept { return x; }
-    T Right() const noexcept { return x + w; }
     T Top() const noexcept { return y; }
     T Bottom() const noexcept { return y + h; }
+    T Left() const noexcept { return x; }
+    T Right() const noexcept { return x + w; }
+    T Width() const noexcept { return w; }
+    T Height() const noexcept { return h; }
+
+    BasicRect<T> CutOffTop(T height) {
+        auto result = BasicRect<T>(x, y, w, height);
+        y += height;
+
+        return result;
+    }
+
+    BasicRect<T> CutOffRight(T width) {
+        w -= width;
+        return BasicRect<T>(w, y, width, h);
+    }
 
     T CenterX() const noexcept { return x + w / 2; }
     T CenterY() const noexcept { return y + h / 2; }
