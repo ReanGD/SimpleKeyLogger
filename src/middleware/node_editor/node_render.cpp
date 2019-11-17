@@ -2,6 +2,10 @@
 
 #include <cassert>
 
+#include "engine/common/exception.h"
+#include "middleware/node_editor/noise_2d.h"
+#include "middleware/node_editor/noiseutils.h"
+
 
 inline uint8_t BlendChannel(const uint8_t channel0, const uint8_t channel1, double alpha) {
     return static_cast<uint8_t>((static_cast<double>(channel1) * alpha) + (static_cast<double>(channel0) * (1.0f - alpha)));
@@ -44,4 +48,38 @@ const math::Color GradientColor::Get(double gradientPos) const {
 
 void GradientColor::Clear() {
     m_points.clear();
+}
+
+RenderNode::RenderNode()
+    : PreviewNode("Render")
+    , m_render(new noise::utils::RendererImage()) {
+    AddInPin(new BasePin(PinType::Noise2D, 0));
+    AddOutPin(new BasePin(PinType::Image, 0));
+    SetIsFull(false);
+
+    // TODO: set correct size
+    m_render->SetDestSize(256, 256);
+    m_render->SetBounds(2.0, 6.0, 1.0, 5.0);
+}
+
+RenderNode::~RenderNode() {
+    if (m_render != nullptr) {
+        delete m_render;
+        m_render = nullptr;
+    }
+}
+
+void RenderNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
+    auto* srcNoiseNode = dynamic_cast<BaseNoise2DNode*>(srcNode);
+    if (!srcNoiseNode) {
+        throw EngineError("BaseNoise2DNode incoming node is expected");
+    }
+
+    m_render->SetSourceModule(srcNoiseNode);
+
+    BaseNode::SetSourceNode(srcNode, dstPin);
+}
+
+void RenderNode::Update() {
+    UpdatePreview(m_render->Render());
 }

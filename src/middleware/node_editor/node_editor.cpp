@@ -2,6 +2,7 @@
 
 #include "middleware/node_editor/noise_2d.h"
 #include "middleware/node_editor/noise_3d.h"
+#include "middleware/node_editor/node_render.h"
 #include "middleware/node_editor/node_editor_storage.h"
 
 
@@ -138,6 +139,13 @@ void NodeEditor::Draw() {
                 node = std::make_shared<SphereNode>();
             } else if (ImGui::MenuItem("Cylinder")) {
                 node = std::make_shared<CylinderNode>();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Image")) {
+            if (ImGui::MenuItem("Render")) {
+                node = std::make_shared<RenderNode>();
             }
             ImGui::EndMenu();
         }

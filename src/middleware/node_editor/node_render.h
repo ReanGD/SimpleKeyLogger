@@ -1,7 +1,9 @@
 #pragma once
 
 #include <map>
+
 #include "engine/gui/math.h"
+#include "middleware/node_editor/preview_node.h"
 
 
 class GradientColor {
@@ -16,4 +18,19 @@ public:
 private:
     // pos => color
     std::map<double, math::Color> m_points;
+};
+
+class RenderNode : public PreviewNode {
+public:
+    RenderNode();
+    ~RenderNode() override;
+
+    void SetSourceNode(BaseNode* srcNode, BasePin* dstPin) final;
+    void Update() final;
+
+protected:
+    bool DrawSettings() final { return false; }
+
+private:
+    noise::utils::RendererImage* m_render = nullptr;
 };
