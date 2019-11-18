@@ -6,7 +6,6 @@
 
 
 struct ImFont;
-class Heightmap;
 class UINodeEditor;
 class UIInterface : Noncopyable {
 public:
@@ -19,10 +18,10 @@ public:
     void Destroy();
 
 private:
-    void DrawInfoBar(const math::Rectf& rect);
-    void DrawRightPanel(const math::Rectf& rect);
-    void DrawViewer(const math::Rectf& rect);
-    void DrawNodeEditor(const math::Rectf& rect);
+    void DrawInfoBar(math::Rectf rect);
+    void DrawRightPanel(math::Rectf rect);
+    void DrawViewer(math::Rectf rect, const std::shared_ptr<Texture>& texture);
+    void DrawNodeEditor(math::Rectf rect);
 private:
     Engine& m_engine;
     NodeEditor m_editor;

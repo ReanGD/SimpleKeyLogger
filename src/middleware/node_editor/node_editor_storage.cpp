@@ -71,6 +71,20 @@ bool NodeEditorStorage::DelLink(const ne::LinkId linkId, bool checkOnly) {
     return true;
 }
 
+std::shared_ptr<BaseNode> NodeEditorStorage::GetNode(const ne::NodeId nodeId) {
+    if (!nodeId) {
+        return std::shared_ptr<BaseNode>();
+    }
+    auto* node = nodeId.AsPointer<BaseNode>();
+    for (const auto& it: m_nodes) {
+        if (it.get() == node) {
+            return it;
+        }
+    }
+
+    return std::shared_ptr<BaseNode>();
+}
+
 void NodeEditorStorage::Draw() {
     for (const auto& node: m_nodes) {
         node->Draw();

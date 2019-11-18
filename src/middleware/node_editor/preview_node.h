@@ -25,6 +25,9 @@ protected:
 
     void DrawPreview() final;
 
+public:
+    std::shared_ptr<Texture> GetView() noexcept { return m_texturePreview; }
+
 private:
     uint32_t m_texSize = 128;
     uint32_t m_previewSize = 128;

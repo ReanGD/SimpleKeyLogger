@@ -27,7 +27,11 @@ public:
 
     void AddNode(const std::shared_ptr<BaseNode>& node);
     bool AddLink(const ax::NodeEditor::PinId pinIdFirst, const ax::NodeEditor::PinId pinIdSecond, bool checkOnly);
+
     bool DelLink(const ax::NodeEditor::LinkId linkId, bool checkOnly);
+
+    std::shared_ptr<BaseNode> GetNode(const ax::NodeEditor::NodeId nodeId);
+
     void Draw();
 
 private:

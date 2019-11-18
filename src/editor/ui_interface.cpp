@@ -4,8 +4,8 @@
 #include <filesystem>
 
 #include "engine/gui/widgets.h"
-#include "engine/heightmap/heightmap.h"
 #include "engine/common/exception.h"
+#include "middleware/node_editor/preview_node.h"
 
 
 static const ImGuiWindowFlags staticWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
@@ -50,7 +50,6 @@ void UIInterface::Render(bool editorMode) {
         math::Rectf rect(0, 0, width, height);
 
         DrawRightPanel(rect.CutOffRight(300));
-        DrawViewer(rect.CutOffTop(height / 2));
         DrawNodeEditor(rect);
 
         // ImGui::ShowDemoWindow(nullptr);
@@ -65,7 +64,7 @@ void UIInterface::Render(bool editorMode) {
 void UIInterface::Destroy() {
 }
 
-void UIInterface::DrawInfoBar(const math::Rectf& rect) {
+void UIInterface::DrawInfoBar(math::Rectf rect) {
     if (BeginWindow("infobar", rect)) {
         ImGui::PushFont(m_fontMono);
         auto pos = m_engine.GetScene().GetCamera()->GetPosition();
@@ -80,7 +79,7 @@ void UIInterface::DrawInfoBar(const math::Rectf& rect) {
     }
 }
 
-void UIInterface::DrawRightPanel(const math::Rectf& rect) {
+void UIInterface::DrawRightPanel(math::Rectf rect) {
     if (BeginWindow("right_panel", rect)) {
 
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_None)) {
@@ -100,15 +99,45 @@ void UIInterface::DrawRightPanel(const math::Rectf& rect) {
     }
 }
 
-void UIInterface::DrawViewer(const math::Rectf& rect) {
+void UIInterface::DrawViewer(math::Rectf rect, const std::shared_ptr<Texture>& texture) {
     if (BeginWindow("viewer", rect)) {
+        gui::Image(texture, rect.SizeCast<math::Size::Type>());
         ImGui::End();
     }
 }
 
-void UIInterface::DrawNodeEditor(const math::Rectf& rect) {
+void UIInterface::DrawNodeEditor(math::Rectf rect) {
+    static std::shared_ptr<Texture> texture = nullptr;
+
+    math::Rectf viewRect;
+    bool drawView = false;
+    if (texture) {
+        drawView = true;
+        viewRect = rect.CutOffTop(rect.Height() / 2);
+    }
+
     if (BeginWindow("node_editor", rect)) {
         m_editor.Draw();
+        auto node = m_editor.GetViewNode();
+        if (node) {
+            auto previewNode = std::dynamic_pointer_cast<PreviewNode>(node);
+            if (!previewNode) {
+                throw EngineError("Expecting node with type PreviewNode");
+            }
+            auto view = previewNode->GetView();
+            texture = view;
+            if (!view) {
+                drawView = false;
+            }
+        } else {
+            texture = nullptr;
+            drawView = false;
+        }
+
         ImGui::End();
+    }
+
+    if (drawView) {
+        DrawViewer(viewRect, texture);
     }
 }

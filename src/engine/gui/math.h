@@ -23,6 +23,8 @@ struct Color {
 
 template <typename T>
 struct BasicPoint {
+    using Type = T;
+
     BasicPoint() = default;
     BasicPoint(T x, T y) noexcept : x(x), y(y) {}
 
@@ -35,6 +37,8 @@ using Pointf = BasicPoint<float>;
 
 template <typename T>
 struct BasicSize {
+    using Type = T;
+
     BasicSize() noexcept : w(0), h(0) {}
     BasicSize(T w, T h) noexcept : w(w), h(h) {}
 
@@ -47,34 +51,38 @@ using Sizef = BasicSize<float>;
 
 template <typename T>
 struct BasicRect {
-    using point_t = BasicPoint<T>;
+    using Type = T;
+    using PointT = BasicPoint<T>;
+    using SizeT = BasicSize<T>;
+    using RectT = BasicRect<T>;
 
     BasicRect() = default;
-    BasicRect(const point_t& pos1, const point_t& pos2) noexcept : x(pos1.x), y(pos1.y), w(pos2.x - pos1.x), h(pos2.y - pos1.y) {}
+    BasicRect(const PointT& pos1, const PointT& pos2) noexcept : x(pos1.x), y(pos1.y), w(pos2.x - pos1.x), h(pos2.y - pos1.y) {}
     BasicRect(T x, T y, T w, T h) noexcept : x(x), y(y), w(w), h(h) {}
 
     T Top() const noexcept { return y; }
     T Bottom() const noexcept { return y + h; }
     T Left() const noexcept { return x; }
     T Right() const noexcept { return x + w; }
+
     T Width() const noexcept { return w; }
     T Height() const noexcept { return h; }
-
-    BasicRect<T> CutOffTop(T height) {
-        auto result = BasicRect<T>(x, y, w, height);
-        y += height;
-
-        return result;
-    }
-
-    BasicRect<T> CutOffRight(T width) {
-        w -= width;
-        return BasicRect<T>(w, y, width, h);
-    }
+    template<typename U> BasicSize<U> SizeCast() const noexcept { return BasicSize<U>(static_cast<U>(w), static_cast<U>(h)); }
 
     T CenterX() const noexcept { return x + w / 2; }
     T CenterY() const noexcept { return y + h / 2; }
-    point_t Center() const noexcept { return point_t(CenterX(), CenterY()); }
+    PointT Center() const noexcept { return PointT(CenterX(), CenterY()); }
+
+    RectT CutOffTop(T height) {
+        auto result = RectT(x, y, w, height);
+        y += height;
+        return result;
+    }
+
+    RectT CutOffRight(T width) {
+        w -= width;
+        return RectT(w, y, width, h);
+    }
 
     T x = 0;
     T y = 0;
