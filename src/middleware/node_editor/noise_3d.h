@@ -6,10 +6,9 @@
 
 
 class BaseNoise2DNode;
-class BaseNoise3DNode : public BaseNode {
+class BaseNoise3DNode : public PreviewNode {
 protected:
     BaseNoise3DNode(noise::module::Module* module, const std::string& name);
-    ~BaseNoise3DNode() override;
 
 public:
     void SetSourceNode(BaseNode* srcNode, BasePin* dstPin) final;
@@ -19,13 +18,11 @@ public:
 
 protected:
     bool DrawSettings() final;
-    void DrawPreview() final;
 
     virtual bool OnDrawSettings() { return false; }
 
 private:
     noise::module::Module* m_module = nullptr;
-    BaseNoise2DNode* m_nodePreview = nullptr;
 };
 
 class BillowNode : public BaseNoise3DNode, private noise::module::Billow {

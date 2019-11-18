@@ -10,17 +10,10 @@
 namespace ne = ax::NodeEditor;
 
 BaseNoise3DNode::BaseNoise3DNode(noise::module::Module* module, const std::string& name)
-    : BaseNode(name)
+    : PreviewNode(name)
     , m_module(module) {
 
     AddOutPin(new BasePin(PinType::Noise3D, 0));
-}
-
-BaseNoise3DNode::~BaseNoise3DNode() {
-    if (m_nodePreview != nullptr) {
-        delete m_nodePreview;
-        m_nodePreview = nullptr;
-    }
 }
 
 void BaseNoise3DNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
@@ -34,12 +27,7 @@ void BaseNoise3DNode::SetSourceNode(BaseNode* srcNode, BasePin* dstPin) {
 }
 
 void BaseNoise3DNode::Update() {
-    if (m_nodePreview == nullptr) {
-        m_nodePreview = new PlaneNode();
-        auto dstPin = BasePin(PinType::Noise3D, 0);
-        m_nodePreview->SetSourceNode(this, &dstPin);
-    }
-    m_nodePreview->Update();
+    UpdatePreview(this);
 }
 
 bool BaseNoise3DNode::DrawSettings() {
@@ -48,12 +36,6 @@ bool BaseNoise3DNode::DrawSettings() {
     ImGui::PopItemWidth();
 
     return changed;
-}
-
-void BaseNoise3DNode::DrawPreview() {
-    if (m_nodePreview) {
-        m_nodePreview->DrawPreview();
-    }
 }
 
 AbsNode::AbsNode()

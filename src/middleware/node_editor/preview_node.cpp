@@ -16,6 +16,10 @@ PreviewNode::PreviewNode(const std::string& name)
 }
 
 PreviewNode::~PreviewNode() {
+    if (m_shapePreview != nullptr) {
+        delete m_shapePreview;
+        m_shapePreview = nullptr;
+    }
     if (m_renderedPreview != nullptr) {
         delete m_renderedPreview;
         m_renderedPreview = nullptr;
@@ -48,6 +52,16 @@ void PreviewNode::UpdatePreview(const BaseNoise2DNode* sourceModule) {
     }
 
     UpdatePreview(m_renderedPreview->Render());
+}
+
+void PreviewNode::UpdatePreview(BaseNoise3DNode* sourceModule) {
+    if (m_shapePreview == nullptr) {
+        m_shapePreview = new PlaneNode();
+        auto dstPin = BasePin(PinType::Noise3D, 0);
+        m_shapePreview->SetSourceNode(sourceModule, &dstPin);
+    }
+
+    UpdatePreview(m_shapePreview);
 }
 
 void PreviewNode::DrawPreview() {

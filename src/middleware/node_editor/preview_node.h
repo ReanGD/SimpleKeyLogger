@@ -21,8 +21,8 @@ protected:
 
     void UpdatePreview(const ImageView& view);
     void UpdatePreview(const BaseNoise2DNode* sourceModule);
+    void UpdatePreview(BaseNoise3DNode* sourceModule);
 
-public:
     void DrawPreview() final;
 
 private:
@@ -30,4 +30,5 @@ private:
     uint32_t m_previewSize = 128;
     std::shared_ptr<Texture> m_texturePreview = nullptr;
     noise::utils::RendererImage* m_renderedPreview = nullptr;
+    BaseNoise2DNode* m_shapePreview = nullptr;
 };
