@@ -9,7 +9,7 @@
 #include "engine/material/texture.h"
 
 
-static inline ImVec2 ToImGui(const math::Point& value) {
+static inline ImVec2 ToImGui(const math::PointI& value) {
     return ImVec2(static_cast<float>(value.x), static_cast<float>(value.y));
 }
 
@@ -76,7 +76,7 @@ bool Combo(const char* label, size_t& value, const char** items, const size_t co
     return changed;
 }
 
-void DrawNodeIcon(ImDrawList* drawList, math::Rect rect, gui::IconType type, bool filled, ImU32 color, ImU32 innerColor) {
+void DrawNodeIcon(ImDrawList* drawList, math::RectI rect, gui::IconType type, bool filled, ImU32 color, ImU32 innerColor) {
     const auto outline_scale  = rect.w / 24.0f;
     const auto extra_segments = static_cast<int>(2 * outline_scale); // for full circle
 
@@ -269,7 +269,7 @@ void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Col
         auto cursorPos = ImGui::GetCursorScreenPos();
         auto drawList  = ImGui::GetWindowDrawList();
 
-        math::Rect rect(static_cast<int32_t>(cursorPos.x), static_cast<int32_t>(cursorPos.y), static_cast<int32_t>(size.w), static_cast<int32_t>(size.h));
+        math::RectI rect(static_cast<int32_t>(cursorPos.x), static_cast<int32_t>(cursorPos.y), static_cast<int32_t>(size.w), static_cast<int32_t>(size.h));
         detail::DrawNodeIcon(drawList, rect, type, filled, color.value, innerColor.value);
     }
 

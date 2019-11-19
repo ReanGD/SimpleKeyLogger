@@ -32,7 +32,8 @@ struct BasicPoint {
     T y = 0;
 };
 
-using Point = BasicPoint<int32_t>;
+using Point = BasicPoint<uint32_t>;
+using PointI = BasicPoint<int32_t>;
 using Pointf = BasicPoint<float>;
 
 template <typename T>
@@ -90,7 +91,8 @@ struct BasicRect {
     T h = 0;
 };
 
-using Rect = BasicRect<int32_t>;
+using Rect = BasicRect<uint32_t>;
+using RectI = BasicRect<int32_t>;
 using Rectf = BasicRect<float>;
 
 }
