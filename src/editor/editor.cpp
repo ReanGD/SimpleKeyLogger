@@ -5,6 +5,7 @@
 #include <glm/gtc/random.hpp>
 
 #include "engine/api/gl.h"
+#include "engine/common/path.h"
 #include "engine/common/exception.h"
 #include "engine/heightmap/heightmap.h"
 #include "engine/mesh/geometry_generator.h"
@@ -23,7 +24,8 @@ void Editor::Init() {
 
     auto& scene = m_engine.GetScene();
     auto& texManager = TextureManager::Get();
-    texManager.AddFindPath(std::filesystem::current_path() / "assets" / "textures");
+    auto& fileManager = FileManager::Get();
+    fileManager.AddRootAlias("$tex", std::filesystem::current_path() / "assets" / "textures");
 
     auto camera = scene.GetCamera();
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -52,11 +54,11 @@ void Editor::Init() {
     auto shaderSprite = Shader::Create("vertex_sprite", "fragment_clr");
     auto shaderNormals = Shader::Create("vertex_normals", "geometry_normals", "fragment_normals");
 
-    auto texture = texManager.Load("brice.jpg");
-    auto groundTex = texManager.Load("ground.jpg");
-    auto heightmapTex = texManager.Load("heightmap2.jpg");
+    auto texture = texManager.Load("$tex/brice.jpg");
+    auto groundTex = texManager.Load("$tex/ground.jpg");
+    auto heightmapTex = texManager.Load("$tex/heightmap2.jpg");
 
-    // auto heightmapBody = Heightmap().Load("heightmap2.jpg", error);
+    // auto heightmapBody = Heightmap().Load("$tex/heightmap2.jpg", error);
     // if (!heightmapBody) {
     //     return false;
     // }

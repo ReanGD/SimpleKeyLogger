@@ -1,11 +1,12 @@
 #include "engine/heightmap/heightmap.h"
 
-#include "engine/material/texture_manager.h"
+#include "engine/common/path.h"
+#include "engine/material/image.h"
 #include "engine/common/exception.h"
 
 
 std::shared_ptr<PhysicalNode> Heightmap::Load(const std::filesystem::path& path) {
-    auto fullPath = TextureManager::Get().GetFullPath(path);
+    auto fullPath = FileManager::Get().GetRealPath(path);
     Image image(fullPath.c_str(), true);
 
     auto header = image.view.header;
