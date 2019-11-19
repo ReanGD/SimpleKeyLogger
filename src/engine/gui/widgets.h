@@ -167,7 +167,7 @@ bool Checkbox(const char* label, bool& value);
 
 void NodeIcon(const math::Size& size, gui::IconType type, bool filled, math::Color color = math::Color(1, 1, 1, 1), math::Color innerColor = math::Color(0, 0, 0, 0));
 void Image(const std::shared_ptr<Texture>& texture, const math::Size& size,
-    const math::Pointf& uv0 = math::Pointf(0, 0), const math::Pointf& uv1 = math::Pointf(1, 1),
+    const math::Pointf& uv0 = math::Pointf(0, 1), const math::Pointf& uv1 = math::Pointf(1, 0),
     math::Color tintCol = math::Color(255), math::Color borderCol = math::Color(0));
 
 } // end namespace gui

@@ -28,7 +28,7 @@ void Editor::Init() {
     fileManager.AddRootAlias("$tex", std::filesystem::current_path() / "assets" / "textures");
 
     auto camera = scene.GetCamera();
-    camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
+    camera->SetViewParams(glm::vec3(-10, 20, 0), glm::vec3(1, 0, 0));
     m_controller.AttachCamera(camera);
 
     auto shaderTex = Shader::Create("vertex_old", "fragment_tex");
@@ -126,7 +126,6 @@ void Editor::Init() {
     }
 
     m_fbo = std::make_shared<Framebuffer>();
-    m_fbo->Create(2000, 2000);
 }
 
 void Editor::Render() {
@@ -143,12 +142,12 @@ void Editor::Render() {
     m_ubCamera->Bind(index);
 
     scene.Draw();
-    m_fbo->Bind();
+    m_fbo->Bind(2000, 2000);
     glViewport(0, 0, 2000, 2000);
     glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     scene.Draw();
-    m_fbo->Unbind();
+    auto fboTex = m_fbo->Unbind();
     if (m_showNormals) {
         scene.DrawWithMaterial(*m_materialNormals);
     }
@@ -160,7 +159,7 @@ void Editor::Render() {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Render(m_editorMode);
+    m_interface.Render(m_editorMode, fboTex);
 }
 
 void Editor::Destroy() {

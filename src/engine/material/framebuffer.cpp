@@ -21,45 +21,53 @@ static std::string FramebufferStatusResultToString(GLenum value) {
 }
 
 
-Framebuffer::Framebuffer() {
-    glGenFramebuffers(1, &m_handle);
-    glGenRenderbuffers(1, &m_renderbufferHandle);
-}
-
 Framebuffer::~Framebuffer() {
     Destroy();
 }
 
-void Framebuffer::Create(uint32_t width, uint32_t height) {
+void Framebuffer::Bind(uint32_t width, uint32_t height) {
+    if ((m_handle == 0) || (width != m_width) || (height != m_height)) {
+        m_width = width;
+        m_height = height;
+        Destroy();
+        Create();
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
+}
+
+std::shared_ptr<Texture> Framebuffer::Unbind() const {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return m_colorBuffer;
+}
+
+void Framebuffer::Create() {
+    glGenRenderbuffers(1, &m_renderbufferHandle);
     glBindRenderbuffer(GL_RENDERBUFFER, m_renderbufferHandle);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(m_width), static_cast<GLsizei>(m_height));
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-    m_colorBuffer = TextureManager::Get().Create(ImageHeader(width, height, PixelFormat::R8G8B8));
+    m_colorBuffer = TextureManager::Get().Create(ImageHeader(m_width, m_height, PixelFormat::R8G8B8));
 
-    Bind();
+    glGenFramebuffers(1, &m_handle);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
 
     GLint mipmapLvl = 0;
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBuffer->m_handle, mipmapLvl);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderbufferHandle);
 
     auto err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    Unbind();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     if (err != GL_FRAMEBUFFER_COMPLETE) {
         throw EngineError("framebuffer is not complete: {}", FramebufferStatusResultToString(err));
     }
 }
 
-void Framebuffer::Bind() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_handle);
-}
-
-void Framebuffer::Unbind() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void Framebuffer::Destroy() {
+    m_colorBuffer.reset();
+
     if (m_renderbufferHandle != 0) {
         glDeleteRenderbuffers(1, &m_renderbufferHandle);
         m_renderbufferHandle = 0;

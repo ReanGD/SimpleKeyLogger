@@ -38,7 +38,7 @@ void UIInterface::Init() {
     }
 }
 
-void UIInterface::Render(bool editorMode) {
+void UIInterface::Render(bool editorMode, const std::shared_ptr<Texture>& texture) {
     auto& gui = m_engine.GetGui();
     auto& wio = m_engine.GetWindow().GetIO();
     uint32_t width, height;
@@ -50,7 +50,8 @@ void UIInterface::Render(bool editorMode) {
         math::Rectf rect(0, 0, width, height);
 
         DrawRightPanel(rect.CutOffRight(300));
-        DrawNodeEditor(rect);
+        // DrawNodeEditor(rect);
+        DrawViewer(rect, texture);
 
         // ImGui::ShowDemoWindow(nullptr);
         // ImGui::ShowStyleEditor();

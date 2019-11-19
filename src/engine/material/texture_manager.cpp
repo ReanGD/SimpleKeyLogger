@@ -54,16 +54,6 @@ std::shared_ptr<Texture> DynamicTexture::GetTexture(const ImageHeader& header) {
     return m_texture;
 }
 
-std::shared_ptr<Texture> DynamicTexture::GetTexture(uint32_t width, uint32_t height) {
-    if ((m_texture == nullptr) || (m_header.width != width) || (m_header.height != height)) {
-        m_header.width = width;
-        m_header.height = height;
-        m_texture = TextureManager::Get().Create(m_header);
-    }
-
-    return m_texture;
-}
-
 std::shared_ptr<Texture> DynamicTexture::UpdateOrCreate(const ImageView& image) {
     return UpdateOrCreate(image, true);
 }

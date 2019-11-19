@@ -14,7 +14,7 @@ public:
     ~UIInterface() = default;
 
     void Init();
-    void Render(bool editorMode);
+    void Render(bool editorMode, const std::shared_ptr<Texture>& texture);
     void Destroy();
 
 private:

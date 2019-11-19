@@ -37,9 +37,7 @@ public:
     ~DynamicTexture() = default;
 
     std::shared_ptr<Texture> GetTexture();
-
     std::shared_ptr<Texture> GetTexture(const ImageHeader& header);
-    std::shared_ptr<Texture> GetTexture(uint32_t width, uint32_t height);
 
     // auto generate mip levels if Need
     std::shared_ptr<Texture> UpdateOrCreate(const ImageView& image);
