@@ -35,12 +35,7 @@ void PreviewNode::UpdatePreview(const ImageView& view) {
         throw EngineError("the height={} of the image for preview should be equal previewSize={}", view.header.height, m_previewSize);
     }
 
-    if (!m_texturePreview || (m_texSize != m_previewSize)) {
-        m_texturePreview = TextureManager::Get().Create(view);
-        m_texSize = m_previewSize;
-    } else {
-        m_texturePreview->Update(view);
-    }
+    m_texturePreview.UpdateOrCreate(view);
 }
 
 void PreviewNode::UpdatePreview(const BaseNoise2DNode* sourceModule) {
@@ -66,5 +61,9 @@ void PreviewNode::UpdatePreview(BaseNoise3DNode* sourceModule) {
 
 void PreviewNode::DrawPreview() {
     ImGui::SameLine();
-    gui::Image(m_texturePreview, math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
+    gui::Image(m_texturePreview.GetTexture(), math::Size(m_previewSize, m_previewSize), math::Pointf(0,1), math::Pointf(1,0));
+}
+
+std::shared_ptr<Texture> PreviewNode::GetView() {
+    return m_texturePreview.GetTexture();
 }

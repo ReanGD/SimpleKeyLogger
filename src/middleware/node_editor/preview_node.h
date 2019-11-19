@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "engine/material/image.h"
 #include "middleware/node_editor/node.h"
+#include "engine/material/texture_manager.h"
 
 
 namespace noise {
@@ -11,7 +11,6 @@ namespace noise {
         class RendererImage;
     }
 }
-class Texture;
 class BaseNoise2DNode;
 class BaseNoise3DNode;
 class PreviewNode : public BaseNode {
@@ -26,12 +25,11 @@ protected:
     void DrawPreview() final;
 
 public:
-    std::shared_ptr<Texture> GetView() noexcept { return m_texturePreview; }
+    std::shared_ptr<Texture> GetView();
 
 private:
-    uint32_t m_texSize = 128;
     uint32_t m_previewSize = 128;
-    std::shared_ptr<Texture> m_texturePreview = nullptr;
+    DynamicTexture m_texturePreview;
     noise::utils::RendererImage* m_renderedPreview = nullptr;
     BaseNoise2DNode* m_shapePreview = nullptr;
 };

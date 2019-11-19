@@ -35,3 +35,4 @@ private:
     uint m_handle = 0;
     const ImageHeader m_header;
 };
+
