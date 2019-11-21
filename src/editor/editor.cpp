@@ -22,12 +22,11 @@ void Editor::Create() {
     m_interface.Create();
     SetEditorMode(m_editorMode);
 
-    auto& scene = m_engine.GetScene();
     auto& texManager = TextureManager::Get();
     auto& fileManager = FileManager::Get();
     fileManager.AddRootAlias("$tex", std::filesystem::current_path() / "assets" / "textures");
 
-    auto camera = scene.GetCamera();
+    auto camera = m_scene.GetCamera();
     camera->SetViewParams(glm::vec3(-10, 20, 0), glm::vec3(1, 0, 0));
     m_controller.AttachCamera(camera);
 
@@ -90,18 +89,18 @@ void Editor::Create() {
         auto pcube = std::make_shared<PhysicalBox>(glm::vec3(0.5, 0.5, 0.5), glm::linearRand(glm::vec3(0, 25, -7), glm::vec3(12, 200, 7)), glm::linearRand(1, 100));
         m_engine.GetPhysics().AddNode(pcube);
         cube.SetPhysicalNode(pcube);
-        scene.Add(cube);
+        m_scene.Add(cube);
     }
 
     Mesh plane;
     plane.Add(GeometryGenerator::CreateSolidPlane(2048, 2048, 1.0f, 1.0f), materialLandscape);
     auto matModel = glm::scale(glm::mat4(1.0), glm::vec3(2048., 1.0f, 2048.));
     plane.SetModelMatrix(matModel);
-    scene.Add(plane);
+    m_scene.Add(plane);
 
     Mesh sprite;
     sprite.Add(GeometryGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f), materialSprite);
-    scene.Add(sprite);
+    m_scene.Add(sprite);
 
     m_line = GeometryGenerator::CreateLine(glm::vec3(0), glm::vec3(10.0f));
 
@@ -121,67 +120,18 @@ void Editor::Create() {
             matModel = glm::translate(glm::mat4(1.0), glm::vec3(posX, 0.51f, posZ));
             matModel = glm::scale(matModel, glm::vec3(1.0f, 1.0f, 2.0f));
             mesh.SetModelMatrix(matModel);
-            scene.Add(mesh);
+            m_scene.Add(mesh);
         }
     }
 
     m_fbo = std::make_shared<Framebuffer>();
 }
 
-void Editor::Draw() {
-    ProcessIO();
-
-    auto& scene = m_engine.GetScene();
-    auto camera = scene.GetCamera();
-
-    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), camera->GetProjMatrix());
-    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), camera->GetViewMatrix());
-    m_ubCamera->Sync();
-
-    GLuint index = 0;
-    m_ubCamera->Bind(index);
-
-    scene.Draw();
-    m_fbo->Bind(2000, 2000);
-    glViewport(0, 0, 2000, 2000);
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    scene.Draw();
-    auto fboTex = m_fbo->Unbind();
-    if (m_showNormals) {
-        scene.DrawWithMaterial(*m_materialNormals);
-    }
-
-    glm::mat4 matModel(1.0f);
-    m_materialLine->Bind(camera, matModel, matModel);
-    m_line->Bind();
-    m_line->Draw();
-    m_line->Unbind();
-    m_materialLine->Unbind();
-
-    m_interface.Draw(m_editorMode, fboTex);
-}
-
-void Editor::Destroy() {
-    m_interface.Destroy();
-
-    m_materialLine.reset();
-    m_materialNormals.reset();
-    m_line.reset();
-    m_fbo.reset();
-}
-
-void Editor::SetEditorMode(bool value) {
-    m_editorMode = value;
-    m_engine.GetWindow().SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
-    m_engine.GetGui().EnableInput(m_editorMode);
-    m_controller.EnableInput(!m_editorMode);
-}
-
-void Editor::ProcessIO() {
+void Editor::Update(float deltaTime) {
     auto& window = m_engine.GetWindow();
     WindowInput& wio = window.GetIO();
 
+    m_scene.Update();
     if (wio.IsKeyReleasedFirstTime(Key::Escape)) {
         window.Close();
     }
@@ -206,7 +156,7 @@ void Editor::ProcessIO() {
         if (wio.IsKeyReleasedFirstTime(Key::MouseLeft)) {
             glm::vec2 coord;
             wio.GetHomogeneousClipCursorPosition(coord.x, coord.y);
-            auto camera = m_engine.GetScene().GetCamera();
+            auto camera = m_scene.GetCamera();
             glm::vec3 pos = camera->GetPosition();
             glm::vec3 rayWorld = camera->HomogeneousPositionToRay(coord);
 
@@ -219,8 +169,7 @@ void Editor::ProcessIO() {
             }
         }
     } else {
-        auto& scene = m_engine.GetScene();
-        auto camera = scene.GetCamera();
+        auto camera = m_scene.GetCamera();
         auto pos = camera->GetPosition();
 
         if (wio.IsKeyReleasedFirstTime(Key::MouseLeft)) {
@@ -233,7 +182,7 @@ void Editor::ProcessIO() {
                 sphere.Add(GeometryGenerator::CreateSolidSphere(10), *m_materialCube);
                 auto mat = glm::scale(glm::translate(glm::mat4(1), collisionPos), glm::vec3(0.2f));
                 sphere.SetModelMatrix(mat);
-                scene.Add(sphere);
+                m_scene.Add(sphere);
             }
         }
 
@@ -243,9 +192,56 @@ void Editor::ProcessIO() {
             auto pcube = std::make_shared<PhysicalBox>(glm::vec3(0.5, 0.5, 0.5), pos, 10);
             m_engine.GetPhysics().AddNode(pcube);
             cube.SetPhysicalNode(pcube);
-            scene.Add(cube);
+            m_scene.Add(cube);
         }
     }
 
-    m_controller.Update(wio, m_engine.GetDeltaTime());
+    m_controller.Update(wio, deltaTime);
+}
+
+void Editor::Draw() {
+    auto camera = m_scene.GetCamera();
+
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uProjMatrix"), camera->GetProjMatrix());
+    m_ubCamera->setUniform(m_declCamera->GetOffset("uViewMatrix"), camera->GetViewMatrix());
+    m_ubCamera->Sync();
+
+    GLuint index = 0;
+    m_ubCamera->Bind(index);
+
+    m_scene.Draw();
+    m_fbo->Bind(2000, 2000);
+    glViewport(0, 0, 2000, 2000);
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    m_scene.Draw();
+    auto fboTex = m_fbo->Unbind();
+    if (m_showNormals) {
+        m_scene.DrawWithMaterial(*m_materialNormals);
+    }
+
+    glm::mat4 matModel(1.0f);
+    m_materialLine->Bind(camera, matModel, matModel);
+    m_line->Bind();
+    m_line->Draw();
+    m_line->Unbind();
+    m_materialLine->Unbind();
+
+    m_interface.Draw(m_editorMode, camera, fboTex, m_scene.GetCountTriangles());
+}
+
+void Editor::Destroy() {
+    m_interface.Destroy();
+
+    m_materialLine.reset();
+    m_materialNormals.reset();
+    m_line.reset();
+    m_fbo.reset();
+}
+
+void Editor::SetEditorMode(bool value) {
+    m_editorMode = value;
+    m_engine.GetWindow().SetCursor(m_editorMode ? CursorType::Arrow : CursorType::Disabled);
+    m_engine.GetGui().EnableInput(m_editorMode);
+    m_controller.EnableInput(!m_editorMode);
 }

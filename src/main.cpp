@@ -29,9 +29,14 @@ static bool run(bool isFullscreen, float windowMultiplier, spdlog::level::level_
             return false;
         }
 
-        engine.Run([&editor](){
-            editor.Draw();
-        });
+        engine.Run(
+            [&editor](float deltaTime){
+                editor.Update(deltaTime);
+            },
+            [&editor](){
+                editor.Draw();
+            }
+        );
 
         editor.Destroy();
     } catch(const std::exception& e) {

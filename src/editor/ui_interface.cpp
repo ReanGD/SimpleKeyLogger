@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include "engine/gui/widgets.h"
+#include "engine/camera/camera.h"
 #include "engine/common/exception.h"
 #include "middleware/node_editor/preview_node.h"
 
@@ -38,7 +39,7 @@ void UIInterface::Create() {
     }
 }
 
-void UIInterface::Draw(bool editorMode, const std::shared_ptr<Texture>& texture) {
+void UIInterface::Draw(bool editorMode, const std::shared_ptr<Camera>& camera, const std::shared_ptr<Texture>& texture, uint32_t tpf) {
     auto& gui = m_engine.GetGui();
     auto& wio = m_engine.GetWindow().GetIO();
     uint32_t width, height;
@@ -49,14 +50,14 @@ void UIInterface::Draw(bool editorMode, const std::shared_ptr<Texture>& texture)
     if (editorMode) {
         math::Rectf rect(0, 0, width, height);
 
-        DrawRightPanel(rect.CutOffRight(300));
+        DrawRightPanel(rect.CutOffRight(300), camera);
         // DrawNodeEditor(rect);
         DrawViewer(rect, texture);
 
         // ImGui::ShowDemoWindow(nullptr);
         // ImGui::ShowStyleEditor();
     } else {
-        DrawInfoBar(math::Rectf(0, 0, 500, 50));
+        DrawInfoBar(math::Rectf(0, 0, 500, 50), camera, tpf);
     }
 
     gui.EndFrame();
@@ -65,13 +66,13 @@ void UIInterface::Draw(bool editorMode, const std::shared_ptr<Texture>& texture)
 void UIInterface::Destroy() {
 }
 
-void UIInterface::DrawInfoBar(math::Rectf rect) {
+void UIInterface::DrawInfoBar(math::Rectf rect, const std::shared_ptr<Camera>& camera, uint32_t tpf) {
     if (BeginWindow("infobar", rect)) {
         ImGui::PushFont(m_fontMono);
-        auto pos = m_engine.GetScene().GetCamera()->GetPosition();
+        auto pos = camera->GetPosition();
         auto text = fmt::format("FPS = {:.1f} TPF = {:.2f}M Pos = {:.1f}:{:.1f}:{:.1f}",
             m_engine.GetFps(),
-            static_cast<double>(m_engine.GetTpf()) / 1000.0 / 1000.0,
+            static_cast<double>(tpf) / 1000.0 / 1000.0,
             pos.x, pos.y, pos.z);
         ImGui::TextColored(ImColor(0xFF, 0xDA, 0x00), "%s", text.c_str());
         ImGui::PopFont();
@@ -80,11 +81,10 @@ void UIInterface::DrawInfoBar(math::Rectf rect) {
     }
 }
 
-void UIInterface::DrawRightPanel(math::Rectf rect) {
+void UIInterface::DrawRightPanel(math::Rectf rect, const std::shared_ptr<Camera>& camera) {
     if (BeginWindow("right_panel", rect)) {
 
         if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_None)) {
-            auto camera = m_engine.GetScene().GetCamera();
             float nearPlane = camera->GetNearPlane();
             if (ImGui::DragFloat("near plane", &nearPlane, 0.1f, 0.1f, 10.0f, "%.1f")) {
                 camera->SetNearPlane(nearPlane);

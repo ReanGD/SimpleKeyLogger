@@ -20,7 +20,7 @@ void Engine::Create(bool isFullscreen, float windowMultiplier) {
     SetFillPoligone(m_fillPoligone);
 }
 
-void Engine::Run(const std::function<void ()>& callback) {
+void Engine::Run(const std::function<void (float /* deltaTime */)>& updateCallback, const std::function<void ()>& drawCallback) {
     auto timeLast = std::chrono::steady_clock::now();
 
     uint32_t width, height;
@@ -42,8 +42,8 @@ void Engine::Run(const std::function<void ()>& callback) {
 
         m_gui.Update(m_window, m_deltaTime);
         m_physics.Update(m_deltaTime);
-        m_scene.Update();
-        callback();
+        updateCallback(m_deltaTime);
+        drawCallback();
 
         m_window.EndFrame();
     }

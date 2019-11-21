@@ -1,10 +1,11 @@
 #pragma once
 
+#include "engine/scene/scene.h"
 #include "editor/ui_interface.h"
 #include "engine/material/framebuffer.h"
+#include "engine/physics/physical_node.h"
 #include "engine/material/uniform_buffer.h"
 #include "middleware/camera/fly_controller.h"
-#include "engine/physics/physical_node.h"
 
 
 class Editor : Noncopyable {
@@ -15,16 +16,17 @@ public:
 
 
     void Create();
+    void Update(float deltaTime);
     void Draw();
     void Destroy();
 
 private:
     void SetEditorMode(bool value);
-    void ProcessIO();
 
 private:
     Engine& m_engine;
-    bool m_editorMode = true;
+    Scene m_scene;
+    bool m_editorMode = false;
     bool m_showNormals = false;
     std::shared_ptr<Material> m_materialCube;
     std::shared_ptr<Framebuffer> m_fbo;

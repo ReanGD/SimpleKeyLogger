@@ -3,7 +3,6 @@
 #include <functional>
 
 #include "engine/gui/gui.h"
-#include "engine/scene/scene.h"
 #include "engine/physics/physics.h"
 
 
@@ -13,7 +12,7 @@ public:
     ~Engine() = default;
 
     void Create(bool isFullscreen, float windowMultiplier);
-    void Run(const std::function<void ()>& callback);
+    void Run(const std::function<void (float /* deltaTime */)>& updateCallback, const std::function<void ()>& drawCallback);
 
     Gui& GetGui() noexcept {
         return m_gui;
@@ -21,10 +20,6 @@ public:
 
     Window& GetWindow() noexcept {
         return m_window;
-    }
-
-    Scene& GetScene() noexcept {
-        return m_scene;
     }
 
     Physics& GetPhysics() noexcept {
@@ -37,20 +32,12 @@ public:
         return m_fillPoligone;
     }
 
-    float GetDeltaTime() const noexcept {
-        return m_deltaTime;
-    }
-
     float GetFps() const noexcept {
         return static_cast<float>(m_timeDeltas.size()) / m_timeDeltasTotal;
     }
 
-    uint32_t GetTpf() const noexcept {
-        return m_scene.GetCountTriangles();
-    }
 private:
     Gui m_gui;
-    Scene m_scene;
     Window m_window;
     Physics m_physics;
     bool m_fillPoligone = true;
