@@ -16,21 +16,21 @@ static bool run(bool isFullscreen, float windowMultiplier, spdlog::level::level_
         Editor editor(engine);
 
         try {
-            engine.Init(isFullscreen, windowMultiplier);
+            engine.Create(isFullscreen, windowMultiplier);
         } catch(const std::exception& e) {
             spdlog::error("Engine initialization error: {}", e.what());
             return false;
         }
 
         try {
-            editor.Init();
+            editor.Create();
         } catch(const std::exception& e) {
             spdlog::error("Editor initialization error: {}", e.what());
             return false;
         }
 
         engine.Run([&editor](){
-            editor.Render();
+            editor.Draw();
         });
 
         editor.Destroy();

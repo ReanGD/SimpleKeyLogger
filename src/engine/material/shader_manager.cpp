@@ -164,7 +164,7 @@ private:
     std::map<std::string, UniformInfo> m_uniforms;
 };
 
-void ShaderManager::Init() {
+void ShaderManager::Create() {
     const auto base = std::filesystem::current_path() / "materials";
 
     MaterialParser parser1;

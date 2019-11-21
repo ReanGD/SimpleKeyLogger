@@ -14,6 +14,6 @@ public:
         return instance;
     }
 
-    void Init();
+    void Create();
 private:
 };

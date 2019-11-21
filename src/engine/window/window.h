@@ -27,7 +27,7 @@ public:
     ~Window();
 
 public:
-    void Init(bool isFullscreen, float windowMultiplier);
+    void Create(bool isFullscreen, float windowMultiplier);
     void SetFullscreen(bool value);
     bool IsFullscreen() const noexcept { return m_fullscreen; }
     void Close();

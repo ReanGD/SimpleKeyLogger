@@ -33,7 +33,7 @@ static bool customMaterialCombinerCallback(btManifoldPoint& cp, const btCollisio
 */
 
 btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
-void Physics::Init() {
+void Physics::Create() {
 	// see https://pybullet.org/Bullet/phpBB3/viewtopic.php?t=10224
 	// gContactAddedCallback = customMaterialCombinerCallback;
     m_collisionConfiguration = new btDefaultCollisionConfiguration();

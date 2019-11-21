@@ -24,7 +24,7 @@ UIInterface::UIInterface(Engine& engine)
 
 }
 
-void UIInterface::Init() {
+void UIInterface::Create() {
     ImGuiIO& io = ImGui::GetIO();
     m_fontDefault = io.Fonts->AddFontDefault();
     if (m_fontDefault == nullptr) {
@@ -38,7 +38,7 @@ void UIInterface::Init() {
     }
 }
 
-void UIInterface::Render(bool editorMode, const std::shared_ptr<Texture>& texture) {
+void UIInterface::Draw(bool editorMode, const std::shared_ptr<Texture>& texture) {
     auto& gui = m_engine.GetGui();
     auto& wio = m_engine.GetWindow().GetIO();
     uint32_t width, height;

@@ -236,7 +236,7 @@ struct GLFWCallbacks : Noncopyable {
         }
     }
 
-    static void Init(Window* window, GLFWwindow* glfwWindow) {
+    static void Create(Window* window, GLFWwindow* glfwWindow) {
         m_window = window;
         m_prevMouseButton = glfwSetMouseButtonCallback(glfwWindow, MouseButton);
         m_prevScroll = glfwSetScrollCallback(glfwWindow, Scroll);
@@ -286,7 +286,7 @@ Window::~Window() {
     }
 }
 
-void Window::Init(bool isFullscreen, float windowMultiplier) {
+void Window::Create(bool isFullscreen, float windowMultiplier) {
     m_fullscreen = isFullscreen;
     m_windowMultiplier = windowMultiplier;
 
@@ -367,7 +367,7 @@ void Window::Init(bool isFullscreen, float windowMultiplier) {
 
     SetCursor(CursorType::Disabled);
 
-    GLFWCallbacks::Init(this, m_window);
+    GLFWCallbacks::Create(this, m_window);
     UpdateIO();
     m_io.OnFramebufferSizeEvent(0, 0);
 }

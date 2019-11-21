@@ -52,7 +52,7 @@ Gui::~Gui() {
     }
 }
 
-void Gui::Init() {
+void Gui::Create() {
     IMGUI_CHECKVERSION();
     m_context = ImGui::CreateContext();
     if (m_context == nullptr) {

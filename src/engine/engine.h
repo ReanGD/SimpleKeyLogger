@@ -12,7 +12,7 @@ public:
     Engine() = default;
     ~Engine() = default;
 
-    void Init(bool isFullscreen, float windowMultiplier);
+    void Create(bool isFullscreen, float windowMultiplier);
     void Run(const std::function<void ()>& callback);
 
     Gui& GetGui() noexcept {

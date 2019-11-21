@@ -4,13 +4,13 @@
 #include "engine/api/gl.h"
 
 
-void Engine::Init(bool isFullscreen, float windowMultiplier) {
+void Engine::Create(bool isFullscreen, float windowMultiplier) {
     m_timeDeltas.fill(1.0f / 60.0f);
 
-    m_window.Init(isFullscreen, windowMultiplier);
-    GLApi::Init();
-    m_gui.Init();
-    m_physics.Init();
+    m_window.Create(isFullscreen, windowMultiplier);
+    GLApi::Create();
+    m_gui.Create();
+    m_physics.Create();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

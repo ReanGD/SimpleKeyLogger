@@ -11,7 +11,7 @@ public:
     ~Gui();
 
 public:
-    void Init();
+    void Create();
     void EnableInput(bool value);
     void Update(Window& window, float deltaTime);
 

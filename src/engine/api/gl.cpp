@@ -170,7 +170,7 @@ static void LogTextureFormatsInfo() {
 
 
 
-void GLApi::Init() {
+void GLApi::Create() {
     glewExperimental = GL_TRUE;
 
     GLenum err = glewInit();

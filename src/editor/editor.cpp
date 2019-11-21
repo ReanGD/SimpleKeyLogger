@@ -18,8 +18,8 @@ Editor::Editor(Engine& engine)
 
 }
 
-void Editor::Init() {
-    m_interface.Init();
+void Editor::Create() {
+    m_interface.Create();
     SetEditorMode(m_editorMode);
 
     auto& scene = m_engine.GetScene();
@@ -128,7 +128,7 @@ void Editor::Init() {
     m_fbo = std::make_shared<Framebuffer>();
 }
 
-void Editor::Render() {
+void Editor::Draw() {
     ProcessIO();
 
     auto& scene = m_engine.GetScene();
@@ -159,7 +159,7 @@ void Editor::Render() {
     m_line->Unbind();
     m_materialLine->Unbind();
 
-    m_interface.Render(m_editorMode, fboTex);
+    m_interface.Draw(m_editorMode, fboTex);
 }
 
 void Editor::Destroy() {

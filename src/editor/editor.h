@@ -14,8 +14,8 @@ public:
     ~Editor() = default;
 
 
-    void Init();
-    void Render();
+    void Create();
+    void Draw();
     void Destroy();
 
 private:
