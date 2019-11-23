@@ -38,6 +38,11 @@ struct GeometryGenerator : Noncopyable {
     */
     static std::shared_ptr<Geometry> CreateSolidSphere(uint16_t cntVertexCircle);
     /*!
+        Creates a cylinder with a center at the beginning of coordinates, with a diameter and height equal to 1
+        cntVertexCircle - Number of vertices in the base circle
+    */
+    static std::shared_ptr<Geometry> CreateSolidCylinder(uint16_t cntVertexCircle);
+    /*!
         Creates a square plane at the beginning of the coordinates with the edge side equal to 1.
         The plane is located in the X0Z plane, the normals are directed along the Y axis.
 

@@ -144,6 +144,91 @@ std::shared_ptr<Geometry> GeometryGenerator::CreateSolidSphere(uint16_t cntVerte
     return std::make_shared<Geometry>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
+std::shared_ptr<Geometry> GeometryGenerator::CreateSolidCylinder(uint16_t cntVertexCircle) {
+	cntVertexCircle = glm::max(cntVertexCircle, uint16_t(3));
+	uint32_t vertexCnt = 4*cntVertexCircle;
+
+	float angle = 0;
+	float step = glm::two_pi<float>()/float(cntVertexCircle);
+    auto* vb = new VertexPNTC[vertexCnt];
+	for(uint32_t i=0; i!=cntVertexCircle; ++i) {
+        float s = glm::sin(angle);
+        float c = glm::cos(angle);
+		angle+=step;
+
+		glm::vec3 pos(c*0.5f, -0.5f, s*0.5f);
+		glm::vec3 norm = glm::normalize(glm::vec3(pos.x, 0, pos.z));
+		glm::vec2 tex(pos.x + 0.5f, pos.z + 0.5f);
+
+		float tu = static_cast<float>(i)/static_cast<float>(cntVertexCircle-1);
+
+		// bottom circle
+		vb[i].Position	= pos;
+		vb[i].Normal	= glm::vec3(0,-1,0);
+		vb[i].TexCoord	= tex;
+		// bottom side
+		vb[i+cntVertexCircle*1].Position	= pos;
+		vb[i+cntVertexCircle*1].Normal		= norm;
+		vb[i+cntVertexCircle*1].TexCoord	= glm::vec2(tu,0);
+		// top side
+		pos.y = -pos.y;
+		vb[i+cntVertexCircle*2].Position	= pos;
+		vb[i+cntVertexCircle*2].Normal		= norm;
+		vb[i+cntVertexCircle*2].TexCoord	= glm::vec2(tu,1);
+		// top circle
+		vb[i+cntVertexCircle*3].Position	= pos;
+		vb[i+cntVertexCircle*3].Normal		= glm::vec3(0, 1, 0);
+		vb[i+cntVertexCircle*3].TexCoord	= tex;
+	}
+	// CAABB box;
+	for(uint32_t i=0; i!=vertexCnt; ++i) {
+		vb[i].Tangent	= glm::vec3(0.0f,1.0f,0.0f);
+		// box.Add(vb[i].Position);
+	}
+
+	uint32_t num = 0;
+	uint32_t addSm = (cntVertexCircle - 2)*3;
+	uint16_t addV = cntVertexCircle*3;
+    size_t indexCnt = (cntVertexCircle - 1) * 12;
+    uint16_t* ib = new uint16_t[indexCnt];
+
+    //  bottom + top circle
+	for(uint16_t i=2; i!=cntVertexCircle; ++i) {
+		ib[num+0] = 0;
+		ib[num+1] = i-1;
+		ib[num+2] = i;
+
+		ib[num+0+addSm] = addV;
+		ib[num+1+addSm] = addV+i-1;
+		ib[num+2+addSm] = addV+i;
+		num+=3;
+	}
+
+	// bottom + top side
+	num = addSm*2;
+	for(uint16_t i=0; i!=uint16_t(cntVertexCircle); ++i) {
+		uint16_t z1 = cntVertexCircle + i;
+		uint16_t z2 = cntVertexCircle + (i+1)%cntVertexCircle;
+		uint16_t z3 = cntVertexCircle + z1;
+		uint16_t z4 = cntVertexCircle + z2;
+		ib[num++] = z1;
+		ib[num++] = z3;
+		ib[num++] = z4;
+		ib[num++] = z1;
+		ib[num++] = z4;
+		ib[num++] = z2;
+	}
+
+
+    VertexBuffer vertexBuffer(vb, vertexCnt * sizeof(VertexPNTC));
+    delete []vb;
+
+    IndexBuffer indexBuffer(ib, indexCnt * sizeof(*ib));
+    delete []ib;
+
+    return std::make_shared<Geometry>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+}
+
 template<class T>
 std::shared_ptr<Geometry> CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
     // CAABB box;

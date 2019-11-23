@@ -17,9 +17,9 @@ uniform vec3 uToEyeDirection;
 
 const vec3 uToLightDirection = vec3(0, 1, 0);
 // rgb - цвет источника света, a - ambient интенсивность
-const vec4 uLightColor = vec4(1, 0, 1, 0.1);
+const vec4 uLightColor = vec4(1, 1, 1, 0.7);
 // uShininess > 0
-const float uShininess = 20.0;
+const float uShininess = 1000.0;
 
 /*
 	Расчитать освещение по модели Фонга
