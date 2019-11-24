@@ -15,8 +15,7 @@ GeneralScene::GeneralScene(Engine& engine)
 }
 
 void GeneralScene::GenerateGround() {
-    auto& texManager = TextureManager::Get();
-    auto groundTex = texManager.Load("$tex/ground.jpg");
+    auto groundTex = TextureManager::Get().Load("$tex/ground.jpg");
 
     Material materialGround(m_shaderTex);
     materialGround.SetBaseTexture(0, groundTex);
@@ -57,6 +56,51 @@ void GeneralScene::GenerateTrees() {
     }
 }
 
+void GeneralScene::GenerateGrass() {
+    auto flower0Tex = TextureManager::Get().Load("$tex/flower0.png");
+    auto grass0Tex = TextureManager::Get().Load("$tex/grass0.png");
+    auto grass1Tex = TextureManager::Get().Load("$tex/grass1.png");
+
+    auto shaderTexDiscard = Shader::Create("vertex_old", "fragment_tex_discard");
+    Material materialFlower0(shaderTexDiscard);
+    materialFlower0.SetBaseTexture(0, flower0Tex);
+
+    Material materialGrass0(shaderTexDiscard);
+    materialGrass0.SetBaseTexture(0, grass0Tex);
+
+    Material materialGrass1(shaderTexDiscard);
+    materialGrass1.SetBaseTexture(0, grass1Tex);
+
+    auto plane = MeshGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
+
+    std::srand(15);
+    auto material = materialGrass0;
+    for (int i=0; i!=2000; ++i) {
+        auto matModelPosition = glm::translate(one, glm::linearRand(glm::vec3(-50, 0, -50), glm::vec3(50, 0, 50)));
+
+        if (i == 900) {
+            material = materialGrass1;
+        } else  if (i == 1800) {
+            material = materialFlower0;
+        }
+        for (int j=0; j!=3; ++j) {
+            Node grass0;
+            grass0.Add(plane, material);
+
+            float angleX = - glm::half_pi<float>() + glm::linearRand(-0.3f, 0.3f);
+            auto matRotX = glm::rotate(one, angleX, glm::vec3(1, 0, 0));
+
+            float angleY = static_cast<float>(j) * glm::pi<float>() / 3.0f + glm::linearRand(-0.3f, 0.3f);
+            auto matRotY = glm::rotate(one, angleY, glm::vec3(0, 1, 0));
+
+            auto matScale = glm::scale(one, glm::vec3(glm::linearRand(0.7f, 1.3f)));
+
+            grass0.SetModelMatrix(matModelPosition * matRotY * matRotX * matScale);
+            m_scene.Add(grass0);
+        }
+    }
+}
+
 void GeneralScene::Create() {
     auto camera = m_scene.GetCamera();
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
@@ -69,6 +113,7 @@ void GeneralScene::Create() {
 
     GenerateGround();
     GenerateTrees();
+    GenerateGrass();
 }
 
 void GeneralScene::Update(float deltaTime) {

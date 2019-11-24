@@ -14,6 +14,7 @@ public:
 private:
     void GenerateGround();
     void GenerateTrees();
+    void GenerateGrass();
 
 public:
     void Create();

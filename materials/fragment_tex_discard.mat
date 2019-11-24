@@ -1,0 +1,24 @@
+material {
+    name : "fragment_tex_discard",
+}
+
+fragment = <<SHADER
+#version 330 core
+
+in VS_OUT {
+    smooth vec3 normal;
+    smooth vec2 texCoord;
+} vsOut;
+
+out vec4 color;
+
+uniform sampler2D uBaseTexture;
+
+void main() {
+    vec4 texColor = texture(uBaseTexture, vsOut.texCoord);
+    if(texColor.a < 0.2)
+        discard;
+
+    color = texColor;
+}
+SHADER
