@@ -1,29 +1,155 @@
 #pragma once
 
-#include <vector>
+#include <string>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include "engine/common/noncopyable.h"
 
-#include "engine/mesh/geometry.h"
-#include "engine/material/material.h"
 
-
-class PhysicalNode;
-class Mesh {
+class VertexDecl {
 public:
-    Mesh() = default;
-    ~Mesh() = default;
+    struct Layout{
+        uint8_t index;
+        uint8_t elementCnt;
+    };
 
-    void Add(const std::shared_ptr<Geometry>& geometry, const Material& material);
-    void SetPhysicalNode(const std::shared_ptr<PhysicalNode>& node) noexcept;
-    void SetModelMatrix(const glm::mat4& matrix) noexcept;
+    VertexDecl() = delete;
+    VertexDecl(const std::initializer_list<Layout>& layouts);
+    ~VertexDecl() = default;
 
-    void Update();
-    uint32_t Draw(const std::shared_ptr<Camera>& camera) const;
-    uint32_t DrawWithMaterial(const std::shared_ptr<Camera>& camera, const Material& material) const;
+public:
+    size_t Size() const noexcept {
+        return m_vertexCount * sizeof(float);
+    }
+
+    void Bind() const;
 
 private:
-    glm::mat4 m_matModel = glm::mat4(1.0f);
-    glm::mat3 m_matNormal = glm::mat3(1.0f);
-    std::shared_ptr<PhysicalNode> m_physicalNode = nullptr;
+    uint8_t m_layoutsCount = 0;
+    uint8_t m_vertexCount = 0;
+    Layout m_layouts[16];
+};
 
-    std::vector<std::pair<std::shared_ptr<Geometry>, Material>> m_objects;
+
+struct VertexP {
+	glm::vec3 Position;
+
+    static const VertexDecl vDecl;
+};
+
+struct VertexPNTC {
+	glm::vec3 Position;
+	glm::vec3 Normal;
+	glm::vec3 Tangent;
+	glm::vec2 TexCoord;
+
+    static const VertexDecl vDecl;
+};
+
+class DataBuffer {
+protected:
+    DataBuffer() = delete;
+    DataBuffer(uint target, size_t size);
+    DataBuffer(uint target, const void* data, size_t size);
+
+public:
+    ~DataBuffer() = default;
+
+public:
+    size_t Size() const noexcept {
+        return m_size;
+    }
+    void Destroy();
+
+protected:
+    void* Lock(uint target) const noexcept;
+    bool Unlock(uint target) const noexcept;
+
+protected:
+    size_t m_size;
+    uint m_handle;
+};
+
+class VertexBuffer : public DataBuffer {
+public:
+    VertexBuffer(size_t size);
+    VertexBuffer(const void* data, size_t size);
+
+public:
+    void Bind() const;
+    void Unbind() const;
+
+    void* Lock() const noexcept;
+    bool Unlock() const noexcept;
+};
+
+class IndexBuffer : public DataBuffer {
+public:
+    explicit IndexBuffer(const uint16_t* data, size_t size);
+    explicit IndexBuffer(const uint32_t* data, size_t size);
+
+public:
+    uint Count() const noexcept {
+        return m_count;
+    }
+
+    uint Type() const noexcept {
+        return m_type;
+    }
+
+    void Bind() const;
+    void Unbind() const;
+
+    void* Lock() const noexcept;
+    bool Unlock() const noexcept;
+
+private:
+    uint m_type;
+    uint m_count;
+};
+
+class Mesh : Noncopyable {
+public:
+    Mesh() = delete;
+    Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
+    ~Mesh();
+
+public:
+    void Bind() const;
+    void Unbind() const;
+    uint32_t Draw() const;
+
+private:
+    void Destroy();
+
+private:
+    uint m_handle;
+    VertexDecl m_vDecl;
+    VertexBuffer m_vertexBuffer;
+    IndexBuffer m_indexBuffer;
+};
+
+class Lines : Noncopyable {
+public:
+    Lines() = delete;
+    Lines(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer);
+    ~Lines();
+
+public:
+    VertexBuffer& GetVertexBuffer() noexcept {
+        return m_vertexBuffer;
+    }
+
+    void Bind() const;
+    void Unbind() const;
+    uint32_t Draw() const;
+
+private:
+    void Destroy();
+
+private:
+    uint m_handle;
+    uint32_t m_vertexCount;
+    VertexDecl m_vDecl;
+    VertexBuffer m_vertexBuffer;
 };

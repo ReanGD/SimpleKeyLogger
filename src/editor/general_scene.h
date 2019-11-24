@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/engine.h"
-#include "engine/scene/scene.h"
+#include "engine/mesh/scene.h"
 #include "middleware/camera/fly_controller.h"
 
 

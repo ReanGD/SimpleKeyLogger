@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/mesh/mesh.h"
+#include "engine/mesh/node.h"
 
 
 class Scene : Noncopyable {
@@ -8,7 +8,7 @@ public:
     Scene();
     ~Scene() = default;
 
-    void Add(const Mesh& mesh);
+    void Add(const Node& node);
 
     void Update();
     void Draw();
@@ -23,5 +23,5 @@ public:
 private:
     uint32_t m_countTriangles = 0;
     std::shared_ptr<Camera> m_camera;
-    std::vector<Mesh> m_meshes;
+    std::vector<Node> m_nodes;
 };

@@ -3,8 +3,8 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "engine/mesh/geometry_generator.h"
 #include "engine/material/texture_manager.h"
+#include "middleware/generator/mesh_generator.h"
 
 
 static constexpr const auto one = glm::mat4(1);
@@ -21,8 +21,8 @@ void GeneralScene::GenerateGround() {
     Material materialGround(m_shaderTex);
     materialGround.SetBaseTexture(0, groundTex);
 
-    Mesh plane;
-    plane.Add(GeometryGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
+    Node plane;
+    plane.Add(MeshGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
     auto matModel = glm::scale(one, glm::vec3(256, 1, 256));
     plane.SetModelMatrix(matModel);
     m_scene.Add(plane);
@@ -35,22 +35,22 @@ void GeneralScene::GenerateTrees() {
     materialTreeCrown.SetBaseColor(glm::vec3(0, 128, 0) / 255.0f);
 
 
-    auto trunk = GeometryGenerator::CreateSolidCylinder(5);
+    auto trunk = MeshGenerator::CreateSolidCylinder(5);
     const glm::mat4 matModelTrunk = glm::translate(one, glm::vec3(0, 2, 0)) * glm::scale(one, glm::vec3(0.5, 4, 0.5));
 
-    auto crown = GeometryGenerator::CreateSolidSphere(10);
+    auto crown = MeshGenerator::CreateSolidSphere(10);
     const glm::mat4 matModelCrown = glm::translate(one, glm::vec3(0, 7, 0)) * glm::scale(one, glm::vec3(4, 8, 4));
 
     std::srand(5);
     for (auto i=0; i!=100; ++i) {
         auto matModelPosition = glm::translate(one, glm::linearRand(glm::vec3(-100, 0, -100), glm::vec3(100, 0, 100)));
 
-        Mesh treeTrunk;
+        Node treeTrunk;
         treeTrunk.Add(trunk, materialTreeTrunk);
         treeTrunk.SetModelMatrix(matModelPosition * matModelTrunk);
         m_scene.Add(treeTrunk);
 
-        Mesh treeCrown;
+        Node treeCrown;
         treeCrown.Add(crown, materialTreeCrown);
         treeCrown.SetModelMatrix(matModelPosition * matModelCrown);
         m_scene.Add(treeCrown);
