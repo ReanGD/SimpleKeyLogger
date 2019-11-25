@@ -1,4 +1,4 @@
-#include "middleware/node_editor/node.h"
+#include "middleware/node_editor/base_editor_node.h"
 
 #include <imgui_node_editor.h>
 #include <imgui_internal.h>

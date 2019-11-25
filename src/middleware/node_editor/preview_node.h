@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "middleware/node_editor/node.h"
 #include "engine/material/texture_manager.h"
+#include "middleware/node_editor/base_editor_node.h"
 
 
 namespace noise {
