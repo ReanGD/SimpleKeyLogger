@@ -13,6 +13,7 @@ Editor::Editor(Engine& engine)
 void Editor::Create() {
     auto& fileManager = FileManager::Get();
     fileManager.AddRootAlias("$tex", std::filesystem::current_path() / "assets" / "textures");
+    fileManager.AddRootAlias("$shader", std::filesystem::current_path() / "materials");
 
     SetEditorMode(m_editorMode);
 

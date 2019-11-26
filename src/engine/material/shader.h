@@ -1,34 +1,24 @@
 #pragma once
 
-#include <string>
 #include <memory>
 #include <glm/mat4x4.hpp>
-#include "engine/material/uniform_buffer.h"
+#include "engine/common/noncopyable.h"
 
 
+class UniformBufferDecl;
 class Shader : Noncopyable {
     struct PrivateArg{};
+    friend class ShaderManager;
 
 public:
     Shader() = delete;
-    Shader(const PrivateArg&, uint handle);
+    Shader(const PrivateArg&, uint32_t id, uint handle);
     ~Shader();
-    static std::shared_ptr<Shader> Create(
-        const std::string& vertexShaderName,
-        const std::string& fragmentShaderName);
-    static std::shared_ptr<Shader> Create(
-        const std::string& geometryShaderName,
-        const std::string& vertexShaderName,
-        const std::string& fragmentShaderName);
-
-    // TODO: remove it
-    uint GetHandle() const noexcept {
-        return m_handle;
-    }
 
     void Bind() const;
     void Unbind() const;
 
+    uint32_t GetId() const noexcept { return m_id; }
     std::shared_ptr<UniformBufferDecl> GetUBDecl(const char* name);
 
     void SetBool(const char* name, bool value) const;
@@ -48,5 +38,6 @@ private:
     void Destroy();
 
 private:
+    uint32_t m_id = 0;
     uint m_handle = 0;
 };

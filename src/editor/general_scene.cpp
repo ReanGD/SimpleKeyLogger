@@ -3,6 +3,7 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "engine/material/shader_manager.h"
 #include "engine/material/texture_manager.h"
 #include "middleware/generator/mesh_generator.h"
 
@@ -57,11 +58,13 @@ void GeneralScene::GenerateTrees() {
 }
 
 void GeneralScene::GenerateGrass() {
-    auto flower0Tex = TextureManager::Get().Load("$tex/flower0.png");
-    auto grass0Tex = TextureManager::Get().Load("$tex/grass0.png");
-    auto grass1Tex = TextureManager::Get().Load("$tex/grass1.png");
+    auto& texMng = TextureManager::Get();
 
-    auto shaderTexDiscard = Shader::Create("vertex_old", "fragment_tex_discard");
+    auto flower0Tex = texMng.Load("$tex/flower0.png");
+    auto grass0Tex = texMng.Load("$tex/grass0.png");
+    auto grass1Tex = texMng.Load("$tex/grass1.png");
+
+    auto shaderTexDiscard = ShaderManager::Get().Create("$shader/vertex_old.mat", "$shader/fragment_tex_discard.mat");
     Material materialFlower0(shaderTexDiscard);
     materialFlower0.SetBaseTexture(0, flower0Tex);
 
@@ -106,10 +109,11 @@ void GeneralScene::Create() {
     camera->SetViewParams(glm::vec3(-10, 2, 0), glm::vec3(1, 0, 0));
     m_controller.AttachCamera(camera);
 
-    m_shaderTex = Shader::Create("vertex_old", "fragment_tex");
-    m_shaderClr = Shader::Create("vertex_old", "fragment_clr");
-    m_shaderTexLight = Shader::Create("vertex_old", "fragment_tex_light");
-    m_shaderClrLight = Shader::Create("vertex_old", "fragment_clr_light");
+    auto& shMng = ShaderManager::Get();
+    m_shaderTex = shMng.Create("$shader/vertex_old.mat", "$shader/fragment_tex.mat");
+    m_shaderClr = shMng.Create("$shader/vertex_old.mat", "$shader/fragment_clr.mat");
+    m_shaderTexLight = shMng.Create("$shader/vertex_old.mat", "$shader/fragment_tex_light.mat");
+    m_shaderClrLight = shMng.Create("$shader/vertex_old.mat", "$shader/fragment_clr_light.mat");
 
     GenerateGround();
     GenerateTrees();
