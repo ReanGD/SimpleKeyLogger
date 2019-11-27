@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "engine/material/shader_manager.h"
-#include "engine/material/texture_manager.h"
+// #include "engine/material/texture_manager.h"
 #include "engine/material/material_manager.h"
 #include "middleware/generator/mesh_generator.h"
 
@@ -17,9 +17,7 @@ GeneralScene::GeneralScene(Engine& engine)
 }
 
 void GeneralScene::GenerateGround() {
-    auto groundTex = TextureManager::Get().Load("$tex/ground.jpg");
-
-    auto materialGround = MaterialManager::Builder(m_shaderTex).BaseTexture(0, groundTex).Build();
+    auto materialGround = MaterialManager::Builder(m_shaderTex).BaseTexture(0, "$tex/ground.jpg").Build();
 
     Node plane;
     plane.Add(MeshGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
@@ -56,16 +54,10 @@ void GeneralScene::GenerateTrees() {
 }
 
 void GeneralScene::GenerateGrass() {
-    auto& texMng = TextureManager::Get();
-
-    auto flower0Tex = texMng.Load("$tex/flower0.png");
-    auto grass0Tex = texMng.Load("$tex/grass0.png");
-    auto grass1Tex = texMng.Load("$tex/grass1.png");
-
     auto shaderTexDiscard = ShaderManager::Get().Create("$shader/vertex_old.mat", "$shader/fragment_tex_discard.mat");
-    auto materialFlower0 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, flower0Tex).Build();
-    auto materialGrass0 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, grass0Tex).Build();
-    auto materialGrass1 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, grass1Tex).Build();
+    auto materialFlower0 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, "$tex/flower0.png").Build();
+    auto materialGrass0 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, "$tex/grass0.png").Build();
+    auto materialGrass1 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, "$tex/grass1.png").Build();
 
     auto plane = MeshGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
 

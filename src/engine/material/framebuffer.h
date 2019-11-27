@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "engine/material/texture.h"
+#include "engine/common/noncopyable.h"
 
 
+class Texture;
 class Framebuffer : Noncopyable {
 public:
     Framebuffer() = default;

@@ -38,6 +38,6 @@ private:
     void Destroy();
 
 private:
-    uint32_t m_id = 0;
-    uint m_handle = 0;
+    const uint32_t m_id = 0;
+    const uint m_handle = 0;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <filesystem>
 #include <glm/vec3.hpp>
 #include "engine/common/noncopyable.h"
 
@@ -23,6 +24,10 @@ public:
 
         Builder& BaseColor(const glm::vec3& color) noexcept;
         Builder& BaseTexture(uint unit, const std::shared_ptr<Texture>& texture) noexcept;
+        // auto generate mip levels if Need
+        Builder& BaseTexture(uint unit, const std::filesystem::path& path);
+        Builder& BaseTexture(uint unit, const std::filesystem::path& path, bool generateMipLevelsIfNeed);
+
         std::shared_ptr<Material> Build();
 
     private:
@@ -39,4 +44,5 @@ public:
 
 private:
     std::shared_ptr<Material> Build(Builder& builder);
+    uint32_t m_lastId = 0;
 };

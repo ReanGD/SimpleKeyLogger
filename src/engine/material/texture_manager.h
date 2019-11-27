@@ -2,9 +2,11 @@
 
 #include <vector>
 #include <filesystem>
-#include "engine/material/texture.h"
+#include "engine/material/image.h"
+#include "engine/common/noncopyable.h"
 
 
+class Texture;
 class TextureManager : Noncopyable {
 private:
     TextureManager() = default;

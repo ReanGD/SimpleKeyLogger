@@ -5,9 +5,10 @@
 #include "engine/material/texture.h"
 
 
-Material::Material(const PrivateArg&, const std::shared_ptr<Shader>& shader,
+Material::Material(const PrivateArg&, uint32_t id, const std::shared_ptr<Shader>& shader,
     const glm::vec3& baseColor, const std::shared_ptr<Texture>& baseTexture, uint baseTextureUnit)
-    : m_shader(shader)
+    : m_id(id)
+    , m_shader(shader)
     , m_baseColor(baseColor)
     , m_baseTexture(baseTexture)
     , m_baseTextureUnit(baseTextureUnit) {

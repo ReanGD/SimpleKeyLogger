@@ -106,6 +106,5 @@ void Shader::SetMat4(const char* name, const glm::mat4& mat) const {
 void Shader::Destroy() {
     if (m_handle != 0) {
         glDeleteProgram(m_handle);
-        m_handle = 0;
     }
 }

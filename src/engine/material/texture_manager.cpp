@@ -2,6 +2,7 @@
 
 #include "engine/common/path.h"
 #include "engine/common/exception.h"
+#include "engine/material/texture.h"
 
 
 std::shared_ptr<Texture> TextureManager::Create(const ImageHeader& header) {

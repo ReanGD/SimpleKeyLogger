@@ -2,6 +2,7 @@
 
 #include "engine/api/gl.h"
 #include "engine/common/exception.h"
+#include "engine/material/texture.h"
 #include "engine/material/texture_manager.h"
 
 
