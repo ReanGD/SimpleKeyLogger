@@ -5,6 +5,7 @@
 
 #include "engine/material/shader_manager.h"
 #include "engine/material/texture_manager.h"
+#include "engine/material/material_manager.h"
 #include "middleware/generator/mesh_generator.h"
 
 
@@ -18,8 +19,7 @@ GeneralScene::GeneralScene(Engine& engine)
 void GeneralScene::GenerateGround() {
     auto groundTex = TextureManager::Get().Load("$tex/ground.jpg");
 
-    Material materialGround(m_shaderTex);
-    materialGround.SetBaseTexture(0, groundTex);
+    auto materialGround = MaterialManager::Builder(m_shaderTex).BaseTexture(0, groundTex).Build();
 
     Node plane;
     plane.Add(MeshGenerator::CreateSolidPlane(2, 2, 4.0f, 4.0f), materialGround);
@@ -29,10 +29,8 @@ void GeneralScene::GenerateGround() {
 }
 
 void GeneralScene::GenerateTrees() {
-    Material materialTreeTrunk(m_shaderClrLight);
-    materialTreeTrunk.SetBaseColor(glm::vec3(139, 69, 19) / 255.0f);
-    Material materialTreeCrown(m_shaderClrLight);
-    materialTreeCrown.SetBaseColor(glm::vec3(0, 128, 0) / 255.0f);
+    auto materialTreeTrunk = MaterialManager::Builder(m_shaderClrLight).BaseColor(glm::vec3(139, 69, 19) / 255.0f).Build();
+    auto materialTreeCrown = MaterialManager::Builder(m_shaderClrLight).BaseColor(glm::vec3(0, 128, 0) / 255.0f).Build();
 
 
     auto trunk = MeshGenerator::CreateSolidCylinder(5);
@@ -65,14 +63,9 @@ void GeneralScene::GenerateGrass() {
     auto grass1Tex = texMng.Load("$tex/grass1.png");
 
     auto shaderTexDiscard = ShaderManager::Get().Create("$shader/vertex_old.mat", "$shader/fragment_tex_discard.mat");
-    Material materialFlower0(shaderTexDiscard);
-    materialFlower0.SetBaseTexture(0, flower0Tex);
-
-    Material materialGrass0(shaderTexDiscard);
-    materialGrass0.SetBaseTexture(0, grass0Tex);
-
-    Material materialGrass1(shaderTexDiscard);
-    materialGrass1.SetBaseTexture(0, grass1Tex);
+    auto materialFlower0 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, flower0Tex).Build();
+    auto materialGrass0 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, grass0Tex).Build();
+    auto materialGrass1 = MaterialManager::Builder(shaderTexDiscard).BaseTexture(0, grass1Tex).Build();
 
     auto plane = MeshGenerator::CreateSolidPlane(2, 2, 1.0f, 1.0f);
 

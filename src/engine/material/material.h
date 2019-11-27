@@ -1,23 +1,24 @@
 #pragma once
 
+#include <memory>
 #include <glm/mat4x4.hpp>
-
-#include "engine/material/shader.h"
-#include "engine/material/texture.h"
-#include "engine/camera/camera.h"
+#include "engine/common/noncopyable.h"
 
 
-class Material {
+class Shader;
+class Camera;
+class Texture;
+class Material : Noncopyable {
+    struct PrivateArg{};
+    friend class MaterialManager;
+
 public:
     Material() = delete;
-    Material(const std::shared_ptr<Shader>& shader);
+    Material(const PrivateArg&, const std::shared_ptr<Shader>& shader,
+        const glm::vec3& baseColor, const std::shared_ptr<Texture>& baseTexture, uint baseTextureUnit);
     ~Material() = default;
 
 public:
-    Material& SetShader(const std::shared_ptr<Shader>& shader) noexcept;
-    Material& SetBaseColor(const glm::vec3& color) noexcept;
-    Material& SetBaseTexture(uint unit, const std::shared_ptr<Texture>& texture) noexcept;
-
     void Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const;
     void Unbind() const;
 

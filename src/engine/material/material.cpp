@@ -1,28 +1,17 @@
 #include "engine/material/material.h"
 
+#include "engine/camera/camera.h"
+#include "engine/material/shader.h"
+#include "engine/material/texture.h"
 
-Material::Material(const std::shared_ptr<Shader>& shader)
-    : m_shader(shader) {
 
-}
+Material::Material(const PrivateArg&, const std::shared_ptr<Shader>& shader,
+    const glm::vec3& baseColor, const std::shared_ptr<Texture>& baseTexture, uint baseTextureUnit)
+    : m_shader(shader)
+    , m_baseColor(baseColor)
+    , m_baseTexture(baseTexture)
+    , m_baseTextureUnit(baseTextureUnit) {
 
-Material& Material::SetShader(const std::shared_ptr<Shader>& shader) noexcept {
-    m_shader = shader;
-
-    return *this;
-}
-
-Material& Material::SetBaseColor(const glm::vec3& color) noexcept {
-    m_baseColor = color;
-
-    return *this;
-}
-
-Material& Material::SetBaseTexture(uint unit, const std::shared_ptr<Texture>& texture) noexcept {
-    m_baseTexture = texture;
-    m_baseTextureUnit = unit;
-
-    return *this;
 }
 
 void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const {

@@ -5,6 +5,7 @@
 #include "middleware/camera/fly_controller.h"
 
 
+class Shader;
 class GeneralScene : Noncopyable {
 public:
     GeneralScene() = delete;

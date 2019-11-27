@@ -1,5 +1,11 @@
 #include "engine/mesh/scene.h"
 
+#include <glm/gtc/constants.hpp>
+
+#include "engine/mesh/mesh.h"
+#include "engine/camera/camera.h"
+#include "engine/material/material.h"
+
 
 Scene::Scene() {
     m_camera = std::make_shared<Camera>(glm::quarter_pi<float>(), 0.1f, 100.0);
@@ -22,7 +28,7 @@ void Scene::Draw() {
     }
 }
 
-void Scene::DrawWithMaterial(const Material& material) {
+void Scene::DrawWithMaterial(const std::shared_ptr<Material>& material) {
     m_countTriangles = 0;
     for(const auto& mesh: m_nodes) {
         m_countTriangles += mesh.DrawWithMaterial(m_camera, material);

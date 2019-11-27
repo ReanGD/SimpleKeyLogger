@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/mesh/node.h"
+#include "engine/common/noncopyable.h"
 
 
 class Scene : Noncopyable {
@@ -12,7 +13,7 @@ public:
 
     void Update();
     void Draw();
-    void DrawWithMaterial(const Material& material);
+    void DrawWithMaterial(const std::shared_ptr<Material>& material);
 
     uint32_t GetCountTriangles() const noexcept {
         return m_countTriangles;
