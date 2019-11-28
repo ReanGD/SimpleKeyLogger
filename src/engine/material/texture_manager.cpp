@@ -11,16 +11,8 @@ std::shared_ptr<Texture> TextureManager::Create(const ImageHeader& header) {
     return std::make_shared<Texture>(++m_lastId, ImageView(header, 0, nullptr), generateMipLevelsIfNeed, Texture::PrivateArg{});
 }
 
-std::shared_ptr<Texture> TextureManager::Create(const ImageView& image) {
-    return Create(image, true);
-}
-
 std::shared_ptr<Texture> TextureManager::Create(const ImageView& image, bool generateMipLevelsIfNeed) {
     return std::make_shared<Texture>(++m_lastId, image, generateMipLevelsIfNeed, Texture::PrivateArg{});
-}
-
-std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path) {
-    return Load(path, true);
 }
 
 std::shared_ptr<Texture> TextureManager::Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed) {
@@ -76,10 +68,6 @@ std::shared_ptr<Texture> DynamicTexture::GetTexture(const ImageHeader& header) {
     m_header = header;
 
     return m_texture;
-}
-
-std::shared_ptr<Texture> DynamicTexture::UpdateOrCreate(const ImageView& image) {
-    return UpdateOrCreate(image, true);
 }
 
 std::shared_ptr<Texture> DynamicTexture::UpdateOrCreate(const ImageView& image, bool generateMipLevelsIfNeed) {

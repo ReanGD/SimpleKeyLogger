@@ -22,9 +22,7 @@ public:
 
     uint32_t GetId() const noexcept { return m_id; }
 
-    // auto generate mip levels
-    void Update(const ImageView& image);
-    void Update(const ImageView& image, bool generateMipLevels);
+    void Update(const ImageView& image, bool generateMipLevels = true);
 
     void Bind(uint unit) const noexcept;
     void Unbind(uint unit) const noexcept;

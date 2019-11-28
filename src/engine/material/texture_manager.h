@@ -21,14 +21,8 @@ public:
     }
 
     std::shared_ptr<Texture> Create(const ImageHeader& header);
-
-    // auto generate mip levels if Need
-    std::shared_ptr<Texture> Create(const ImageView& image);
-    std::shared_ptr<Texture> Create(const ImageView& image, bool generateMipLevelsIfNeed);
-
-    // auto generate mip levels if Need
-    std::shared_ptr<Texture> Load(const std::filesystem::path& path);
-    std::shared_ptr<Texture> Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed);
+    std::shared_ptr<Texture> Create(const ImageView& image, bool generateMipLevelsIfNeed = true);
+    std::shared_ptr<Texture> Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed = true);
 
 private:
     struct CacheKey {
@@ -53,9 +47,7 @@ public:
     std::shared_ptr<Texture> GetTexture();
     std::shared_ptr<Texture> GetTexture(const ImageHeader& header);
 
-    // auto generate mip levels if Need
-    std::shared_ptr<Texture> UpdateOrCreate(const ImageView& image);
-    std::shared_ptr<Texture> UpdateOrCreate(const ImageView& image, bool generateMipLevelsIfNeed);
+    std::shared_ptr<Texture> UpdateOrCreate(const ImageView& image, bool generateMipLevelsIfNeed = true);
 private:
     ImageHeader m_header;
     std::shared_ptr<Texture> m_texture = nullptr;

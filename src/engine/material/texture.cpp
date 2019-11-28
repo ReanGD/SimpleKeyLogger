@@ -15,10 +15,6 @@ Texture::~Texture() noexcept {
     Destroy();
 }
 
-void Texture::Update(const ImageView& image) {
-    Update(image, true);
-}
-
 void Texture::Update(const ImageView& image, bool generateMipLevels) {
     if (image.header != m_header) {
         Create(image, generateMipLevels);
