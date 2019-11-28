@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <filesystem>
+#include <unordered_map>
+
 #include "engine/material/image.h"
 #include "engine/common/noncopyable.h"
 
@@ -29,7 +31,17 @@ public:
     std::shared_ptr<Texture> Load(const std::filesystem::path& path, bool generateMipLevelsIfNeed);
 
 private:
-    std::vector<std::filesystem::path> m_basePaths;
+    struct CacheKey {
+        std::filesystem::path path;
+        bool generateMipLevelsIfNeed;
+
+        // hash function
+        std::size_t operator()(const CacheKey& value) const;
+        bool operator==(const CacheKey& other) const;
+    };
+
+    std::unordered_map<CacheKey, std::shared_ptr<Texture>, CacheKey> m_cache;
+    uint32_t m_lastId = 0;
 };
 
 class DynamicTexture : Noncopyable {

@@ -17,8 +17,10 @@ class Texture : Noncopyable {
 
 public:
     Texture() = delete;
-    Texture(const ImageView& image, bool generateMipLevelsIfNeed, const PrivateArg&);
+    Texture(uint32_t id, const ImageView& image, bool generateMipLevelsIfNeed, const PrivateArg&);
     ~Texture() noexcept;
+
+    uint32_t GetId() const noexcept { return m_id; }
 
     // auto generate mip levels
     void Update(const ImageView& image);
@@ -32,7 +34,8 @@ private:
     void Destroy() noexcept;
 
 private:
+    const uint32_t m_id = 0;
     uint m_handle = 0;
-    const ImageHeader m_header;
+    ImageHeader m_header;
 };
 

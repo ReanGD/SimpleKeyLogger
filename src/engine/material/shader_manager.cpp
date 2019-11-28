@@ -6,6 +6,7 @@
 #include "engine/common/path.h"
 #include "engine/material/shader.h"
 #include "engine/common/exception.h"
+#include "engine/common/hash_combine.h"
 
 
 std::shared_ptr<Shader> ShaderManager::Create(const std::filesystem::path& vertexShaderPath,
@@ -142,11 +143,6 @@ uint ShaderManager::LoadShader(const std::filesystem::path& path, ShaderType sha
     }
 }
 
-template <class T>
-static inline void hash_combine(std::size_t& seed, const T& v) {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-}
 
 std::size_t ShaderManager::ShaderCacheKey::operator()(const ShaderManager::ShaderCacheKey& value) const {
     std::size_t h = 0;
@@ -158,6 +154,7 @@ std::size_t ShaderManager::ShaderCacheKey::operator()(const ShaderManager::Shade
 bool ShaderManager::ShaderCacheKey::operator==(const ShaderManager::ShaderCacheKey& other) const {
     return ((shaderType == other.shaderType) && (path == other.path));
 }
+
 
 std::size_t ShaderManager::ProgramCacheKey::operator()(const ShaderManager::ProgramCacheKey& value) const {
     std::size_t h = 0;

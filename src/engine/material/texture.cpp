@@ -4,9 +4,10 @@
 #include "engine/common/exception.h"
 
 
-Texture::Texture(const ImageView& image, bool generateMipLevelsIfNeed, const PrivateArg&)
-    : m_header(image.header) {
-    glGenTextures(1, &m_handle);
+Texture::Texture(uint32_t id, const ImageView& image, bool generateMipLevelsIfNeed, const PrivateArg&)
+    : m_id(id)
+    , m_header(image.header) {
+
     Create(image, generateMipLevelsIfNeed);
 }
 
@@ -19,12 +20,13 @@ void Texture::Update(const ImageView& image) {
 }
 
 void Texture::Update(const ImageView& image, bool generateMipLevels) {
-    if (image.data == nullptr) {
-        throw EngineError("texture update data are not filled in");
+    if (image.header != m_header) {
+        Create(image, generateMipLevels);
+        return;
     }
 
-    if (image.header != m_header) {
-        throw EngineError("To update the texture, the new data formats must match the old ones");
+    if (image.data == nullptr) {
+        throw EngineError("texture update data are not filled in");
     }
 
     GLenum internalFormat, format, type;
@@ -66,6 +68,9 @@ void Texture::Unbind(uint unit) const noexcept {
 }
 
 void Texture::Create(const ImageView& image, bool generateMipLevelsIfNeed) {
+    Destroy();
+    glGenTextures(1, &m_handle);
+
     const auto textureFormat = image.header.format;
     if ((!GLApi::IsDXTSupported) && (textureFormat >= PixelFormat::FIRST_COMPRESSED)) {
         throw EngineError("DXT compressed texture format ({}) not supported", ToStr(textureFormat));
