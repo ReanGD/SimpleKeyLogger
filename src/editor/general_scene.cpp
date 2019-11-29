@@ -27,8 +27,8 @@ void GeneralScene::GenerateGround() {
 }
 
 void GeneralScene::GenerateTrees() {
-    auto materialTreeTrunk = MaterialManager::Builder(m_shaderClrLight).BaseColor(glm::vec3(139, 69, 19) / 255.0f).Build();
-    auto materialTreeCrown = MaterialManager::Builder(m_shaderClrLight).BaseColor(glm::vec3(0, 128, 0) / 255.0f).Build();
+    auto materialTreeTrunk = MaterialManager::Builder(m_shaderClrLight).BaseColor(math::Color3(139, 69, 19)).Build();
+    auto materialTreeCrown = MaterialManager::Builder(m_shaderClrLight).BaseColor(math::Color3(0, 128, 0)).Build();
 
 
     auto trunk = MeshGenerator::CreateSolidCylinder(5);

@@ -1,14 +1,10 @@
 #pragma once
 
-#include <memory>
 #include <filesystem>
-#include <glm/vec3.hpp>
-#include "engine/common/noncopyable.h"
+#include <unordered_map>
+#include "engine/material/material.h"
 
 
-class Shader;
-class Texture;
-class Material;
 class MaterialManager : Noncopyable {
 private:
     MaterialManager() = default;
@@ -16,25 +12,18 @@ private:
 
 public:
     struct Builder {
-        friend class MaterialManager;
-
         Builder() = delete;
         Builder(const std::shared_ptr<Shader>& shader);
         ~Builder() = default;
 
-        Builder& BaseColor(const glm::vec3& color) noexcept;
+        Builder& BaseColor(math::Color3 color) noexcept;
         Builder& BaseTexture(uint unit, const std::shared_ptr<Texture>& texture) noexcept;
-        // auto generate mip levels if Need
-        Builder& BaseTexture(uint unit, const std::filesystem::path& path);
-        Builder& BaseTexture(uint unit, const std::filesystem::path& path, bool generateMipLevelsIfNeed);
+        Builder& BaseTexture(uint unit, const std::filesystem::path& path, bool generateMipLevelsIfNeed = true);
 
         std::shared_ptr<Material> Build();
 
     private:
-        std::shared_ptr<Shader> m_shader;
-        glm::vec3 m_baseColor = glm::vec3(0);
-        std::shared_ptr<Texture> m_baseTexture;
-        uint m_baseTextureUnit = 0;
+        Material::Desc m_desc;
     };
 
     static MaterialManager& Get() noexcept {
@@ -43,6 +32,8 @@ public:
     }
 
 private:
-    std::shared_ptr<Material> Build(Builder& builder);
+    std::shared_ptr<Material> Build(const Material::Desc& desc);
+
+    std::unordered_map<Material::Desc, std::shared_ptr<Material>, Material::Desc> m_cache;
     uint32_t m_lastId = 0;
 };
