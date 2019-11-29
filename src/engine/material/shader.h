@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <glm/mat4x4.hpp>
+#include "engine/common/math.h"
 #include "engine/common/noncopyable.h"
 
 
@@ -33,6 +34,8 @@ public:
     void SetMat2(const char* name, const glm::mat2& mat) const;
     void SetMat3(const char* name, const glm::mat3& mat) const;
     void SetMat4(const char* name, const glm::mat4& mat) const;
+    void SetColor3(const char* name, math::Color3f value) const;
+    void SetColor4(const char* name, math::Color4f value) const;
 
 private:
     void Destroy();

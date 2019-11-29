@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "engine/gui/math.h"
+#include "engine/common/math.h"
 #include "engine/common/noncopyable.h"
 
 

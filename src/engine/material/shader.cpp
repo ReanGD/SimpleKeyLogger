@@ -103,6 +103,14 @@ void Shader::SetMat4(const char* name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(m_handle, name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
+void Shader::SetColor3(const char* name, math::Color3f value) const {
+    glUniform3fv(glGetUniformLocation(m_handle, name), 1, value.value);
+}
+
+void Shader::SetColor4(const char* name, math::Color4f value) const {
+    glUniform4fv(glGetUniformLocation(m_handle, name), 1, value.value);
+}
+
 void Shader::Destroy() {
     if (m_handle != 0) {
         glDeleteProgram(m_handle);
