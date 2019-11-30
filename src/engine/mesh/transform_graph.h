@@ -12,11 +12,12 @@ class MaterialNode;
 class TransformNode : Noncopyable, public std::enable_shared_from_this<TransformNode> {
 public:
     TransformNode() = default;
-    TransformNode(const glm::mat4& transform, const std::shared_ptr<TransformNode>& parent = nullptr);
+    TransformNode(const glm::mat4& transform);
+    TransformNode(const glm::mat4& transform, const std::weak_ptr<TransformNode>& parent);
     ~TransformNode() = default;
 
-    std::shared_ptr<TransformNode> Clone(const glm::mat4& transform);
-    std::shared_ptr<TransformNode> Clone(const std::shared_ptr<TransformNode>& parent);
+    std::shared_ptr<TransformNode> Clone(const glm::mat4& transform) const;
+    std::shared_ptr<TransformNode> Clone(const std::weak_ptr<TransformNode>& parent) const;
 
     std::shared_ptr<TransformNode> NewChild(const glm::mat4& transform = glm::mat4(1));
     std::shared_ptr<TransformNode> NewChild(const std::shared_ptr<MaterialNode>& materialNode, const glm::mat4& transform = glm::mat4(1));
@@ -33,6 +34,7 @@ public:
 private:
     std::weak_ptr<TransformNode> m_parent;
     std::vector<std::shared_ptr<TransformNode>> m_children;
+    std::weak_ptr<MaterialNode> m_materialNode;
     bool m_isDirty = true;
     glm::mat4 m_baseTransform = glm::mat4(1);
     glm::mat4 m_totalTransform = glm::mat4(1);

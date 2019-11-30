@@ -5,27 +5,42 @@
 #include "engine/mesh/scene_index.h"
 // #include "engine/physics/physical_node.h"
 
-TransformNode::TransformNode(const glm::mat4& transform, const std::shared_ptr<TransformNode>& parent)
+TransformNode::TransformNode(const glm::mat4& transform)
+    : m_baseTransform(transform) {
+
+}
+
+TransformNode::TransformNode(const glm::mat4& transform, const std::weak_ptr<TransformNode>& parent)
     : m_parent(parent)
     , m_baseTransform(transform) {
 
 }
 
-std::shared_ptr<TransformNode> TransformNode::Clone(const glm::mat4& transform) {
+std::shared_ptr<TransformNode> TransformNode::Clone(const glm::mat4& transform) const {
     auto node = std::make_shared<TransformNode>(transform);
+    if (auto matNode = m_materialNode.lock()) {
+        node->m_materialNode = m_materialNode;
+        matNode->AttachTransformNode(node);
+    }
+
     node->m_children.reserve(m_children.size());
-    for (const auto& node : m_children) {
-        node->AddChild(node->Clone(node));
+    for (const auto& child : m_children) {
+        node->AddChild(child->Clone(node));
     }
 
     return node;
 }
 
-std::shared_ptr<TransformNode> TransformNode::Clone(const std::shared_ptr<TransformNode>& parent) {
+std::shared_ptr<TransformNode> TransformNode::Clone(const std::weak_ptr<TransformNode>& parent) const {
     auto node = std::make_shared<TransformNode>(m_baseTransform, parent);
+    if (auto matNode = m_materialNode.lock()) {
+        node->m_materialNode = m_materialNode;
+        matNode->AttachTransformNode(node);
+    }
+
     node->m_children.reserve(m_children.size());
-    for (const auto& node : m_children) {
-        node->AddChild(node->Clone(node));
+    for (const auto& child : m_children) {
+        node->AddChild(child->Clone(node));
     }
 
     return node;
@@ -40,6 +55,7 @@ std::shared_ptr<TransformNode> TransformNode::NewChild(const glm::mat4& transfor
 
 std::shared_ptr<TransformNode> TransformNode::NewChild(const std::shared_ptr<MaterialNode>& materialNode, const glm::mat4& transform) {
     auto node = std::make_shared<TransformNode>(transform, shared_from_this());
+    node->m_materialNode = materialNode;
     materialNode->AttachTransformNode(node);
     m_children.push_back(node);
 
