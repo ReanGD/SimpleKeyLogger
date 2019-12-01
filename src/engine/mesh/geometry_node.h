@@ -108,11 +108,24 @@ private:
     uint m_count;
 };
 
-class Mesh : Noncopyable {
+class Counter {
 public:
-    Mesh() = delete;
-    Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
-    ~Mesh();
+    Counter() : m_id(++Counter::m_lastId) {}
+
+    uint32_t GetId() const noexcept { return m_id; }
+
+protected:
+    const uint32_t m_id = 0;
+
+private:
+    static uint32_t m_lastId;
+};
+
+class GeometryNode : public Counter, Noncopyable {
+public:
+    GeometryNode() = delete;
+    GeometryNode(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer);
+    ~GeometryNode();
 
 public:
     void Bind() const;
@@ -129,7 +142,7 @@ private:
     IndexBuffer m_indexBuffer;
 };
 
-class Lines : Noncopyable {
+class Lines : public Counter, Noncopyable {
 public:
     Lines() = delete;
     Lines(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer);

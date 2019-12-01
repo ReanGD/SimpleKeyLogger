@@ -2,8 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "engine/mesh/mesh.h"
 #include "engine/common/exception.h"
+#include "engine/mesh/geometry_node.h"
 
 
 std::shared_ptr<Lines> MeshGenerator::CreateLine(const glm::vec3& from, const glm::vec3& to) {
@@ -18,7 +18,7 @@ std::shared_ptr<Lines> MeshGenerator::CreateLine(const glm::vec3& from, const gl
     return std::make_shared<Lines>(VertexP::vDecl, vertexBuffer);
 }
 
-std::shared_ptr<Mesh> MeshGenerator::CreateSolidCube() {
+std::shared_ptr<GeometryNode> MeshGenerator::CreateSolidCube() {
     VertexPNTC vb[24];
     vb[ 0].Position	= glm::vec3(-0.5f,-0.5f,-0.5f);
     vb[ 1].Position	= glm::vec3(-0.5f, 0.5f,-0.5f);
@@ -74,10 +74,10 @@ std::shared_ptr<Mesh> MeshGenerator::CreateSolidCube() {
     }
     IndexBuffer indexBuffer(ib, sizeof(ib));
 
-    return std::make_shared<Mesh>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return std::make_shared<GeometryNode>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
-std::shared_ptr<Mesh> MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
+std::shared_ptr<GeometryNode> MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle) {
     cntVertexCircle = glm::min(cntVertexCircle, uint16_t(363));
     uint16_t plg = cntVertexCircle/2 - 1;
 
@@ -143,10 +143,10 @@ std::shared_ptr<Mesh> MeshGenerator::CreateSolidSphere(uint16_t cntVertexCircle)
     IndexBuffer indexBuffer(ib, indexCnt * sizeof(*ib));
     delete []ib;
 
-    return std::make_shared<Mesh>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return std::make_shared<GeometryNode>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
-std::shared_ptr<Mesh> MeshGenerator::CreateSolidCylinder(uint16_t cntVertexCircle) {
+std::shared_ptr<GeometryNode> MeshGenerator::CreateSolidCylinder(uint16_t cntVertexCircle) {
 	cntVertexCircle = glm::max(cntVertexCircle, uint16_t(3));
 	uint32_t vertexCnt = 4*cntVertexCircle;
 
@@ -228,11 +228,11 @@ std::shared_ptr<Mesh> MeshGenerator::CreateSolidCylinder(uint16_t cntVertexCircl
     IndexBuffer indexBuffer(ib, indexCnt * sizeof(*ib));
     delete []ib;
 
-    return std::make_shared<Mesh>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return std::make_shared<GeometryNode>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
 template<class T>
-std::shared_ptr<Mesh> CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
+std::shared_ptr<GeometryNode> CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
     // CAABB box;
     uint32_t ind = 0;
     uint32_t vertexCnt = (cntXSides+1)*(cntZSides+1);
@@ -274,10 +274,10 @@ std::shared_ptr<Mesh> CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, f
     IndexBuffer indexBuffer(ib, indexCnt * sizeof(T));
     delete []ib;
 
-    return std::make_shared<Mesh>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
+    return std::make_shared<GeometryNode>(VertexPNTC::vDecl, vertexBuffer, indexBuffer);
 }
 
-std::shared_ptr<Mesh> MeshGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
+std::shared_ptr<GeometryNode> MeshGenerator::CreateSolidPlane(uint32_t cntXSides, uint32_t cntZSides, float scaleTextureX, float scaleTextureZ) {
     cntXSides = glm::max(cntXSides, uint32_t(2));
     cntZSides = glm::max(cntZSides, uint32_t(2));
 

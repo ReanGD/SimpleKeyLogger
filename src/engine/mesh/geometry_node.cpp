@@ -1,7 +1,7 @@
-#include "engine/mesh/mesh.h"
+#include "engine/mesh/geometry_node.h"
 
-#include <stdexcept>
 #include "engine/api/gl.h"
+#include "engine/common/exception.h"
 
 
 const VertexDecl VertexP::vDecl = {
@@ -18,7 +18,7 @@ const VertexDecl VertexPNTC::vDecl = {
 // see: glGetAttribLocation
 VertexDecl::VertexDecl(const std::initializer_list<Layout>& layouts) {
     if (layouts.size() >= 16) {
-        throw std::runtime_error("Number of available layers exceeded");
+        throw EngineError("Number of available layers exceeded");
     }
 
     for (const auto& layout: layouts) {
@@ -135,7 +135,9 @@ bool IndexBuffer::Unlock() const noexcept {
     return DataBuffer::Unlock(GL_ELEMENT_ARRAY_BUFFER);
 }
 
-Mesh::Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
+uint32_t Counter::m_lastId = 0;
+
+GeometryNode::GeometryNode(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer)
     : m_vDecl(vDecl)
     , m_vertexBuffer(vertexBuffer)
     , m_indexBuffer(indexBuffer) {
@@ -152,24 +154,24 @@ Mesh::Mesh(const VertexDecl& vDecl, const VertexBuffer& vertexBuffer, const Inde
     m_indexBuffer.Unbind();
 }
 
-Mesh::~Mesh() {
+GeometryNode::~GeometryNode() {
     Destroy();
 }
 
-void Mesh::Bind() const {
+void GeometryNode::Bind() const {
     glBindVertexArray(m_handle);
 }
 
-void Mesh::Unbind() const {
+void GeometryNode::Unbind() const {
     glBindVertexArray(0);
 }
 
-uint32_t Mesh::Draw() const {
+uint32_t GeometryNode::Draw() const {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexBuffer.Count()), static_cast<GLenum>(m_indexBuffer.Type()), 0);
     return m_indexBuffer.Count() / 3;
 }
 
-void Mesh::Destroy() {
+void GeometryNode::Destroy() {
     if (m_handle != 0) {
         glDeleteVertexArrays(1, &m_handle);
         m_handle = 0;
