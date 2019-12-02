@@ -31,8 +31,15 @@ Material::Material(uint32_t id, const Material::Desc& desc)
     , m_desc(desc) {
 }
 
-void Material::Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const {
+uint32_t Material::GetShaderId() const noexcept {
+    return m_desc.m_shader->GetId();
+}
+
+void Material::BindShader() const {
     m_desc.m_shader->Bind();
+}
+
+void Material::BindUniforms(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const {
     if (m_desc.m_baseTexture) {
         m_desc.m_baseTexture->Bind(m_desc.m_baseTextureUnit);
         m_desc.m_shader->SetInt("uBaseTexture", int(m_desc.m_baseTextureUnit));

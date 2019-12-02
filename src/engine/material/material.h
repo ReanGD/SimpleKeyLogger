@@ -29,8 +29,10 @@ public:
 
 public:
     uint32_t GetId() const noexcept { return m_id; }
+    uint32_t GetShaderId() const noexcept;
 
-    void Bind(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const;
+    void BindShader() const;
+    void BindUniforms(const std::shared_ptr<Camera>& camera, const glm::mat4& matModel, const glm::mat3& matNormal) const;
     void Unbind() const;
 
 private:

@@ -1,15 +1,19 @@
 #pragma once
 
-#include "engine/mesh/node.h"
-#include "engine/common/noncopyable.h"
+#include <map>
+#include "engine/mesh/material_node.h"
+#include "engine/mesh/transform_graph.h"
 
 
-class Scene : Noncopyable {
+class Camera;
+class Material;
+class GeometryNode;
+class Scene : Noncopyable, public TransformGraph {
 public:
     Scene();
     ~Scene() = default;
 
-    void Add(const Node& node);
+    std::shared_ptr<MaterialNode> CreateMaterialNode(const std::shared_ptr<Material>& material, const std::shared_ptr<GeometryNode>& geometry);
 
     void Update();
     void Draw();
@@ -24,5 +28,5 @@ public:
 private:
     uint32_t m_countTriangles = 0;
     std::shared_ptr<Camera> m_camera;
-    std::vector<Node> m_nodes;
+    std::map<IndexKey, std::shared_ptr<MaterialNode>> m_index;
 };
