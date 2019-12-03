@@ -56,7 +56,8 @@ void GeneralScene::GenerateGrass() {
 
     std::srand(15);
     auto materialNode = grass0;
-    for (int i=0; i!=2000; ++i) {
+    auto multiplier = 2;
+    for (int i=0; i!=multiplier * 1000; ++i) {
         auto scaleValue = glm::linearRand(0.7f, 1.3f);
         auto matScale = glm::scale(one, glm::vec3(scaleValue));
 
@@ -66,9 +67,9 @@ void GeneralScene::GenerateGrass() {
         auto root = std::make_shared<TransformNode>(matModelPosition * matScale);
         m_scene.AddChild(root);
 
-        if (i == 900) {
+        if (i == multiplier * 450) {
             materialNode = grass1;
-        } else  if (i == 1800) {
+        } else  if (i == multiplier * 900) {
             materialNode = flower0;
         }
         for (int j=0; j!=3; ++j) {

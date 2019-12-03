@@ -32,16 +32,19 @@ void Scene::Update() {
 
 void Scene::Draw() {
     uint32_t lastShaderId = 0;
+    uint32_t lastGeometryId = 0;
     for(const auto& [key, value]: m_index) {
         if (key.m_shaderId != lastShaderId) {
             value->m_material->BindShader();
             lastShaderId = key.m_shaderId;
         }
+        if (key.m_geometryId != lastGeometryId) {
+            value->m_geometry->Bind();
+            lastGeometryId = key.m_geometryId;
+        }
         for (const auto& transformNode: value->m_transformNodes) {
             value->m_material->BindUniforms(m_camera, transformNode->GetTotalTransform(), transformNode->GetTotalNormalMatrix());
-            value->m_geometry->Bind();
             m_countTriangles += value->m_geometry->Draw();
-            value->m_geometry->Unbind();
         }
     }
 }
