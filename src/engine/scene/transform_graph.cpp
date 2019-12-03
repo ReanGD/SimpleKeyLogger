@@ -1,8 +1,8 @@
-#include "engine/mesh/transform_graph.h"
+#include "engine/scene/transform_graph.h"
 
 #include <glm/gtc/matrix_inverse.hpp>
 
-#include "engine/mesh/material_node.h"
+#include "engine/scene/material_node.h"
 // #include "engine/physics/physical_node.h"
 
 TransformNode::TransformNode(const glm::mat4& transform)

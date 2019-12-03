@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "engine/common/exception.h"
-#include "engine/mesh/geometry_node.h"
+#include "engine/scene/geometry_node.h"
 
 
 std::shared_ptr<Lines> MeshGenerator::CreateLine(const glm::vec3& from, const glm::vec3& to) {

@@ -1,10 +1,10 @@
-#include "engine/mesh/scene.h"
+#include "engine/scene/scene.h"
 
 #include <glm/gtc/constants.hpp>
 
 #include "engine/camera/camera.h"
 #include "engine/material/material.h"
-#include "engine/mesh/geometry_node.h"
+#include "engine/scene/geometry_node.h"
 
 
 Scene::Scene() {

@@ -1,4 +1,4 @@
-#include "engine/mesh/geometry_node.h"
+#include "engine/scene/geometry_node.h"
 
 #include "engine/api/gl.h"
 #include "engine/common/exception.h"

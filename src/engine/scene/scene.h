@@ -1,8 +1,8 @@
 #pragma once
 
 #include <map>
-#include "engine/mesh/material_node.h"
-#include "engine/mesh/transform_graph.h"
+#include "engine/scene/material_node.h"
+#include "engine/scene/transform_graph.h"
 
 
 class Camera;

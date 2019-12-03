@@ -1,4 +1,4 @@
-#include "engine/mesh/material_node.h"
+#include "engine/scene/material_node.h"
 
 #include <tuple>
 
